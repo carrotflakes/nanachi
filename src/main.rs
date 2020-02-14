@@ -195,14 +195,6 @@ fn draw_nanachi(img: &mut ImageBuffer<image::Rgb<u8>, Vec<u8>>) {
     shape.push(f(nanachi[0][nanachi[0].len()-2], nanachi[0][nanachi[0].len()-1], nanachi[0][0]));
     shape.push(shape[0]);
 
-    draw_fill(img, shape.as_slice(), image::Rgb([255, 235, 230]));
-
-    for ps in nanachi.iter() {
-        for s in ps.windows(2) {
-            draw_line(img, s[0], s[1], image::Rgb([64, 8, 8]));
-        }
-    }
-
     let moji_shape = vec![
         (0.30, 0.73),
         (0.20, 0.75),
@@ -216,8 +208,6 @@ fn draw_nanachi(img: &mut ImageBuffer<image::Rgb<u8>, Vec<u8>>) {
         (0.86, 0.74),
         (0.30, 0.74),
     ].iter().map(|p| (p.0 * 512.0, p.1 * 512.0)).collect::<Vec<_>>();
-
-    draw_fill(img, moji_shape.as_slice(), image::Rgb([255, 235, 230]));
 
     let moji = vec![
         vec![
@@ -253,6 +243,17 @@ fn draw_nanachi(img: &mut ImageBuffer<image::Rgb<u8>, Vec<u8>>) {
             (0.78, 0.87),
         ]
     ].iter().map(|v| v.iter().map(|p| (p.0 * 512.0, p.1 * 512.0)).collect::<Vec<_>>()).collect::<Vec<_>>();
+
+    draw_fill(img, shape.as_slice(), image::Rgb([255, 235, 230]));
+
+    draw_fill(img, moji_shape.as_slice(), image::Rgb([255, 235, 230]));
+
+    for ps in nanachi.iter() {
+        for s in ps.windows(2) {
+            draw_line(img, s[0], s[1], image::Rgb([64, 8, 8]));
+        }
+    }
+
     for ps in moji.iter() {
         for s in ps.windows(2) {
             draw_line(img, s[0], s[1], image::Rgb([64, 8, 8]));
