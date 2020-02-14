@@ -41,7 +41,7 @@ fn main() {
             vec.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
             for i in 0..vec.len() / 2 {
                 let s = vec[i * 2].max(0.0) as u32;
-                let e = vec[i * 2 + 1].max(0.0).min((width - 1) as f64) as u32;
+                let e = vec[i * 2 + 1].max(0.0).min(width as f64) as u32;
                 for x in s..e {
                     img.put_pixel(x, y, image::Rgb([[255, 128, 0], [0, 255, 128], [128, 0, 255]][si % 3]));
                 }
