@@ -36,17 +36,7 @@ fn main() {
     });
 
     for (si, ps) in shapes.iter().enumerate() {
-        for y in 0..height {
-            let mut vec = ps.windows(2).filter_map(|pair| intersection_(pair[0].0, pair[0].1, pair[1].0, pair[1].1, y as f64)).collect::<Vec<f64>>();
-            vec.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
-            for i in 0..vec.len() / 2 {
-                let s = vec[i * 2].max(0.0) as u32;
-                let e = vec[i * 2 + 1].max(0.0).min(width as f64) as u32;
-                for x in s..e {
-                    img.put_pixel(x, y, image::Rgb([[255, 128, 0], [0, 255, 128], [128, 0, 255]][si % 3]));
-                }
-            }
-        }
+        draw_fill(&mut img, ps.as_slice(), image::Rgb([[255, 128, 0], [0, 255, 128], [128, 0, 255]][si % 3]));
         for s in ps.windows(2) {
             draw_line(&mut img, s[0], s[1], image::Rgb([[128, 64, 0], [0, 128, 64], [64, 0, 128]][si % 3]));
         }
@@ -95,6 +85,20 @@ fn draw_line(img: &mut ImageBuffer<image::Rgb<u8>, Vec<u8>>, mut p1: (f64, f64),
             let y = (p2.1 - p1.1) * ((x as f64 - p1.0) / (p2.0 - p1.0)) + p1.1;
             if 0.0 <= y && y < img.height() as f64 {
                 img.put_pixel(x, y as u32, pixel);
+            }
+        }
+    }
+}
+
+fn draw_fill(img: &mut ImageBuffer<image::Rgb<u8>, Vec<u8>>, ps: &[(f64, f64)], pixel: image::Rgb<u8>) {
+    for y in 0..img.height() {
+        let mut vec = ps.windows(2).filter_map(|pair| intersection_(pair[0].0, pair[0].1, pair[1].0, pair[1].1, y as f64)).collect::<Vec<f64>>();
+        vec.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
+        for i in 0..vec.len() / 2 {
+            let s = vec[i * 2].max(0.0) as u32;
+            let e = vec[i * 2 + 1].max(0.0).min(img.width() as f64) as u32;
+            for x in s..e {
+                img.put_pixel(x, y, pixel);
             }
         }
     }
@@ -177,6 +181,21 @@ fn draw_nanachi(img: &mut ImageBuffer<image::Rgb<u8>, Vec<u8>>) {
             (0.55, 0.67),
         ],
     ].iter().map(|v| v.iter().map(|p| (p.0 * 512.0, p.1 * 512.0)).collect::<Vec<_>>()).collect::<Vec<_>>();
+
+    let mut shape = Vec::new();
+    let f = |l: (f64, f64), c: (f64, f64), r: (f64, f64)| {
+        let ll = (l.0 - c.0).atan2(l.1 - c.1);
+        let rr = (c.0 - r.0).atan2(c.1 - r.1);
+        (c.0 - (ll.cos() + rr.cos()) * 8.0, c.1 + (ll.sin() + rr.sin()) * 8.0)
+    };
+    shape.push(f(nanachi[0][nanachi[0].len()-1], nanachi[0][0], nanachi[0][1]));
+    for i in 0..nanachi[0].len()-2 {
+        shape.push(f(nanachi[0][i], nanachi[0][i+1], nanachi[0][i+2]));
+    }
+    shape.push(f(nanachi[0][nanachi[0].len()-2], nanachi[0][nanachi[0].len()-1], nanachi[0][0]));
+    shape.push(shape[0]);
+
+    draw_fill(img, shape.as_slice(), image::Rgb([255, 235, 230]));
 
     for ps in nanachi.iter() {
         for s in ps.windows(2) {
