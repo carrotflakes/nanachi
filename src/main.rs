@@ -25,7 +25,7 @@ fn main() {
         points.iter().map(|p| transform(p, t, r, (s, s))).collect::<Vec<_>>()
     }).collect::<Vec<_>>();
 
-    println!("{:?}", shapes);
+    //println!("{:?}", shapes);
 
     let mut img = ImageBuffer::from_fn(width, height, |x, y| {
         if (x / 8 + y / 8) % 2 == 0 {
@@ -51,6 +51,8 @@ fn main() {
             draw_line(&mut img, s[0], s[1], image::Rgb([[128, 64, 0], [0, 128, 64], [64, 0, 128]][si % 3]));
         }
     }
+
+    draw_nanachi(&mut img);
 
     let res = img.save("./my_image.png");
     println!("{:?}", res);
@@ -94,6 +96,91 @@ fn draw_line(img: &mut ImageBuffer<image::Rgb<u8>, Vec<u8>>, mut p1: (f64, f64),
             if 0.0 <= y && y < img.height() as f64 {
                 img.put_pixel(x, y as u32, pixel);
             }
+        }
+    }
+}
+
+fn draw_nanachi(img: &mut ImageBuffer<image::Rgb<u8>, Vec<u8>>) {
+    let nanachi = vec![
+        // contour
+        vec![
+            (0.41, 0.75),
+            (0.30, 0.74),
+            (0.20, 0.69),
+            (0.18, 0.60),
+            (0.20, 0.52),
+            (0.24, 0.45),
+            (0.33, 0.40),
+            (0.30, 0.25),
+            (0.33, 0.12),
+            (0.36, 0.08),
+            (0.40, 0.15),
+            (0.39, 0.28),
+            (0.38, 0.40),
+            (0.48, 0.38),
+            (0.57, 0.37),
+            (0.57, 0.25),
+            (0.62, 0.10),
+            (0.67, 0.05),
+            (0.70, 0.10),
+            (0.67, 0.25),
+            (0.62, 0.38),
+            (0.74, 0.42),
+            (0.80, 0.50),
+            (0.82, 0.60),
+            (0.78, 0.70),
+            (0.65, 0.76),
+            (0.52, 0.76),
+        ],
+        // left eyelid
+        vec![
+            (0.30, 0.51),
+            (0.40, 0.50),
+        ],
+        // left eye
+        vec![
+            (0.33, 0.51),
+            (0.32, 0.55),
+            (0.33, 0.61),
+            (0.37, 0.61),
+            (0.38, 0.55),
+            (0.37, 0.50),
+        ],
+        // right eyelid
+        vec![
+            (0.60, 0.50),
+            (0.70, 0.51),
+        ],
+        // right
+        vec![
+            (0.63, 0.50),
+            (0.62, 0.55),
+            (0.63, 0.61),
+            (0.67, 0.61),
+            (0.68, 0.55),
+            (0.67, 0.51),
+        ],
+        // upper lip
+        vec![
+            (0.40, 0.66),
+            (0.45, 0.67),
+            (0.50, 0.66),
+            (0.55, 0.67),
+            (0.60, 0.66),
+        ],
+        // lower lip
+        vec![
+            (0.45, 0.67),
+            (0.46, 0.70),
+            (0.50, 0.71),
+            (0.54, 0.70),
+            (0.55, 0.67),
+        ],
+    ].iter().map(|v| v.iter().map(|p| (p.0 * 512.0, p.1 * 512.0)).collect::<Vec<_>>()).collect::<Vec<_>>();
+
+    for ps in nanachi.iter() {
+        for s in ps.windows(2) {
+            draw_line(img, s[0], s[1], image::Rgb([64, 8, 8]));
         }
     }
 }
