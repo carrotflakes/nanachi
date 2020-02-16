@@ -90,6 +90,38 @@ fn draw_line(img: &mut ImageBuffer<image::Rgb<u8>, Vec<u8>>, mut p1: (f64, f64),
     }
 }
 
+fn draw_path(img: &mut ImageBuffer<image::Rgb<u8>, Vec<u8>>, ps: &[(f64, f64)], pixel: image::Rgb<u8>) {
+    for y in 0..img.height() {
+        for x in 0..img.width() {
+            for pair in ps.windows(2) {
+                if distance_between_line_segment_and_point(&pair[0], &pair[1], &(x as f64, y as f64)) < 5.0 {
+                    img.put_pixel(x, y, pixel);
+                }
+            }
+        }
+    }
+}
+
+fn distance_between_line_and_point(p1: (f64, f64), p2: (f64, f64), p0: (f64, f64)) -> f64 {
+    ((p2.1 - p1.1) * p0.0 - (p2.0 - p1.0) * p0.1 + p2.0 * p1.1 - p2.1 * p1.0).abs() / (p2.1 - p1.1).hypot(p2.0 - p1.0)
+}
+
+fn distance_between_line_segment_and_point(p1: &(f64, f64), p2: &(f64, f64), p0: &(f64, f64)) -> f64 {
+    let a = p2.0 - p1.0;
+    let b = p2.1 - p1.1;
+    let a2 = a.powi(2);
+    let b2 = b.powi(2);
+    let r2 = a2 + b2;
+    let tt = -(a * (p1.0 - p0.0) + b * (p1.1 - p0.1));
+    if tt < 0.0 {
+        (p1.0 - p0.0).powi(2) + (p1.1 - p0.1).powi(2)
+    } else if tt > r2 {
+        (p2.0 - p0.0).powi(2) + (p2.1 - p0.1).powi(2)
+    } else {
+        (a * (p1.1 - p0.1) - b * (p1.0 - p0.0)).powi(2) / r2
+    }
+}
+
 fn draw_fill(img: &mut ImageBuffer<image::Rgb<u8>, Vec<u8>>, ps: &[(f64, f64)], pixel: image::Rgb<u8>) {
     for y in 0..img.height() {
         let mut vec = ps.windows(2).filter_map(|pair| intersection_(pair[0].0, pair[0].1, pair[1].0, pair[1].1, y as f64)).collect::<Vec<f64>>();
@@ -252,6 +284,7 @@ fn draw_nanachi(img: &mut ImageBuffer<image::Rgb<u8>, Vec<u8>>) {
         for s in ps.windows(2) {
             draw_line(img, s[0], s[1], image::Rgb([64, 8, 8]));
         }
+        draw_path(img, ps, image::Rgb([64, 8, 8]));
     }
 
     for ps in moji.iter() {
