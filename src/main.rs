@@ -1,7 +1,7 @@
 extern crate image;
 extern crate rand_pcg;
 
-use image::ImageBuffer;
+use image::{ImageBuffer, Rgb};
 use std::f64::consts::PI;
 use rand_core::RngCore;
 use rand_pcg::Pcg32;
@@ -29,16 +29,16 @@ fn main() {
 
     let mut img = ImageBuffer::from_fn(width, height, |x, y| {
         if (x / 8 + y / 8) % 2 == 0 {
-            image::Rgb([240u8, 240, 240])
+            Rgb([240u8, 240, 240])
         } else {
-            image::Rgb([255, 255, 255])
+            Rgb([255, 255, 255])
         }
     });
 
     for (si, ps) in shapes.iter().enumerate() {
-        draw_fill(&mut img, ps.as_slice(), image::Rgb([[255, 128, 0], [0, 255, 128], [128, 0, 255]][si % 3]));
+        draw_fill(&mut img, ps.as_slice(), Rgb([[255, 128, 0], [0, 255, 128], [128, 0, 255]][si % 3]));
         for s in ps.windows(2) {
-            draw_line(&mut img, s[0], s[1], image::Rgb([[128, 64, 0], [0, 128, 64], [64, 0, 128]][si % 3]));
+            draw_line(&mut img, s[0], s[1], Rgb([[128, 64, 0], [0, 128, 64], [64, 0, 128]][si % 3]));
         }
     }
 
@@ -66,7 +66,7 @@ fn transform(p: &(f64, f64), translation: (f64, f64), rotation: f64, scale: (f64
     (x, y)
 }
 
-fn draw_line(img: &mut ImageBuffer<image::Rgb<u8>, Vec<u8>>, mut p1: (f64, f64), mut p2: (f64, f64), pixel: image::Rgb<u8>) {
+fn draw_line(img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>, mut p1: (f64, f64), mut p2: (f64, f64), pixel: Rgb<u8>) {
     if (p1.0 - p2.0).abs() < (p1.1 - p2.1).abs() {
         if p1.1 > p2.1 {
             std::mem::swap(&mut p1, &mut p2);
@@ -90,12 +90,15 @@ fn draw_line(img: &mut ImageBuffer<image::Rgb<u8>, Vec<u8>>, mut p1: (f64, f64),
     }
 }
 
-fn draw_path(img: &mut ImageBuffer<image::Rgb<u8>, Vec<u8>>, ps: &[(f64, f64)], pixel: image::Rgb<u8>) {
+fn draw_path(img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>, ps: &[(f64, f64)], pixel: Rgb<u8>) {
     for y in 0..img.height() {
         for x in 0..img.width() {
             for pair in ps.windows(2) {
-                if distance_between_line_segment_and_point(&pair[0], &pair[1], &(x as f64, y as f64)) < 5.0 {
+                let d = distance_between_line_segment_and_point(&pair[0], &pair[1], &(x as f64, y as f64));
+                if d < 5.0 {
                     img.put_pixel(x, y, pixel);
+                } else if d < 6.0 {
+                    img.put_pixel(x, y, blend_rgb(*img.get_pixel(x, y), pixel, 6.0 - d));
                 }
             }
         }
@@ -122,7 +125,7 @@ fn distance_between_line_segment_and_point(p1: &(f64, f64), p2: &(f64, f64), p0:
     }
 }
 
-fn draw_fill(img: &mut ImageBuffer<image::Rgb<u8>, Vec<u8>>, ps: &[(f64, f64)], pixel: image::Rgb<u8>) {
+fn draw_fill(img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>, ps: &[(f64, f64)], pixel: Rgb<u8>) {
     for y in 0..img.height() {
         let mut vec = ps.windows(2).filter_map(|pair| intersection_(pair[0].0, pair[0].1, pair[1].0, pair[1].1, y as f64)).collect::<Vec<f64>>();
         vec.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
@@ -136,7 +139,7 @@ fn draw_fill(img: &mut ImageBuffer<image::Rgb<u8>, Vec<u8>>, ps: &[(f64, f64)], 
     }
 }
 
-fn draw_nanachi(img: &mut ImageBuffer<image::Rgb<u8>, Vec<u8>>) {
+fn draw_nanachi(img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>) {
     let nanachi = vec![
         // contour
         vec![
@@ -276,20 +279,28 @@ fn draw_nanachi(img: &mut ImageBuffer<image::Rgb<u8>, Vec<u8>>) {
         ]
     ].iter().map(|v| v.iter().map(|p| (p.0 * 512.0, p.1 * 512.0)).collect::<Vec<_>>()).collect::<Vec<_>>();
 
-    draw_fill(img, shape.as_slice(), image::Rgb([255, 235, 230]));
+    draw_fill(img, shape.as_slice(), Rgb([255, 235, 230]));
 
-    draw_fill(img, moji_shape.as_slice(), image::Rgb([255, 235, 230]));
+    draw_fill(img, moji_shape.as_slice(), Rgb([255, 235, 230]));
 
     for ps in nanachi.iter() {
         for s in ps.windows(2) {
-            draw_line(img, s[0], s[1], image::Rgb([64, 8, 8]));
+            draw_line(img, s[0], s[1], Rgb([64, 8, 8]));
         }
-        draw_path(img, ps, image::Rgb([64, 8, 8]));
+        draw_path(img, ps, Rgb([64, 8, 8]));
     }
 
     for ps in moji.iter() {
         for s in ps.windows(2) {
-            draw_line(img, s[0], s[1], image::Rgb([64, 8, 8]));
+            draw_line(img, s[0], s[1], Rgb([64, 8, 8]));
         }
     }
+}
+
+fn blend_rgb(p1: Rgb<u8>, p2: Rgb<u8>, r: f64) -> Rgb<u8> {
+    Rgb([
+        (p1[0] as f64 * (1.0 - r) + p2[0] as f64 * r) as u8,
+        (p1[1] as f64 * (1.0 - r) + p2[1] as f64 * r) as u8,
+        (p1[2] as f64 * (1.0 - r) + p2[2] as f64 * r) as u8
+    ])
 }
