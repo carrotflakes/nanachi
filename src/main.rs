@@ -2,14 +2,21 @@ extern crate image;
 extern crate rand_pcg;
 
 mod core;
+mod bezier;
 
 use image::{ImageBuffer, Rgb};
 use std::f64::consts::PI;
 use rand_core::RngCore;
 use rand_pcg::Pcg32;
 use crate::core::*;
+use bezier::{Bezier, Point};
 
 fn main() {
+    let b = Bezier {
+        points: vec![Point(0.0, 0.0), Point(0.0, 1.0), Point(0.0, 1.0), Point(1.0, 0.0)],
+        close: false
+    };
+    println!("{:?}", b.as_lines_points(8));
     let (width, height) = (512, 512);
 
     let spoke = (2.0 * PI / 5.0).cos() / (1.0 * PI / 5.0).cos();
