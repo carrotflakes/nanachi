@@ -1,23 +1,38 @@
 extern crate image;
 extern crate rand_pcg;
 
+mod point;
 mod core;
 mod bezier;
+mod k_curve;
 
 use image::{ImageBuffer, Rgb};
 use std::f64::consts::PI;
 use rand_core::RngCore;
 use rand_pcg::Pcg32;
 use crate::core::*;
-use bezier::{Bezier, Point};
+use point::Point;
+use bezier::{Bezier4, Bezier3};
 
 fn main() {
-    let b = Bezier {
+    let b = Bezier4 {
         points: vec![Point(0.0, 0.0), Point(0.0, 1.0), Point(0.0, 1.0), Point(1.0, 0.0)],
         close: false
     };
     println!("{:?}", b.as_lines_points(8));
     let (width, height) = (512, 512);
+    let b3 = Bezier3 {
+        points: vec![Point(0.0, 0.0), Point(0.5, 1.0), Point(1.0, 0.0)],
+        close: false
+    };
+    println!("{:?}", b3.as_lines_points(8));
+
+    let b = k_curve::k_curve(vec![Point(0.0, 0.0), Point(10.0, 0.0), Point(0.0, 10.0)], false, 3);
+    println!("{:?}", b);
+    println!("{:?}", b.as_lines_points(4));
+    let b = k_curve::k_curve(vec![Point(0.0, 0.0), Point(10.0, 0.0), Point(0.0, 10.0)], true, 3);
+    println!("{:?}", b);
+    println!("{:?}", b.as_lines_points(4));
 
     let spoke = (2.0 * PI / 5.0).cos() / (1.0 * PI / 5.0).cos();
     let points = (0..=10).map(|i| {
@@ -51,6 +66,11 @@ fn main() {
             draw_line(&mut img, s[0], s[1], Rgb([[128, 64, 0], [0, 128, 64], [64, 0, 128]][si % 3]));
         }
     }
+
+    //draw_path(&mut img, &[(100.0, 100.0), (200.0, 100.0), (200.0, 200.0), (100.0, 200.0)], Rgb([200, 0, 0]));
+    draw_path(&mut img, &k_curve::k_curve(vec![Point(0.2, 0.2), Point(0.8, 0.2), Point(0.8, 0.8), Point(0.2, 0.8)], true, 0).as_lines_points(8).iter().map(|x| (x.0 * width as f64, x.1 * height as f64)).collect::<Vec<_>>(), Rgb([200, 0, 0]));
+    draw_path(&mut img, &k_curve::k_curve(vec![Point(0.2, 0.2), Point(0.8, 0.2), Point(0.8, 0.8), Point(0.2, 0.8)], true, 1).as_lines_points(8).iter().map(|x| (x.0 * width as f64, x.1 * height as f64)).collect::<Vec<_>>(), Rgb([0, 200, 0]));
+    draw_path(&mut img, &k_curve::k_curve(vec![Point(0.2, 0.2), Point(0.8, 0.2), Point(0.8, 0.8), Point(0.2, 0.8)], true, 2).as_lines_points(8).iter().map(|x| (x.0 * width as f64, x.1 * height as f64)).collect::<Vec<_>>(), Rgb([200, 200, 0]));
 
     draw_nanachi(&mut img);
 
@@ -206,7 +226,7 @@ fn draw_nanachi(img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>) {
         for s in ps.windows(2) {
             draw_line(img, s[0], s[1], Rgb([64, 8, 8]));
         }
-        draw_path(img, ps, Rgb([64, 8, 8]));
+        //draw_path(img, ps, Rgb([64, 8, 8]));
     }
 
     for ps in moji.iter() {
