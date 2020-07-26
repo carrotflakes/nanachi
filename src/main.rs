@@ -15,43 +15,27 @@ use point::Point;
 use bezier::{Bezier3, Bezier2};
 
 fn main() {
-    let b = Bezier3 {
-        points: vec![Point(0.0, 0.0), Point(0.0, 1.0), Point(0.0, 1.0), Point(1.0, 0.0)],
-        close: false
-    };
-    println!("{:?}", b.as_lines_points(8));
+    {
+        let b = Bezier3 {
+            points: vec![Point(0.0, 0.0), Point(0.0, 1.0), Point(0.0, 1.0), Point(1.0, 0.0)],
+            close: false
+        };
+        println!("{:?}", b.as_lines_points(8));
+        let b3 = Bezier2 {
+            points: vec![Point(0.0, 0.0), Point(0.5, 1.0), Point(1.0, 0.0)],
+            close: false
+        };
+        println!("{:?}", b3.as_lines_points(8));
+
+        let b = k_curve::k_curve(vec![Point(0.0, 0.0), Point(10.0, 0.0), Point(0.0, 10.0)], false, 3);
+        println!("{:?}", b);
+        println!("{:?}", b.as_lines_points(4));
+        let b = k_curve::k_curve(vec![Point(0.0, 0.0), Point(10.0, 0.0), Point(0.0, 10.0)], true, 3);
+        println!("{:?}", b);
+        println!("{:?}", b.as_lines_points(4));
+    }
+
     let (width, height) = (512, 512);
-    let b3 = Bezier2 {
-        points: vec![Point(0.0, 0.0), Point(0.5, 1.0), Point(1.0, 0.0)],
-        close: false
-    };
-    println!("{:?}", b3.as_lines_points(8));
-
-    let b = k_curve::k_curve(vec![Point(0.0, 0.0), Point(10.0, 0.0), Point(0.0, 10.0)], false, 3);
-    println!("{:?}", b);
-    println!("{:?}", b.as_lines_points(4));
-    let b = k_curve::k_curve(vec![Point(0.0, 0.0), Point(10.0, 0.0), Point(0.0, 10.0)], true, 3);
-    println!("{:?}", b);
-    println!("{:?}", b.as_lines_points(4));
-
-    let spoke = (2.0 * PI / 5.0).cos() / (1.0 * PI / 5.0).cos();
-    let points = (0..=10).map(|i| {
-        let p = i as f64 / 10.0 * PI * 2.0;
-        let (s, c) = p.sin_cos();
-        let r = (1.0 - (i % 2) as f64 * (1.0 - spoke)) * 10.0;
-        (s * r, c * r)
-    }).collect::<Vec<_>>();
-
-    let mut rnd = Pcg32::new(0xcafef00dd15ea5e5, 0xa02bdbf7bb3c0a7);
-    let shapes = (0..100).map(|_| {
-        let t = (rnd.next_u32() as f64 / std::u32::MAX as f64 * width as f64, rnd.next_u32() as f64 / std::u32::MAX as f64 * height as f64);
-        let r = rnd.next_u32() as f64 / std::u32::MAX as f64 * PI * 2.0;
-        let s = rnd.next_u32() as f64 / std::u32::MAX as f64 * 4.0 + 5.0;
-        points.iter().map(|p| transform(p, t, r, (s, s))).collect::<Vec<_>>()
-    }).collect::<Vec<_>>();
-
-    //println!("{:?}", shapes);
-
     let mut img = ImageBuffer::from_fn(width, height, |x, y| {
         if (x / 8 + y / 8) % 2 == 0 {
             Rgb([240u8, 240, 240])
@@ -60,12 +44,7 @@ fn main() {
         }
     });
 
-    for (si, ps) in shapes.iter().enumerate() {
-        draw_fill(&mut img, ps.as_slice(), Rgb([[255, 128, 0], [0, 255, 128], [128, 0, 255]][si % 3]));
-        for s in ps.windows(2) {
-            draw_line(&mut img, s[0], s[1], Rgb([[128, 64, 0], [0, 128, 64], [64, 0, 128]][si % 3]));
-        }
-    }
+    draw_stars(&mut img);
 
     //draw_path(&mut img, &[(100.0, 100.0), (200.0, 100.0), (200.0, 200.0), (100.0, 200.0)], Rgb([200, 0, 0]));
     draw_path(&mut img, &k_curve::k_curve(vec![Point(0.2, 0.2), Point(0.8, 0.2), Point(0.8, 0.8), Point(0.2, 0.8)], true, 0).as_lines_points(8).iter().map(|x| (x.0 * width as f64, x.1 * height as f64)).collect::<Vec<_>>(), Rgb([200, 0, 0]));
@@ -76,6 +55,31 @@ fn main() {
 
     let res = img.save("./my_image.png");
     println!("{:?}", res);
+}
+
+fn draw_stars(img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>) {
+    let spoke = (2.0 * PI / 5.0).cos() / (1.0 * PI / 5.0).cos();
+    let points = (0..=10).map(|i| {
+        let p = i as f64 / 10.0 * PI * 2.0;
+        let (s, c) = p.sin_cos();
+        let r = (1.0 - (i % 2) as f64 * (1.0 - spoke)) * 10.0;
+        (s * r, c * r)
+    }).collect::<Vec<_>>();
+
+    let mut rnd = Pcg32::new(0xcafef00dd15ea5e5, 0xa02bdbf7bb3c0a7);
+    let shapes = (0..100).map(|_| {
+        let t = (rnd.next_u32() as f64 / std::u32::MAX as f64 * img.width() as f64, rnd.next_u32() as f64 / std::u32::MAX as f64 * img.height() as f64);
+        let r = rnd.next_u32() as f64 / std::u32::MAX as f64 * PI * 2.0;
+        let s = rnd.next_u32() as f64 / std::u32::MAX as f64 * 4.0 + 5.0;
+        points.iter().map(|p| transform(p, t, r, (s, s))).collect::<Vec<_>>()
+    }).collect::<Vec<_>>();
+
+    for (si, ps) in shapes.iter().enumerate() {
+        draw_fill(img, ps.as_slice(), Rgb([[255, 128, 0], [0, 255, 128], [128, 0, 255]][si % 3]));
+        for s in ps.windows(2) {
+            draw_line(img, s[0], s[1], Rgb([[128, 64, 0], [0, 128, 64], [64, 0, 128]][si % 3]));
+        }
+    }
 }
 
 fn draw_nanachi(img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>) {
