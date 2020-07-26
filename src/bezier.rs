@@ -1,12 +1,12 @@
 use crate::point::Point;
 
 
-pub struct Bezier4 {
+pub struct Bezier3 {
   pub points: Vec<Point>,
   pub close: bool
 }
 
-impl Bezier4 {
+impl Bezier3 {
   pub fn get_point(&self, pos: f64) -> Point {
     let i = pos.floor() as usize * 3;
     let ps = &self.points[i..i+4];
@@ -34,12 +34,12 @@ impl Bezier4 {
 }
 
 #[derive(Debug)]
-pub struct Bezier3 {
+pub struct Bezier2 {
   pub points: Vec<Point>,
   pub close: bool
 }
 
-impl Bezier3 {
+impl Bezier2 {
   pub fn get_point(&self, pos: f64) -> Point {
     let i = pos.floor() as usize * 2;
     let ps = &self.points[i..i+3];

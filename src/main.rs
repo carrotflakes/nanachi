@@ -12,16 +12,16 @@ use rand_core::RngCore;
 use rand_pcg::Pcg32;
 use crate::core::*;
 use point::Point;
-use bezier::{Bezier4, Bezier3};
+use bezier::{Bezier3, Bezier2};
 
 fn main() {
-    let b = Bezier4 {
+    let b = Bezier3 {
         points: vec![Point(0.0, 0.0), Point(0.0, 1.0), Point(0.0, 1.0), Point(1.0, 0.0)],
         close: false
     };
     println!("{:?}", b.as_lines_points(8));
     let (width, height) = (512, 512);
-    let b3 = Bezier3 {
+    let b3 = Bezier2 {
         points: vec![Point(0.0, 0.0), Point(0.5, 1.0), Point(1.0, 0.0)],
         close: false
     };

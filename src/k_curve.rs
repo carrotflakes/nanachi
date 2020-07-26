@@ -1,5 +1,5 @@
 use crate::point::Point;
-use crate::bezier::Bezier3;
+use crate::bezier::Bezier2;
 
 struct K {
   points: Vec<Point>,
@@ -131,7 +131,7 @@ impl K {
     solve_tridiagonal_equation(a, &mut self.b, &self.points);
   }
 
-  pub fn get_bezier(&self) -> Bezier3 {
+  pub fn get_bezier(&self) -> Bezier2 {
     let mut points = self.b.clone();
     if self.close {
       points.push(points[0]);
@@ -143,14 +143,14 @@ impl K {
         points = Vec::from(&points[2..self.n * 2 - 1])
       };
     }
-    Bezier3 {
+    Bezier2 {
       points,
       close: self.close
     }
   }
 }
 
-pub fn k_curve(points: Vec<Point>, close: bool, iteration: usize) -> Bezier3 {
+pub fn k_curve(points: Vec<Point>, close: bool, iteration: usize) -> Bezier2 {
   let mut k = K::new(points, close);
   k.optimize(iteration);
   k.get_bezier()
