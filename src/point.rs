@@ -38,3 +38,15 @@ impl std::ops::Div<f64> for Point {
         Point(self.0 / rhs, self.1 / rhs)
     }
 }
+
+impl From<(f64, f64)> for Point {
+    fn from(tuple: (f64, f64)) -> Point {
+        Point(tuple.0, tuple.1)
+    }
+}
+
+impl Into<(f64, f64)> for Point {
+    fn into(self) -> (f64, f64) {
+        (self.0, self.1)
+    }
+}

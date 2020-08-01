@@ -324,7 +324,7 @@ fn draw_nanachi(img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>) {
         for s in ps.windows(2) {
             draw::draw_line(img, s[0], s[1], Rgb([64, 8, 8]));
         }
-        //draw_path(img, ps, Rgb([64, 8, 8]));
+        //draw::draw_path(img, ps, Rgb([64, 8, 8]));
     }
 
     for ps in moji.iter() {

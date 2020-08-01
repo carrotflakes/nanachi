@@ -1,12 +1,15 @@
 use crate::geometry;
+use crate::point::Point;
 use image::{ImageBuffer, Rgb};
 
-pub fn draw_line(
+pub fn draw_line<P: Into<Point>>(
     img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>,
-    mut p1: (f64, f64),
-    mut p2: (f64, f64),
+    p1: P,
+    p2: P,
     pixel: Rgb<u8>,
 ) {
+    let mut p1: Point = p1.into();
+    let mut p2: Point = p2.into();
     if (p1.0 - p2.0).abs() < (p1.1 - p2.1).abs() {
         if p1.1 > p2.1 {
             std::mem::swap(&mut p1, &mut p2);
@@ -30,14 +33,14 @@ pub fn draw_line(
     }
 }
 
-pub fn draw_path(img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>, ps: &[(f64, f64)], pixel: Rgb<u8>) {
+pub fn draw_path<P: Into<Point> + Copy>(img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>, ps: &[P], pixel: Rgb<u8>) {
     for y in 0..img.height() {
         for x in 0..img.width() {
             for pair in ps.windows(2) {
                 let d = geometry::distance_between_line_segment_and_point(
-                    &pair[0],
-                    &pair[1],
-                    &(x as f64, y as f64),
+                    pair[0],
+                    pair[1],
+                    (x as f64, y as f64),
                 );
                 if d < 5.0 {
                     img.put_pixel(x, y, pixel);
@@ -49,18 +52,18 @@ pub fn draw_path(img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>, ps: &[(f64, f64)], pix
     }
 }
 
-pub fn draw_lines(
+pub fn draw_lines<P: Into<Point> + Copy>(
     img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>,
-    lines: Vec<((f64, f64), (f64, f64))>,
+    lines: Vec<(P, P)>,
     pixel: Rgb<u8>,
 ) {
     for y in 0..img.height() {
         for x in 0..img.width() {
             for pair in lines.iter() {
                 let d = geometry::distance_between_line_segment_and_point(
-                    &pair.0,
-                    &pair.1,
-                    &(x as f64, y as f64),
+                    pair.0,
+                    pair.1,
+                    (x as f64, y as f64),
                 );
                 if d < 5.0 {
                     img.put_pixel(x, y, pixel);

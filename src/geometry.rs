@@ -1,10 +1,12 @@
+use crate::point::Point;
+
 pub fn intersect_segment_and_horizon(ax: f64, ay: f64, bx: f64, by: f64, hy: f64) -> Option<f64> {
-    if ay != by && ((hy < ay) ^ (hy < by)) {
-        let r = (hy - ay) / (by - ay);
-        Some(ax * (1.0 - r) + bx * r)
-    } else {
-        None
-    }
+  if ay != by && ((hy < ay) ^ (hy < by)) {
+    let r = (hy - ay) / (by - ay);
+    Some(ax * (1.0 - r) + bx * r)
+  } else {
+    None
+  }
 }
 
 pub fn transform(
@@ -26,11 +28,14 @@ pub fn distance_between_line_and_point(p1: (f64, f64), p2: (f64, f64), p0: (f64,
         / (p2.1 - p1.1).hypot(p2.0 - p1.0)
 }
 
-pub fn distance_between_line_segment_and_point(
-    p1: &(f64, f64),
-    p2: &(f64, f64),
-    p0: &(f64, f64),
+pub fn distance_between_line_segment_and_point<P1: Into<Point>, P2: Into<Point>>(
+    p1: P1,
+    p2: P1,
+    p0: P2,
 ) -> f64 {
+  let p1: Point = p1.into();
+  let p2: Point = p2.into();
+  let p0: Point = p0.into();
     let a = p2.0 - p1.0;
     let b = p2.1 - p1.1;
     let a2 = a.powi(2);
