@@ -1,36 +1,44 @@
-extern crate image;
-extern crate rand_pcg;
-
-mod point;
-mod core;
-mod bezier;
-mod k_curve;
-
-use image::{ImageBuffer, Rgb};
-use std::f64::consts::PI;
+use nanachi::{
+    bezier::{Bezier2, Bezier3},
+    draw, geometry,
+    image::{ImageBuffer, Rgb},
+    k_curve,
+    point::Point,
+};
 use rand_core::RngCore;
 use rand_pcg::Pcg32;
-use crate::core::*;
-use point::Point;
-use bezier::{Bezier3, Bezier2};
+use std::f64::consts::PI;
 
 fn main() {
     {
         let b = Bezier3 {
-            points: vec![Point(0.0, 0.0), Point(0.0, 1.0), Point(0.0, 1.0), Point(1.0, 0.0)],
-            close: false
+            points: vec![
+                Point(0.0, 0.0),
+                Point(0.0, 1.0),
+                Point(0.0, 1.0),
+                Point(1.0, 0.0),
+            ],
+            close: false,
         };
         println!("{:?}", b.as_lines_points(8));
         let b3 = Bezier2 {
             points: vec![Point(0.0, 0.0), Point(0.5, 1.0), Point(1.0, 0.0)],
-            close: false
+            close: false,
         };
         println!("{:?}", b3.as_lines_points(8));
 
-        let b = k_curve::k_curve(vec![Point(0.0, 0.0), Point(10.0, 0.0), Point(0.0, 10.0)], false, 3);
+        let b = k_curve::k_curve(
+            vec![Point(0.0, 0.0), Point(10.0, 0.0), Point(0.0, 10.0)],
+            false,
+            3,
+        );
         println!("{:?}", b);
         println!("{:?}", b.as_lines_points(4));
-        let b = k_curve::k_curve(vec![Point(0.0, 0.0), Point(10.0, 0.0), Point(0.0, 10.0)], true, 3);
+        let b = k_curve::k_curve(
+            vec![Point(0.0, 0.0), Point(10.0, 0.0), Point(0.0, 10.0)],
+            true,
+            3,
+        );
         println!("{:?}", b);
         println!("{:?}", b.as_lines_points(4));
     }
@@ -47,9 +55,60 @@ fn main() {
     draw_stars(&mut img);
 
     //draw_path(&mut img, &[(100.0, 100.0), (200.0, 100.0), (200.0, 200.0), (100.0, 200.0)], Rgb([200, 0, 0]));
-    draw_path(&mut img, &k_curve::k_curve(vec![Point(0.2, 0.2), Point(0.8, 0.2), Point(0.8, 0.8), Point(0.2, 0.8)], true, 0).as_lines_points(8).iter().map(|x| (x.0 * width as f64, x.1 * height as f64)).collect::<Vec<_>>(), Rgb([200, 0, 0]));
-    draw_path(&mut img, &k_curve::k_curve(vec![Point(0.2, 0.2), Point(0.8, 0.2), Point(0.8, 0.8), Point(0.2, 0.8)], true, 1).as_lines_points(8).iter().map(|x| (x.0 * width as f64, x.1 * height as f64)).collect::<Vec<_>>(), Rgb([0, 200, 0]));
-    draw_path(&mut img, &k_curve::k_curve(vec![Point(0.2, 0.2), Point(0.8, 0.2), Point(0.8, 0.8), Point(0.2, 0.8)], true, 2).as_lines_points(8).iter().map(|x| (x.0 * width as f64, x.1 * height as f64)).collect::<Vec<_>>(), Rgb([200, 200, 0]));
+    draw::draw_path(
+        &mut img,
+        &k_curve::k_curve(
+            vec![
+                Point(0.2, 0.2),
+                Point(0.8, 0.2),
+                Point(0.8, 0.8),
+                Point(0.2, 0.8),
+            ],
+            true,
+            0,
+        )
+        .as_lines_points(8)
+        .iter()
+        .map(|x| (x.0 * width as f64, x.1 * height as f64))
+        .collect::<Vec<_>>(),
+        Rgb([200, 0, 0]),
+    );
+    draw::draw_path(
+        &mut img,
+        &k_curve::k_curve(
+            vec![
+                Point(0.2, 0.2),
+                Point(0.8, 0.2),
+                Point(0.8, 0.8),
+                Point(0.2, 0.8),
+            ],
+            true,
+            1,
+        )
+        .as_lines_points(8)
+        .iter()
+        .map(|x| (x.0 * width as f64, x.1 * height as f64))
+        .collect::<Vec<_>>(),
+        Rgb([0, 200, 0]),
+    );
+    draw::draw_path(
+        &mut img,
+        &k_curve::k_curve(
+            vec![
+                Point(0.2, 0.2),
+                Point(0.8, 0.2),
+                Point(0.8, 0.8),
+                Point(0.2, 0.8),
+            ],
+            true,
+            2,
+        )
+        .as_lines_points(8)
+        .iter()
+        .map(|x| (x.0 * width as f64, x.1 * height as f64))
+        .collect::<Vec<_>>(),
+        Rgb([200, 200, 0]),
+    );
 
     draw_nanachi(&mut img);
 
@@ -59,25 +118,44 @@ fn main() {
 
 fn draw_stars(img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>) {
     let spoke = (2.0 * PI / 5.0).cos() / (1.0 * PI / 5.0).cos();
-    let points = (0..=10).map(|i| {
-        let p = i as f64 / 10.0 * PI * 2.0;
-        let (s, c) = p.sin_cos();
-        let r = (1.0 - (i % 2) as f64 * (1.0 - spoke)) * 10.0;
-        (s * r, c * r)
-    }).collect::<Vec<_>>();
+    let points = (0..=10)
+        .map(|i| {
+            let p = i as f64 / 10.0 * PI * 2.0;
+            let (s, c) = p.sin_cos();
+            let r = (1.0 - (i % 2) as f64 * (1.0 - spoke)) * 10.0;
+            (s * r, c * r)
+        })
+        .collect::<Vec<_>>();
 
     let mut rnd = Pcg32::new(0xcafef00dd15ea5e5, 0xa02bdbf7bb3c0a7);
-    let shapes = (0..100).map(|_| {
-        let t = (rnd.next_u32() as f64 / std::u32::MAX as f64 * img.width() as f64, rnd.next_u32() as f64 / std::u32::MAX as f64 * img.height() as f64);
-        let r = rnd.next_u32() as f64 / std::u32::MAX as f64 * PI * 2.0;
-        let s = rnd.next_u32() as f64 / std::u32::MAX as f64 * 4.0 + 5.0;
-        points.iter().map(|p| transform(p, t, r, (s, s))).collect::<Vec<_>>()
-    }).collect::<Vec<_>>();
+    let shapes = (0..100)
+        .map(|_| {
+            let t = (
+                rnd.next_u32() as f64 / std::u32::MAX as f64 * img.width() as f64,
+                rnd.next_u32() as f64 / std::u32::MAX as f64 * img.height() as f64,
+            );
+            let r = rnd.next_u32() as f64 / std::u32::MAX as f64 * PI * 2.0;
+            let s = rnd.next_u32() as f64 / std::u32::MAX as f64 * 4.0 + 5.0;
+            points
+                .iter()
+                .map(|p| geometry::transform(p, t, r, (s, s)))
+                .collect::<Vec<_>>()
+        })
+        .collect::<Vec<_>>();
 
     for (si, ps) in shapes.iter().enumerate() {
-        draw_fill(img, ps.as_slice(), Rgb([[255, 128, 0], [0, 255, 128], [128, 0, 255]][si % 3]));
+        draw::draw_fill(
+            img,
+            ps.as_slice(),
+            Rgb([[255, 128, 0], [0, 255, 128], [128, 0, 255]][si % 3]),
+        );
         for s in ps.windows(2) {
-            draw_line(img, s[0], s[1], Rgb([[128, 64, 0], [0, 128, 64], [64, 0, 128]][si % 3]));
+            draw::draw_line(
+                img,
+                s[0],
+                s[1],
+                Rgb([[128, 64, 0], [0, 128, 64], [64, 0, 128]][si % 3]),
+            );
         }
     }
 }
@@ -115,10 +193,7 @@ fn draw_nanachi(img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>) {
             (0.52, 0.76),
         ],
         // left eyelid
-        vec![
-            (0.30, 0.51),
-            (0.40, 0.50),
-        ],
+        vec![(0.30, 0.51), (0.40, 0.50)],
         // left eye
         vec![
             (0.33, 0.51),
@@ -129,10 +204,7 @@ fn draw_nanachi(img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>) {
             (0.37, 0.50),
         ],
         // right eyelid
-        vec![
-            (0.60, 0.50),
-            (0.70, 0.51),
-        ],
+        vec![(0.60, 0.50), (0.70, 0.51)],
         // right
         vec![
             (0.63, 0.50),
@@ -158,19 +230,37 @@ fn draw_nanachi(img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>) {
             (0.54, 0.70),
             (0.55, 0.67),
         ],
-    ].iter().map(|v| v.iter().map(|p| (p.0 * 512.0, p.1 * 512.0)).collect::<Vec<_>>()).collect::<Vec<_>>();
+    ]
+    .iter()
+    .map(|v| {
+        v.iter()
+            .map(|p| (p.0 * 512.0, p.1 * 512.0))
+            .collect::<Vec<_>>()
+    })
+    .collect::<Vec<_>>();
 
     let mut shape = Vec::new();
     let f = |l: (f64, f64), c: (f64, f64), r: (f64, f64)| {
         let ll = (l.0 - c.0).atan2(l.1 - c.1);
         let rr = (c.0 - r.0).atan2(c.1 - r.1);
-        (c.0 - (ll.cos() + rr.cos()) * 8.0, c.1 + (ll.sin() + rr.sin()) * 8.0)
+        (
+            c.0 - (ll.cos() + rr.cos()) * 8.0,
+            c.1 + (ll.sin() + rr.sin()) * 8.0,
+        )
     };
-    shape.push(f(nanachi[0][nanachi[0].len()-1], nanachi[0][0], nanachi[0][1]));
-    for i in 0..nanachi[0].len()-2 {
-        shape.push(f(nanachi[0][i], nanachi[0][i+1], nanachi[0][i+2]));
+    shape.push(f(
+        nanachi[0][nanachi[0].len() - 1],
+        nanachi[0][0],
+        nanachi[0][1],
+    ));
+    for i in 0..nanachi[0].len() - 2 {
+        shape.push(f(nanachi[0][i], nanachi[0][i + 1], nanachi[0][i + 2]));
     }
-    shape.push(f(nanachi[0][nanachi[0].len()-2], nanachi[0][nanachi[0].len()-1], nanachi[0][0]));
+    shape.push(f(
+        nanachi[0][nanachi[0].len() - 2],
+        nanachi[0][nanachi[0].len() - 1],
+        nanachi[0][0],
+    ));
     shape.push(shape[0]);
 
     let moji_shape = vec![
@@ -185,7 +275,10 @@ fn draw_nanachi(img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>) {
         (0.85, 0.83),
         (0.86, 0.74),
         (0.30, 0.74),
-    ].iter().map(|p| (p.0 * 512.0, p.1 * 512.0)).collect::<Vec<_>>();
+    ]
+    .iter()
+    .map(|p| (p.0 * 512.0, p.1 * 512.0))
+    .collect::<Vec<_>>();
 
     let moji = vec![
         vec![
@@ -197,10 +290,7 @@ fn draw_nanachi(img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>) {
             (0.30, 0.76),
             (0.42, 0.77),
         ],
-        vec![
-            (0.24, 0.80),
-            (0.25, 0.81),
-        ],
+        vec![(0.24, 0.80), (0.25, 0.81)],
         vec![
             (0.58, 0.76),
             (0.56, 0.86),
@@ -209,33 +299,37 @@ fn draw_nanachi(img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>) {
             (0.53, 0.80),
             (0.65, 0.79),
         ],
-        vec![
-            (0.52, 0.82),
-            (0.53, 0.83),
-        ],
+        vec![(0.52, 0.82), (0.53, 0.83)],
         vec![
             (0.83, 0.78),
             (0.66, 0.81),
             (0.72, 0.73),
             (0.74, 0.80),
             (0.78, 0.87),
-        ]
-    ].iter().map(|v| v.iter().map(|p| (p.0 * 512.0, p.1 * 512.0)).collect::<Vec<_>>()).collect::<Vec<_>>();
+        ],
+    ]
+    .iter()
+    .map(|v| {
+        v.iter()
+            .map(|p| (p.0 * 512.0, p.1 * 512.0))
+            .collect::<Vec<_>>()
+    })
+    .collect::<Vec<_>>();
 
-    draw_fill(img, shape.as_slice(), Rgb([255, 235, 230]));
+    draw::draw_fill(img, shape.as_slice(), Rgb([255, 235, 230]));
 
-    draw_fill(img, moji_shape.as_slice(), Rgb([255, 235, 230]));
+    draw::draw_fill(img, moji_shape.as_slice(), Rgb([255, 235, 230]));
 
     for ps in nanachi.iter() {
         for s in ps.windows(2) {
-            draw_line(img, s[0], s[1], Rgb([64, 8, 8]));
+            draw::draw_line(img, s[0], s[1], Rgb([64, 8, 8]));
         }
         //draw_path(img, ps, Rgb([64, 8, 8]));
     }
 
     for ps in moji.iter() {
         for s in ps.windows(2) {
-            draw_line(img, s[0], s[1], Rgb([64, 8, 8]));
+            draw::draw_line(img, s[0], s[1], Rgb([64, 8, 8]));
         }
     }
 }
