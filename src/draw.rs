@@ -37,7 +37,9 @@ pub fn draw_path<P: Into<Point> + Copy>(
     img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>,
     ps: &[P],
     pixel: Rgb<u8>,
+    stroke_width: f64,
 ) {
+    let grad_width = 1.0;
     for y in 0..img.height() {
         for x in 0..img.width() {
             for pair in ps.windows(2) {
@@ -46,10 +48,10 @@ pub fn draw_path<P: Into<Point> + Copy>(
                     pair[1],
                     (x as f64, y as f64),
                 );
-                if d < 5.0 {
+                if d < stroke_width {
                     img.put_pixel(x, y, pixel);
-                } else if d < 6.0 {
-                    img.put_pixel(x, y, blend_rgb(*img.get_pixel(x, y), pixel, 6.0 - d));
+                } else if d < stroke_width + grad_width {
+                    img.put_pixel(x, y, blend_rgb(*img.get_pixel(x, y), pixel, (stroke_width + grad_width - d) / grad_width));
                 }
             }
         }
