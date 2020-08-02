@@ -1,5 +1,4 @@
 use nanachi::{
-    bezier::{Bezier2, Bezier3},
     draw, geometry,
     image::{ImageBuffer, Rgb},
     k_curve,
@@ -10,39 +9,6 @@ use rand_pcg::Pcg32;
 use std::f64::consts::PI;
 
 fn main() {
-    {
-        let b = Bezier3 {
-            points: vec![
-                Point(0.0, 0.0),
-                Point(0.0, 1.0),
-                Point(0.0, 1.0),
-                Point(1.0, 0.0),
-            ],
-            close: false,
-        };
-        println!("{:?}", b.as_lines_points(8));
-        let b3 = Bezier2 {
-            points: vec![Point(0.0, 0.0), Point(0.5, 1.0), Point(1.0, 0.0)],
-            close: false,
-        };
-        println!("{:?}", b3.as_lines_points(8));
-
-        let b = k_curve::k_curve(
-            vec![Point(0.0, 0.0), Point(10.0, 0.0), Point(0.0, 10.0)],
-            false,
-            3,
-        );
-        println!("{:?}", b);
-        println!("{:?}", b.as_lines_points(4));
-        let b = k_curve::k_curve(
-            vec![Point(0.0, 0.0), Point(10.0, 0.0), Point(0.0, 10.0)],
-            true,
-            3,
-        );
-        println!("{:?}", b);
-        println!("{:?}", b.as_lines_points(4));
-    }
-
     let (width, height) = (512, 512);
     let mut img = ImageBuffer::from_fn(width, height, |x, y| {
         if (x / 8 + y / 8) % 2 == 0 {
@@ -54,7 +20,6 @@ fn main() {
 
     draw_stars(&mut img);
 
-    //draw_path(&mut img, &[(100.0, 100.0), (200.0, 100.0), (200.0, 200.0), (100.0, 200.0)], Rgb([200, 0, 0]));
     draw::draw_path(
         &mut img,
         &k_curve::k_curve(

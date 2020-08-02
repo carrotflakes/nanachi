@@ -33,7 +33,11 @@ pub fn draw_line<P: Into<Point>>(
     }
 }
 
-pub fn draw_path<P: Into<Point> + Copy>(img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>, ps: &[P], pixel: Rgb<u8>) {
+pub fn draw_path<P: Into<Point> + Copy>(
+    img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>,
+    ps: &[P],
+    pixel: Rgb<u8>,
+) {
     for y in 0..img.height() {
         for x in 0..img.width() {
             for pair in ps.windows(2) {
