@@ -16,6 +16,9 @@ impl Bezier3 {
 
     pub fn as_lines_points(&self, division: usize) -> Vec<Point> {
         assert!(1 <= division);
+        if self.points.is_empty() {
+            return Vec::new();
+        }
         let mut vec = Vec::new();
         for i in 0..self.anchor_num() - 1 {
             vec.push(self.points[i * 3]);
@@ -49,6 +52,9 @@ impl Bezier2 {
 
     pub fn as_lines_points(&self, division: usize) -> Vec<Point> {
         assert!(1 <= division);
+        if self.points.is_empty() {
+            return Vec::new();
+        }
         let mut vec = Vec::new();
         for i in 0..self.anchor_num() - 1 {
             vec.push(self.points[i * 2]);

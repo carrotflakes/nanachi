@@ -37,4 +37,6 @@ fn main() {
         println!("{:?}", b);
         println!("{:?}", b.as_lines_points(4));
     }
+    let path2 = nanachi::k_curve::k_curve(vec![], false, 4).as_lines_points(10);
+    println!("path2 {:?}", path2);
 }
