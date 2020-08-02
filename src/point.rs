@@ -39,14 +39,14 @@ impl std::ops::Div<f64> for Point {
     }
 }
 
-impl From<(f64, f64)> for Point {
-    fn from(tuple: (f64, f64)) -> Point {
-        Point(tuple.0, tuple.1)
+impl<T: Into<f64>> From<(T, T)> for Point {
+    fn from(tuple: (T, T)) -> Point {
+        Point(tuple.0.into(), tuple.1.into())
     }
 }
 
-impl Into<(f64, f64)> for Point {
-    fn into(self) -> (f64, f64) {
-        (self.0, self.1)
+impl<T: From<f64>> Into<(T, T)> for Point {
+    fn into(self) -> (T, T) {
+        (self.0.into(), self.1.into())
     }
 }
