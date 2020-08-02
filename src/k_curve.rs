@@ -14,6 +14,7 @@ struct K {
 impl K {
     pub fn new(points: Vec<Point>, close: bool) -> Self {
         let n = points.len();
+        assert!(2 <= n);
 
         let mut l = vec![0.5; n];
         if !close {
@@ -151,6 +152,12 @@ impl K {
 }
 
 pub fn k_curve(points: Vec<Point>, close: bool, iteration: usize) -> Bezier2 {
+    if points.len() <= 1 {
+        return Bezier2 {
+            points: Vec::new(),
+            close,
+        };
+    }
     let mut k = K::new(points, close);
     k.optimize(iteration);
     k.get_bezier()

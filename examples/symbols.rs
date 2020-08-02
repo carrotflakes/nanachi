@@ -26,21 +26,41 @@ fn main() {
     .collect::<Vec<Point>>()
     .into();
     path.transform_mut(&AugmentedMatrix::new().rotate(-0.1));
-    draw::draw_path(&mut img, &path.into() as &Vec<Point>, Rgb([10, 10, 250]), 2.0);
+    draw::draw_path(
+        &mut img,
+        &path.into() as &Vec<Point>,
+        Rgb([10, 10, 250]),
+        2.0,
+    );
 
     let mut path = primitives::triangle(100.);
     path.transform_mut(&AugmentedMatrix::new().rotate(0.0).translate(100., 100.));
     let pc = position_color::BlockCheck::new(Rgb([200, 200, 200]), Rgb([100, 100, 100]), 10.0);
     draw::draw_fill(&mut img, &path.clone().into() as &Vec<Point>, &pc);
-    draw::draw_path(&mut img, &path.into() as &Vec<Point>, Rgb([10, 250, 10]), 5.0);
+    draw::draw_path(
+        &mut img,
+        &path.into() as &Vec<Point>,
+        Rgb([10, 250, 10]),
+        5.0,
+    );
 
     let mut path = primitives::triangle(100.);
     path.transform_mut(&AugmentedMatrix::new().rotate(0.2).translate(100., 100.));
-    draw::draw_path(&mut img, &path.into() as &Vec<Point>, Rgb([10, 250, 10]), 5.0);
+    draw::draw_path(
+        &mut img,
+        &path.into() as &Vec<Point>,
+        Rgb([10, 250, 10]),
+        5.0,
+    );
 
     let mut path = primitives::triangle(100.);
     path.transform_mut(&AugmentedMatrix::new().rotate(0.4).translate(100., 100.));
-    draw::draw_path(&mut img, &path.into() as &Vec<Point>, Rgb([10, 250, 10]), 5.0);
+    draw::draw_path(
+        &mut img,
+        &path.into() as &Vec<Point>,
+        Rgb([10, 250, 10]),
+        5.0,
+    );
 
     draw::draw_path(
         &mut img,
@@ -59,7 +79,7 @@ fn main() {
         .map(|x| (x.0 * width as f64, x.1 * height as f64))
         .collect::<Vec<_>>(),
         Rgb([200, 0, 0]),
-        5.0
+        5.0,
     );
     draw::draw_path(
         &mut img,
@@ -78,7 +98,7 @@ fn main() {
         .map(|x| (x.0 * width as f64, x.1 * height as f64))
         .collect::<Vec<_>>(),
         Rgb([0, 200, 0]),
-        5.0
+        5.0,
     );
     draw::draw_path(
         &mut img,
@@ -97,7 +117,7 @@ fn main() {
         .map(|x| (x.0 * width as f64, x.1 * height as f64))
         .collect::<Vec<_>>(),
         Rgb([200, 200, 0]),
-        5.0
+        5.0,
     );
 
     let res = img.save("./symbols.png");

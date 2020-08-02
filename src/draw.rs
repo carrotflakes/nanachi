@@ -51,7 +51,15 @@ pub fn draw_path<P: Into<Point> + Copy>(
                 if d < stroke_width {
                     img.put_pixel(x, y, pixel);
                 } else if d < stroke_width + grad_width {
-                    img.put_pixel(x, y, blend_rgb(*img.get_pixel(x, y), pixel, (stroke_width + grad_width - d) / grad_width));
+                    img.put_pixel(
+                        x,
+                        y,
+                        blend_rgb(
+                            *img.get_pixel(x, y),
+                            pixel,
+                            (stroke_width + grad_width - d) / grad_width,
+                        ),
+                    );
                 }
             }
         }
