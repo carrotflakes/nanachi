@@ -8,4 +8,5 @@ pub mod geometry;
 pub mod k_curve;
 pub mod path;
 pub mod point;
+pub mod position_color;
 pub mod primitives;

@@ -1,8 +1,7 @@
 use nanachi::{
     draw, geometry,
     image::{ImageBuffer, Rgb},
-    k_curve,
-    point::Point,
+    position_color,
 };
 use rand_core::RngCore;
 use rand_pcg::Pcg32;
@@ -54,11 +53,10 @@ fn draw_stars(img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>) {
         .collect::<Vec<_>>();
 
     for (si, ps) in shapes.iter().enumerate() {
-        draw::draw_fill(
-            img,
-            ps.as_slice(),
-            Rgb([[255, 128, 0], [0, 255, 128], [128, 0, 255]][si % 3]),
-        );
+        let pc = position_color::Constant::new(Rgb(
+            [[255, 128, 0], [0, 255, 128], [128, 0, 255]][si % 3]
+        ));
+        draw::draw_fill(img, ps.as_slice(), &pc);
         for s in ps.windows(2) {
             draw::draw_line(
                 img,
@@ -226,9 +224,11 @@ fn draw_nanachi(img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>) {
     })
     .collect::<Vec<_>>();
 
-    draw::draw_fill(img, shape.as_slice(), Rgb([255, 235, 230]));
+    let pc = position_color::Constant::new(Rgb([255, 235, 230]));
 
-    draw::draw_fill(img, moji_shape.as_slice(), Rgb([255, 235, 230]));
+    draw::draw_fill(img, shape.as_slice(), &pc);
+
+    draw::draw_fill(img, moji_shape.as_slice(), &pc);
 
     for ps in nanachi.iter() {
         for s in ps.windows(2) {

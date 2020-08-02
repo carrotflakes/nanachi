@@ -6,7 +6,7 @@ use nanachi::{
     k_curve,
     path::Path,
     point::Point,
-    primitives,
+    position_color, primitives,
 };
 
 fn main() {
@@ -30,7 +30,8 @@ fn main() {
 
     let mut path = primitives::triangle(100.);
     path.transform_mut(&AugmentedMatrix::new().rotate(0.0).translate(100., 100.));
-    draw::draw_fill(&mut img, &path.clone().into() as &Vec<Point>, Rgb([100, 250, 100]));
+    let pc = position_color::BlockCheck::new(Rgb([200, 200, 200]), Rgb([100, 100, 100]), 10.0);
+    draw::draw_fill(&mut img, &path.clone().into() as &Vec<Point>, &pc);
     draw::draw_path(&mut img, &path.into() as &Vec<Point>, Rgb([10, 250, 10]));
 
     let mut path = primitives::triangle(100.);
