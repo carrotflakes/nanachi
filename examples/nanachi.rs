@@ -20,61 +20,6 @@ fn main() {
 
     draw_stars(&mut img);
 
-    draw::draw_path(
-        &mut img,
-        &k_curve::k_curve(
-            vec![
-                Point(0.2, 0.2),
-                Point(0.8, 0.2),
-                Point(0.8, 0.8),
-                Point(0.2, 0.8),
-            ],
-            true,
-            0,
-        )
-        .as_lines_points(8)
-        .iter()
-        .map(|x| (x.0 * width as f64, x.1 * height as f64))
-        .collect::<Vec<_>>(),
-        Rgb([200, 0, 0]),
-    );
-    draw::draw_path(
-        &mut img,
-        &k_curve::k_curve(
-            vec![
-                Point(0.2, 0.2),
-                Point(0.8, 0.2),
-                Point(0.8, 0.8),
-                Point(0.2, 0.8),
-            ],
-            true,
-            1,
-        )
-        .as_lines_points(8)
-        .iter()
-        .map(|x| (x.0 * width as f64, x.1 * height as f64))
-        .collect::<Vec<_>>(),
-        Rgb([0, 200, 0]),
-    );
-    draw::draw_path(
-        &mut img,
-        &k_curve::k_curve(
-            vec![
-                Point(0.2, 0.2),
-                Point(0.8, 0.2),
-                Point(0.8, 0.8),
-                Point(0.2, 0.8),
-            ],
-            true,
-            2,
-        )
-        .as_lines_points(8)
-        .iter()
-        .map(|x| (x.0 * width as f64, x.1 * height as f64))
-        .collect::<Vec<_>>(),
-        Rgb([200, 200, 0]),
-    );
-
     draw_nanachi(&mut img);
 
     let res = img.save("./my_image.png");

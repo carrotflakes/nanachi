@@ -79,14 +79,18 @@ pub fn draw_lines<P: Into<Point> + Copy>(
     }
 }
 
-pub fn draw_fill(img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>, ps: &[(f64, f64)], pixel: Rgb<u8>) {
+pub fn draw_fill<P: Into<Point> + Copy>(
+    img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>,
+    ps: &[P],
+    pixel: Rgb<u8>,
+) {
     for y in 0..img.height() {
         let mut vec = ps
             .windows(2)
             .filter_map(|pair| {
-                geometry::intersect_segment_and_horizon(
-                    pair[0].0, pair[0].1, pair[1].0, pair[1].1, y as f64,
-                )
+                let p1: Point = pair[0].into();
+                let p2: Point = pair[1].into();
+                geometry::intersect_segment_and_horizon(p1.0, p1.1, p2.0, p2.1, y as f64)
             })
             .collect::<Vec<f64>>();
         vec.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
