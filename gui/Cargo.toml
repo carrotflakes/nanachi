@@ -1,0 +1,9 @@
+[package]
+name = "gui"
+version = "0.1.0"
+authors = ["carrotflakes <carrotflakes@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+nanachi = { path = ".." }
+sdl2 = "0.32"
