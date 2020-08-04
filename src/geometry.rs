@@ -35,7 +35,7 @@ pub fn distance_between_line_and_point<P1: Into<Point>, P2: Into<Point>>(
         / (p2.1 - p1.1).hypot(p2.0 - p1.0)
 }
 
-pub fn distance_between_line_segment_and_point<P1: Into<Point>, P2: Into<Point>>(
+pub fn squared_distance_between_line_segment_and_point<P1: Into<Point>, P2: Into<Point>>(
     p1: P1,
     p2: P1,
     p0: P2,

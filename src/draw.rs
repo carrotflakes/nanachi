@@ -39,16 +39,16 @@ pub fn draw_path<P: Into<Point> + Copy>(
     pixel: Rgb<u8>,
     stroke_width: f64,
 ) {
-    const GRAD_WIDTH: f64 = 1.5;
+    const GRAD_WIDTH: f64 = 1.0;
     for y in 0..img.height() {
         for x in 0..img.width() {
             let mut alpha = 0.0;
             for pair in ps.windows(2) {
-                let d = geometry::distance_between_line_segment_and_point(
+                let d = geometry::squared_distance_between_line_segment_and_point(
                     pair[0],
                     pair[1],
                     (x as f64, y as f64),
-                );
+                ).sqrt();
                 if d < stroke_width {
                     img.put_pixel(x, y, pixel);
                 } else if d < stroke_width + GRAD_WIDTH {
@@ -83,11 +83,11 @@ pub fn draw_lines<P: Into<Point> + Copy>(
     for y in 0..img.height() {
         for x in 0..img.width() {
             for pair in lines.iter() {
-                let d = geometry::distance_between_line_segment_and_point(
+                let d = geometry::squared_distance_between_line_segment_and_point(
                     pair.0,
                     pair.1,
                     (x as f64, y as f64),
-                );
+                ).sqrt();
                 if d < 5.0 {
                     img.put_pixel(x, y, pixel);
                 } else if d < 6.0 {

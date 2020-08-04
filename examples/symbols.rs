@@ -30,7 +30,7 @@ fn main() {
         &mut img,
         &path.into() as &Vec<Point>,
         Rgb([10, 10, 250]),
-        2.0,
+        1.0,
     );
 
     let mut path = primitives::triangle(100.);
@@ -41,7 +41,7 @@ fn main() {
         &mut img,
         &path.into() as &Vec<Point>,
         Rgb([10, 250, 10]),
-        5.0,
+        2.0,
     );
 
     let mut path = primitives::triangle(100.);
@@ -50,7 +50,7 @@ fn main() {
         &mut img,
         &path.into() as &Vec<Point>,
         Rgb([10, 250, 10]),
-        5.0,
+        2.0,
     );
 
     let mut path = primitives::triangle(100.);
@@ -59,7 +59,7 @@ fn main() {
         &mut img,
         &path.into() as &Vec<Point>,
         Rgb([10, 250, 10]),
-        5.0,
+        2.0,
     );
 
     draw::draw_path(
@@ -79,7 +79,7 @@ fn main() {
         .map(|x| (x.0 * width as f64, x.1 * height as f64))
         .collect::<Vec<_>>(),
         Rgb([200, 0, 0]),
-        5.0,
+        2.0,
     );
     draw::draw_path(
         &mut img,
@@ -98,7 +98,7 @@ fn main() {
         .map(|x| (x.0 * width as f64, x.1 * height as f64))
         .collect::<Vec<_>>(),
         Rgb([0, 200, 0]),
-        5.0,
+        2.0,
     );
     draw::draw_path(
         &mut img,
@@ -117,7 +117,7 @@ fn main() {
         .map(|x| (x.0 * width as f64, x.1 * height as f64))
         .collect::<Vec<_>>(),
         Rgb([200, 200, 0]),
-        5.0,
+        2.0,
     );
 
     let res = img.save("./symbols.png");
