@@ -124,6 +124,54 @@ pub fn draw_fill<P: Into<Point> + Copy, C: PositionColor<Rgb<u8>>>(
     }
 }
 
+pub fn draw_hori<P: Into<Point> + Copy, C: PositionColor<Rgb<u8>>>(
+    buf: &mut ImageBuffer<Rgb<u8>, Vec<u8>>,
+    center: P,
+    rotate: f64,
+    position_color: &C,
+) {
+    use std::f64::consts::{PI, FRAC_PI_2, FRAC_PI_4};
+    let r = rotate.rem_euclid(2.0 * PI) + FRAC_PI_4;
+    let center: Point = center.into();
+    if r <= PI {
+        if r <= FRAC_PI_2 { // down
+            for x in 0..buf.width() {
+                let yy = center.1 + rotate.sin() * (x as f64 - center.0);
+                for y in yy.round().max(0.0) as u32..buf.height() {
+                    let pixel = position_color.position_color((x, y).into());
+                    buf.put_pixel(x, y, pixel);
+                }
+            }
+        } else { // left
+            for y in 0..buf.height() {
+                let xx = center.0 + rotate.cos() * (y as f64 - center.1);
+                for x in 0..(xx.round().max(0.0) as u32).min(buf.width()) {
+                    let pixel = position_color.position_color((x, y).into());
+                    buf.put_pixel(x, y, pixel);
+                }
+            }
+        }
+    } else {
+        if r <= PI + FRAC_PI_2 { // up
+            for x in 0..buf.width() {
+                let yy = center.1 - rotate.sin() * (x as f64 - center.0);
+                for y in 0..(yy.round().max(0.0) as u32).min(buf.height()) {
+                    let pixel = position_color.position_color((x, y).into());
+                    buf.put_pixel(x, y, pixel);
+                }
+            }
+        } else { // right
+            for y in 0..buf.height() {
+                let xx = center.0 - rotate.cos() * (y as f64 - center.1);
+                for x in xx.round().max(0.0) as u32..buf.width() {
+                    let pixel = position_color.position_color((x, y).into());
+                    buf.put_pixel(x, y, pixel);
+                }
+            }
+        }
+    }
+}
+
 pub fn blend_rgb(p1: Rgb<u8>, p2: Rgb<u8>, r: f64) -> Rgb<u8> {
     Rgb([
         (p1[0] as f64 * (1.0 - r) + p2[0] as f64 * r) as u8,
