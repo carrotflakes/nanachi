@@ -8,10 +8,16 @@ use nanachi::{
     point::Point,
     position_color, primitives,
 };
+use std::f64::consts::PI;
 
 fn main() {
     let (width, height) = (512, 512);
     let mut img = ImageBuffer::from_pixel(width, height, Rgb([250u8, 250, 250]));
+
+    draw::draw_hori_with_antialias(&mut img, (256, 256+200), PI * 0.1, &position_color::Constant::new(Rgb([200, 250, 250])));
+    draw::draw_hori_with_antialias(&mut img, (256-200, 256), PI * 0.6, &position_color::Constant::new(Rgb([200, 200, 250])));
+    draw::draw_hori_with_antialias(&mut img, (256, 256-200), PI * 1.1, &position_color::Constant::new(Rgb([250, 200, 250])));
+    draw::draw_hori_with_antialias(&mut img, (256+200, 256), PI * 1.6, &position_color::Constant::new(Rgb([250, 200, 200])));
 
     draw::draw_line(&mut img, (10, 10), (100, 100), Rgb([250, 10, 10]));
     let mut path: Path = vec![

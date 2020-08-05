@@ -172,6 +172,164 @@ pub fn draw_hori<P: Into<Point> + Copy, C: PositionColor<Rgb<u8>>>(
     }
 }
 
+pub fn draw_hori_with_antialias<P: Into<Point> + Copy, C: PositionColor<Rgb<u8>>>(
+    buf: &mut ImageBuffer<Rgb<u8>, Vec<u8>>,
+    center: P,
+    rotate: f64,
+    position_color: &C,
+) {
+    use std::f64::consts::FRAC_PI_4;
+    let center: Point = center.into();
+    fn floor_fract(f: f64) -> (i32, f64) {
+        (f.floor() as i32, f.fract())
+    }
+    let mix = |buf: &mut ImageBuffer<Rgb<u8>, Vec<u8>>, x: i32, y: i32, alpha: f64| {
+        if x < 0 || y < 0 || buf.width() as i32 <= x ||  buf.height() as i32 <= y { return; }
+        let pixel = position_color.position_color((x, y).into());
+        buf.put_pixel(x as u32, y as u32, blend_rgb(*buf.get_pixel(x as u32, y as u32), pixel, alpha));
+    };
+    let (sin, cos) = rotate.sin_cos();
+    match ((rotate / FRAC_PI_4) as i32).rem_euclid(8) {
+        0 => {
+            let mut a = floor_fract(center.1 + sin * -center.0);
+            for x in 0..buf.width() as i32 {
+                let b = floor_fract(center.1 + sin * ((x + 1) as f64 - center.0));
+                if a.0 == b.0 {
+                    mix(buf, x, a.0, 1.0 - (a.1 + b.1) / 2.0);
+                } else {
+                    mix(buf, x, a.0, (1.0 - a.1).powi(2) * (b.1 + 1.0 - a.1) / 2.0);
+                    mix(buf, x, b.0, 1.0 - b.1.powi(2) * (b.1 + 1.0 - a.1) / 2.0);
+                }
+                for y in (b.0 + 1).max(0)..buf.height() as i32 {
+                    let pixel = position_color.position_color((x, y).into());
+                    buf.put_pixel(x as u32, y as u32, pixel);
+                }
+                a = b;
+            }
+        }
+        1 => {
+            let mut a = floor_fract(center.0 + cos * -center.1);
+            for y in 0..buf.height() as i32 {
+                let b = floor_fract(center.0 + cos * ((y + 1) as f64 - center.1));
+                if a.0 == b.0 {
+                    mix(buf, a.0, y, (a.1 + b.1) / 2.0);
+                } else {
+                    mix(buf, b.0, y, b.1.powi(2) * (b.1 + 1.0 - a.1) / 2.0);
+                    mix(buf, a.0, y, 1.0 - (1.0 - a.1).powi(2) * (b.1 + 1.0 - a.1) / 2.0);
+                }
+                for x in 0..a.0.min(buf.width() as i32) {
+                    let pixel = position_color.position_color((x, y).into());
+                    buf.put_pixel(x as u32, y as u32, pixel);
+                }
+                a = b;
+            }
+        }
+        2 => {
+            let mut a = floor_fract(center.0 + cos * -center.1);
+            for y in 0..buf.height() as i32 {
+                let b = floor_fract(center.0 + cos * ((y + 1) as f64 - center.1));
+                if a.0 == b.0 {
+                    mix(buf, a.0, y, (a.1 + b.1) / 2.0);
+                } else {
+                    mix(buf, a.0, y, b.1.powi(2) * (a.1 + 1.0 - b.1) / 2.0);
+                    mix(buf, b.0, y, 1.0 - (1.0 - a.1).powi(2) * (a.1 + 1.0 - b.1) / 2.0);
+                }
+                for x in 0..a.0.min(buf.width() as i32) {
+                    let pixel = position_color.position_color((x, y).into());
+                    buf.put_pixel(x as u32, y as u32, pixel);
+                }
+                a = b;
+            }
+        }
+        3 => {
+            let mut a = floor_fract(center.1 - sin * -center.0);
+            for x in 0..buf.width() as i32 {
+                let b = floor_fract(center.1 - sin * ((x + 1) as f64 - center.0));
+                if a.0 == b.0 {
+                    mix(buf, x, a.0, (a.1 + b.1) / 2.0);
+                } else {
+                    mix(buf, x, a.0, (1.0 - a.1).powi(2) * (a.1 + 1.0 - b.1) / 2.0);
+                    mix(buf, x, b.0, 1.0 - b.1.powi(2) * (a.1 + 1.0 - b.1) / 2.0);
+                }
+                for y in 0..a.0.min(buf.height() as i32) {
+                    let pixel = position_color.position_color((x, y).into());
+                    buf.put_pixel(x as u32, y as u32, pixel);
+                }
+                a = b;
+            }
+        }
+        4 => {
+            let mut a = floor_fract(center.1 - sin * -center.0);
+            for x in 0..buf.width() as i32 {
+                let b = floor_fract(center.1 - sin * ((x + 1) as f64 - center.0));
+                if a.0 == b.0 {
+                    mix(buf, x, a.0, (a.1 + b.1) / 2.0);
+                } else {
+                    mix(buf, x, b.0, (1.0 - b.1).powi(2) * (b.1 + 1.0 - a.1) / 2.0);
+                    mix(buf, x, a.0, 1.0 - a.1.powi(2) * (b.1 + 1.0 - a.1) / 2.0);
+                }
+                for y in 0..a.0.min(buf.height() as i32) {
+                    let pixel = position_color.position_color((x, y).into());
+                    buf.put_pixel(x as u32, y as u32, pixel);
+                }
+                a = b;
+            }
+        }
+        5 => {
+            let mut a = floor_fract(center.0 - cos * -center.1);
+            for y in 0..buf.height() as i32 {
+                let b = floor_fract(center.0 - cos * ((y + 1) as f64 - center.1));
+                if a.0 == b.0 {
+                    mix(buf, a.0, y, 1.0 - (a.1 + b.1) / 2.0);
+                } else {
+                    mix(buf, a.0, y, (1.0 - a.1).powi(2) * (b.1 + 1.0 - a.1) / 2.0);
+                    mix(buf, b.0, y, 1.0 - b.1.powi(2) * (b.1 + 1.0 - a.1) / 2.0);
+                }
+                for x in (b.0 + 1).max(0)..buf.width() as i32 {
+                    let pixel = position_color.position_color((x, y).into());
+                    buf.put_pixel(x as u32, y as u32, pixel);
+                }
+                a = b;
+            }
+        }
+        6 => {
+            let mut a = floor_fract(center.0 - cos * -center.1);
+            for y in 0..buf.height() as i32 {
+                let b = floor_fract(center.0 - cos * ((y + 1) as f64 - center.1));
+                if a.0 == b.0 {
+                    mix(buf, a.0, y, 1.0 - (a.1 + b.1) / 2.0);
+                } else {
+                    mix(buf, b.0, y, (1.0 - b.1).powi(2) * (a.1 + 1.0 - b.1) / 2.0);
+                    mix(buf, a.0, y, 1.0 - a.1.powi(2) * (a.1 + 1.0 - b.1) / 2.0);
+                }
+                for x in (b.0 + 1).max(0)..buf.width() as i32 {
+                    let pixel = position_color.position_color((x, y).into());
+                    buf.put_pixel(x as u32, y as u32, pixel);
+                }
+                a = b;
+            }
+        }
+        7 => {
+            let mut a = floor_fract(center.1 + sin * -center.0);
+            for x in 0..buf.width() as i32 {
+                let b = floor_fract(center.1 + sin * ((x + 1) as f64 - center.0));
+                if a.0 == b.0 {
+                    mix(buf, x, a.0, 1.0 - (a.1 + b.1) / 2.0);
+                } else {
+                    mix(buf, x, b.0, (1.0 - b.1).powi(2) / 2.0 * (a.1 + 1.0 - b.1));
+                    mix(buf, x, a.0, 1.0 - a.1.powi(2) / 2.0 * (a.1 + 1.0 - b.1));
+                }
+                for y in (a.0 + 1).max(0)..buf.height() as i32 {
+                    let pixel = position_color.position_color((x, y).into());
+                    buf.put_pixel(x as u32, y as u32, pixel);
+                }
+                a = b;
+            }
+        }
+        _ => unreachable!()
+    }
+}
+
 pub fn blend_rgb(p1: Rgb<u8>, p2: Rgb<u8>, r: f64) -> Rgb<u8> {
     Rgb([
         (p1[0] as f64 * (1.0 - r) + p2[0] as f64 * r) as u8,
