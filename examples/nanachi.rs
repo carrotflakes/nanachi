@@ -56,7 +56,7 @@ fn draw_stars(img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>) {
         let pc = position_color::Constant::new(Rgb(
             [[255, 128, 0], [0, 255, 128], [128, 0, 255]][si % 3]
         ));
-        draw::draw_fill(img, ps.as_slice(), &pc);
+        draw::draw_fill(img, &vec![ps], &pc);
         for s in ps.windows(2) {
             draw::draw_line(
                 img,
@@ -226,9 +226,9 @@ fn draw_nanachi(img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>) {
 
     let pc = position_color::Constant::new(Rgb([255, 235, 230]));
 
-    draw::draw_fill(img, shape.as_slice(), &pc);
+    draw::draw_fill(img, &vec![&shape], &pc);
 
-    draw::draw_fill(img, moji_shape.as_slice(), &pc);
+    draw::draw_fill(img, &vec![&moji_shape], &pc);
 
     for ps in nanachi.iter() {
         for s in ps.windows(2) {

@@ -94,19 +94,21 @@ pub fn draw_lines<P: Into<Point> + Copy>(
 
 pub fn draw_fill<X, P: Into<Point> + Copy, C: PositionColor<X>>(
     img: &mut ImageBuffer<X, Vec<u8>>,
-    ps: &[P],
+    pss: &Vec<&Vec<P>>,
     position_color: &C,
 ) where
     X: Pixel<Subpixel = u8> + 'static,
 {
     for y in 0..img.height() {
-        let mut vec = ps
-            .windows(2)
+        let mut vec = pss
+            .iter()
+            .flat_map(|ps|
+            ps.windows(2)
             .filter_map(|pair| {
                 let p1: Point = pair[0].into();
                 let p2: Point = pair[1].into();
                 geometry::intersect_segment_and_horizon(p1.0, p1.1, p2.0, p2.1, y as f64)
-            })
+            }))
             .collect::<Vec<f64>>();
         vec.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
         for i in 0..vec.len() / 2 {

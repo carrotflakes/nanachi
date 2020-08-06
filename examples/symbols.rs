@@ -61,8 +61,10 @@ fn main() {
 
     let mut path = primitives::triangle(100.);
     path.transform_mut(&AugmentedMatrix::new().rotate(0.0).translate(100., 100.));
+    let mut path2 = primitives::triangle(100.);
+    path2.transform_mut(&AugmentedMatrix::new().scale(0.5, 0.5).rotate(0.0).translate(100., 100.));
     let pc = position_color::BlockCheck::new(Rgb([200, 200, 200]), Rgb([100, 100, 100]), 10.0);
-    draw::draw_fill(&mut img, &path.clone().into() as &Vec<Point>, &pc);
+    draw::draw_fill(&mut img, &vec![&path.clone().into() as &Vec<Point>, &path2.clone().into() as &Vec<Point>], &pc);
     draw::draw_path(
         &mut img,
         &path.into() as &Vec<Point>,
