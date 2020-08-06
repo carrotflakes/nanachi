@@ -19,6 +19,18 @@ pub fn draw_line<P: Into<Point> + Copy>(
     copy_within(buf, &b, pixel);
 }
 
+pub fn draw_arc(buf: &mut ImageBuffer<Luma<u8>, Vec<u8>>, c: Point, r: f64, a1: f64, a2: f64) {
+    // TODO: normalize a1, a2
+
+    let da = 1.0 / r; // TODO
+    let mut a = a1;
+    while a <= a2 {
+        let (sin, cos) = a.sin_cos();
+        safe_put_pixel(buf, (c.0 + cos * r) as i32, (c.1 - sin * r) as i32, 255);
+        a += da;
+    }
+}
+
 fn draw_line_(buf: &mut ImageBuffer<Luma<u8>, Vec<u8>>, p1: Point, p2: Point) {
     let (p1, p2) = if p1.0 > p2.0 || (p1.0 == p2.0 && p1.1 > p2.1) {
         (p2, p1)
@@ -69,7 +81,9 @@ fn draw_line_(buf: &mut ImageBuffer<Luma<u8>, Vec<u8>>, p1: Point, p2: Point) {
             }
         }
         Direction::No => {}
-        Direction::Top | Direction::Left | Direction::TopLeft | Direction::BottomLeft => unreachable!(),
+        Direction::Top | Direction::Left | Direction::TopLeft | Direction::BottomLeft => {
+            unreachable!()
+        }
     }
 }
 

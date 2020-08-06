@@ -2,7 +2,7 @@ use nanachi::{
     affine::AugmentedMatrix,
     bezier::{Bezier2, Bezier3},
     draw, geometry,
-    image::{ImageBuffer, Rgb},
+    image::{ImageBuffer, Rgb, Luma},
     k_curve,
     path::Path,
     point::Point,
@@ -172,6 +172,15 @@ fn main() {
         Rgb([20, 200, 200]),
     );
     println!("{:?}", time.elapsed());
+
+    {
+        let mut b = ImageBuffer::from_pixel(img.width(), img.height(), Luma([0u8]));
+        nanachi::draw_path::draw_arc(&mut b, Point(300.0, 200.0), 90.0, 0.0, std::f64::consts::PI * 2.0);
+        nanachi::draw_path::draw_arc(&mut b, Point(300.0, 200.0), 50.0, 0.0, std::f64::consts::PI * 2.0);
+        nanachi::draw_path::draw_arc(&mut b, Point(300.0, 200.0), 45.0, 1.0, 3.0);
+        nanachi::draw_path::draw_arc(&mut b, Point(300.0, 200.0), 10.0, 0.0, std::f64::consts::PI * 2.0);
+        nanachi::draw_path::copy_within(&mut img, &b, Rgb([200, 200, 20]));
+    }
 
     let res = img.save("./symbols.png");
     println!("save: {:?}", res);
