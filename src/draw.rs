@@ -1,6 +1,6 @@
 use crate::geometry;
 use crate::{point::Point, position_color::PositionColor};
-use image::{ImageBuffer, Rgb};
+use image::{ImageBuffer, Pixel, Rgb};
 
 pub fn draw_line<P: Into<Point>>(
     img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>,
@@ -92,11 +92,13 @@ pub fn draw_lines<P: Into<Point> + Copy>(
     }
 }
 
-pub fn draw_fill<P: Into<Point> + Copy, C: PositionColor<Rgb<u8>>>(
-    img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>,
+pub fn draw_fill<X, P: Into<Point> + Copy, C: PositionColor<X>>(
+    img: &mut ImageBuffer<X, Vec<u8>>,
     ps: &[P],
     position_color: &C,
-) {
+) where
+    X: Pixel<Subpixel = u8> + 'static,
+{
     for y in 0..img.height() {
         let mut vec = ps
             .windows(2)
