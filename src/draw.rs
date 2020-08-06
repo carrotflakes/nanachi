@@ -48,7 +48,8 @@ pub fn draw_path<P: Into<Point> + Copy>(
                     pair[0],
                     pair[1],
                     (x as f64, y as f64),
-                ).sqrt();
+                )
+                .sqrt();
                 if d < stroke_width {
                     img.put_pixel(x, y, pixel);
                 } else if d < stroke_width + GRAD_WIDTH {
@@ -61,15 +62,7 @@ pub fn draw_path<P: Into<Point> + Copy>(
                 }
             }
             if 0.0 < alpha {
-                img.put_pixel(
-                    x,
-                    y,
-                    blend_rgb(
-                        *img.get_pixel(x, y),
-                        pixel,
-                        alpha,
-                    ),
-                );
+                img.put_pixel(x, y, blend_rgb(*img.get_pixel(x, y), pixel, alpha));
             }
         }
     }
@@ -87,7 +80,8 @@ pub fn draw_lines<P: Into<Point> + Copy>(
                     pair.0,
                     pair.1,
                     (x as f64, y as f64),
-                ).sqrt();
+                )
+                .sqrt();
                 if d < 5.0 {
                     img.put_pixel(x, y, pixel);
                 } else if d < 6.0 {
@@ -130,11 +124,12 @@ pub fn draw_hori<P: Into<Point> + Copy, C: PositionColor<Rgb<u8>>>(
     rotate: f64,
     position_color: &C,
 ) {
-    use std::f64::consts::{PI, FRAC_PI_2, FRAC_PI_4};
+    use std::f64::consts::{FRAC_PI_2, FRAC_PI_4, PI};
     let r = rotate.rem_euclid(2.0 * PI) + FRAC_PI_4;
     let center: Point = center.into();
     if r <= PI {
-        if r <= FRAC_PI_2 { // down
+        if r <= FRAC_PI_2 {
+            // down
             for x in 0..buf.width() {
                 let yy = center.1 + rotate.sin() * (x as f64 - center.0);
                 for y in yy.round().max(0.0) as u32..buf.height() {
@@ -142,7 +137,8 @@ pub fn draw_hori<P: Into<Point> + Copy, C: PositionColor<Rgb<u8>>>(
                     buf.put_pixel(x, y, pixel);
                 }
             }
-        } else { // left
+        } else {
+            // left
             for y in 0..buf.height() {
                 let xx = center.0 + rotate.cos() * (y as f64 - center.1);
                 for x in 0..(xx.round().max(0.0) as u32).min(buf.width()) {
@@ -152,7 +148,8 @@ pub fn draw_hori<P: Into<Point> + Copy, C: PositionColor<Rgb<u8>>>(
             }
         }
     } else {
-        if r <= PI + FRAC_PI_2 { // up
+        if r <= PI + FRAC_PI_2 {
+            // up
             for x in 0..buf.width() {
                 let yy = center.1 - rotate.sin() * (x as f64 - center.0);
                 for y in 0..(yy.round().max(0.0) as u32).min(buf.height()) {
@@ -160,7 +157,8 @@ pub fn draw_hori<P: Into<Point> + Copy, C: PositionColor<Rgb<u8>>>(
                     buf.put_pixel(x, y, pixel);
                 }
             }
-        } else { // right
+        } else {
+            // right
             for y in 0..buf.height() {
                 let xx = center.0 - rotate.cos() * (y as f64 - center.1);
                 for x in xx.round().max(0.0) as u32..buf.width() {
@@ -184,9 +182,15 @@ pub fn draw_hori_with_antialias<P: Into<Point> + Copy, C: PositionColor<Rgb<u8>>
         (f.floor() as i32, f.fract())
     }
     let mix = |buf: &mut ImageBuffer<Rgb<u8>, Vec<u8>>, x: i32, y: i32, alpha: f64| {
-        if x < 0 || y < 0 || buf.width() as i32 <= x ||  buf.height() as i32 <= y { return; }
+        if x < 0 || y < 0 || buf.width() as i32 <= x || buf.height() as i32 <= y {
+            return;
+        }
         let pixel = position_color.position_color((x, y).into());
-        buf.put_pixel(x as u32, y as u32, blend_rgb(*buf.get_pixel(x as u32, y as u32), pixel, alpha));
+        buf.put_pixel(
+            x as u32,
+            y as u32,
+            blend_rgb(*buf.get_pixel(x as u32, y as u32), pixel, alpha),
+        );
     };
     let (sin, cos) = rotate.sin_cos();
     match ((rotate / FRAC_PI_4) as i32).rem_euclid(8) {
@@ -215,7 +219,12 @@ pub fn draw_hori_with_antialias<P: Into<Point> + Copy, C: PositionColor<Rgb<u8>>
                     mix(buf, a.0, y, (a.1 + b.1) / 2.0);
                 } else {
                     mix(buf, b.0, y, b.1.powi(2) * (b.1 + 1.0 - a.1) / 2.0);
-                    mix(buf, a.0, y, 1.0 - (1.0 - a.1).powi(2) * (b.1 + 1.0 - a.1) / 2.0);
+                    mix(
+                        buf,
+                        a.0,
+                        y,
+                        1.0 - (1.0 - a.1).powi(2) * (b.1 + 1.0 - a.1) / 2.0,
+                    );
                 }
                 for x in 0..a.0.min(buf.width() as i32) {
                     let pixel = position_color.position_color((x, y).into());
@@ -232,7 +241,12 @@ pub fn draw_hori_with_antialias<P: Into<Point> + Copy, C: PositionColor<Rgb<u8>>
                     mix(buf, a.0, y, (a.1 + b.1) / 2.0);
                 } else {
                     mix(buf, a.0, y, b.1.powi(2) * (a.1 + 1.0 - b.1) / 2.0);
-                    mix(buf, b.0, y, 1.0 - (1.0 - a.1).powi(2) * (a.1 + 1.0 - b.1) / 2.0);
+                    mix(
+                        buf,
+                        b.0,
+                        y,
+                        1.0 - (1.0 - a.1).powi(2) * (a.1 + 1.0 - b.1) / 2.0,
+                    );
                 }
                 for x in 0..a.0.min(buf.width() as i32) {
                     let pixel = position_color.position_color((x, y).into());
@@ -326,7 +340,7 @@ pub fn draw_hori_with_antialias<P: Into<Point> + Copy, C: PositionColor<Rgb<u8>>
                 a = b;
             }
         }
-        _ => unreachable!()
+        _ => unreachable!(),
     }
 }
 

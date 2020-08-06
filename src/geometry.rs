@@ -1,9 +1,30 @@
 use crate::point::Point;
 
+pub fn intersect_line_and_horizon(a: Point, b: Point, hy: f64) -> f64 {
+    assert!(a.1 != b.1);
+    let r = (hy - a.1) / (b.1 - a.1);
+    a.0 * (1.0 - r) + b.0 * r
+}
+
+pub fn intersect_line_and_vertical(a: Point, b: Point, vx: f64) -> f64 {
+    assert!(a.0 != b.0);
+    let r = (vx - a.0) / (b.0 - a.0);
+    a.1 * (1.0 - r) + b.1 * r
+}
+
 pub fn intersect_segment_and_horizon(ax: f64, ay: f64, bx: f64, by: f64, hy: f64) -> Option<f64> {
     if ay != by && ((hy < ay) ^ (hy < by)) {
         let r = (hy - ay) / (by - ay);
         Some(ax * (1.0 - r) + bx * r)
+    } else {
+        None
+    }
+}
+
+pub fn intersect_segment_and_vertical(ax: f64, ay: f64, bx: f64, by: f64, vx: f64) -> Option<f64> {
+    if ax != bx && ((vx < ax) ^ (vx < bx)) {
+        let r = (vx - ax) / (bx - ax);
+        Some(ay * (1.0 - r) + by * r)
     } else {
         None
     }

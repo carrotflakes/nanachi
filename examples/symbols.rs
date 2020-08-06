@@ -14,10 +14,30 @@ fn main() {
     let (width, height) = (512, 512);
     let mut img = ImageBuffer::from_pixel(width, height, Rgb([250u8, 250, 250]));
 
-    draw::draw_hori_with_antialias(&mut img, (256, 256+200), PI * 0.1, &position_color::Constant::new(Rgb([200, 250, 250])));
-    draw::draw_hori_with_antialias(&mut img, (256-200, 256), PI * 0.6, &position_color::Constant::new(Rgb([200, 200, 250])));
-    draw::draw_hori_with_antialias(&mut img, (256, 256-200), PI * 1.1, &position_color::Constant::new(Rgb([250, 200, 250])));
-    draw::draw_hori_with_antialias(&mut img, (256+200, 256), PI * 1.6, &position_color::Constant::new(Rgb([250, 200, 200])));
+    draw::draw_hori_with_antialias(
+        &mut img,
+        (256, 256 + 200),
+        PI * 0.1,
+        &position_color::Constant::new(Rgb([200, 250, 250])),
+    );
+    draw::draw_hori_with_antialias(
+        &mut img,
+        (256 - 200, 256),
+        PI * 0.6,
+        &position_color::Constant::new(Rgb([200, 200, 250])),
+    );
+    draw::draw_hori_with_antialias(
+        &mut img,
+        (256, 256 - 200),
+        PI * 1.1,
+        &position_color::Constant::new(Rgb([250, 200, 250])),
+    );
+    draw::draw_hori_with_antialias(
+        &mut img,
+        (256 + 200, 256),
+        PI * 1.6,
+        &position_color::Constant::new(Rgb([250, 200, 200])),
+    );
 
     draw::draw_line(&mut img, (10, 10), (100, 100), Rgb([250, 10, 10]));
     let mut path: Path = vec![
@@ -68,6 +88,7 @@ fn main() {
         2.0,
     );
 
+    let time = std::time::Instant::now();
     draw::draw_path(
         &mut img,
         &k_curve::k_curve(
@@ -125,6 +146,30 @@ fn main() {
         Rgb([200, 200, 0]),
         2.0,
     );
+    println!("{:?}", time.elapsed());
+
+    let time = std::time::Instant::now();
+    nanachi::draw_path::draw_line(&mut img, (100, 100), (50, 100), Rgb([20, 20, 200]));
+    nanachi::draw_path::draw_line(&mut img, (100, 100), (50, 50), Rgb([20, 20, 200]));
+    nanachi::draw_path::draw_line(&mut img, (100, 100), (100, 50), Rgb([20, 20, 200]));
+    nanachi::draw_path::draw_line(&mut img, (100, 100), (150, 50), Rgb([20, 20, 200]));
+    nanachi::draw_path::draw_line(&mut img, (100, 100), (150, 100), Rgb([20, 20, 200]));
+    nanachi::draw_path::draw_line(&mut img, (100, 100), (150, 150), Rgb([20, 20, 200]));
+    nanachi::draw_path::draw_line(&mut img, (100, 100), (100, 150), Rgb([20, 20, 200]));
+    nanachi::draw_path::draw_line(&mut img, (100, 100), (50, 150), Rgb([20, 20, 200]));
+    nanachi::draw_path::draw_path(
+        &mut img,
+        &[
+            (100, 100),
+            (100, 400),
+            (300, 450),
+            (450, 300),
+            (400, 100),
+            (100, 100),
+        ],
+        Rgb([20, 200, 200]),
+    );
+    println!("{:?}", time.elapsed());
 
     let res = img.save("./symbols.png");
     println!("save: {:?}", res);
