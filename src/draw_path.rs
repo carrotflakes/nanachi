@@ -5,15 +5,15 @@ use crate::geometry::{
 };
 use crate::point::Point;
 use image::{ImageBuffer, Luma, Rgb};
-use crate::path2::{Path, PathAnchor};
+use crate::path2::{Path, PathAnchor, PathEdge};
 
-pub fn draw_path2<P: Into<Point> + Copy>(
+pub fn draw_path2(
     buf: &mut ImageBuffer<Rgb<u8>, Vec<u8>>,
     path: &Path,
     pixel: Rgb<u8>,
 ) {
     let mut b = ImageBuffer::from_pixel(buf.width(), buf.height(), Luma([0u8]));
-    for i in 0..path.anchors.len() + 1 {
+    for i in 0..path.anchors.len() {
         match (&path.anchors[i], &path.anchors[(i + 1) % path.anchors.len()]) {
             (PathAnchor::Point(p1), PathAnchor::Point(p2)) => {
                 draw_line_(&mut b, *p1, *p2);
@@ -32,6 +32,25 @@ pub fn draw_path2<P: Into<Point> + Copy>(
                 let (sin2, cos2) = a21.sin_cos();
                 draw_line_(&mut b, *c1 + Point(cos1 * r1, -sin1 * r1), *c2 + Point(cos2 * r2, -sin2 * r2));
                 draw_arc(&mut b, *c2, *r2, *a21, *a22);
+            }
+        }
+    }
+    copy_within(buf, &b, pixel);
+}
+
+pub fn draw_path_edge(
+    buf: &mut ImageBuffer<Rgb<u8>, Vec<u8>>,
+    edges: &Vec<PathEdge>,
+    pixel: Rgb<u8>,
+) {
+    let mut b = ImageBuffer::from_pixel(buf.width(), buf.height(), Luma([0u8]));
+    for edge in edges.iter() {
+        match edge {
+            PathEdge::Line(p1, p2) => {
+                draw_line_(&mut b, *p1, *p2);
+            }
+            PathEdge::Arc { center, radius, angle1, angle2 } => {
+                draw_arc(&mut b, *center, *radius, *angle1, *angle2);
             }
         }
     }
