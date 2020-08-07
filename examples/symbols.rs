@@ -225,7 +225,7 @@ fn main() {
                     angle2: 3.14,
                 },
             ],
-            true,
+            false,
         );
         nanachi::draw_path::draw_path2(&mut img, &path, Rgb([200, 100, 0]));
         let path2 = Path::new(
@@ -243,7 +243,7 @@ fn main() {
         );
         let edges = path2.edges();
         nanachi::draw_path::draw_path_edge(&mut img, &edges, Rgb([150, 150, 0]));
-        
+
         let paths = path.edge_path(10.0);
         println!("{:?}", paths);
         for path in paths {
