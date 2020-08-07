@@ -2,7 +2,7 @@ use nanachi::{
     affine::AugmentedMatrix,
     bezier::{Bezier2, Bezier3},
     draw, geometry,
-    image::{ImageBuffer, Rgb, Luma},
+    image::{ImageBuffer, Luma, Rgb},
     k_curve,
     path::Path,
     point::Point,
@@ -62,9 +62,21 @@ fn main() {
     let mut path = primitives::triangle(100.);
     path.transform_mut(&AugmentedMatrix::new().rotate(0.0).translate(100., 100.));
     let mut path2 = primitives::triangle(100.);
-    path2.transform_mut(&AugmentedMatrix::new().scale(0.5, 0.5).rotate(0.0).translate(100., 100.));
+    path2.transform_mut(
+        &AugmentedMatrix::new()
+            .scale(0.5, 0.5)
+            .rotate(0.0)
+            .translate(100., 100.),
+    );
     let pc = position_color::BlockCheck::new(Rgb([200, 200, 200]), Rgb([100, 100, 100]), 10.0);
-    draw::draw_fill(&mut img, &vec![&path.clone().into() as &Vec<Point>, &path2.clone().into() as &Vec<Point>], &pc);
+    draw::draw_fill(
+        &mut img,
+        &vec![
+            &path.clone().into() as &Vec<Point>,
+            &path2.clone().into() as &Vec<Point>,
+        ],
+        &pc,
+    );
     draw::draw_path(
         &mut img,
         &path.into() as &Vec<Point>,
@@ -175,37 +187,68 @@ fn main() {
 
     {
         let mut b = ImageBuffer::from_pixel(img.width(), img.height(), Luma([0u8]));
-        nanachi::draw_path::draw_arc(&mut b, Point(300.0, 200.0), 90.0, 0.0, std::f64::consts::PI * 2.0);
-        nanachi::draw_path::draw_arc(&mut b, Point(300.0, 200.0), 50.0, 0.0, std::f64::consts::PI * 2.0);
+        nanachi::draw_path::draw_arc(
+            &mut b,
+            Point(300.0, 200.0),
+            90.0,
+            0.0,
+            std::f64::consts::PI * 2.0,
+        );
+        nanachi::draw_path::draw_arc(
+            &mut b,
+            Point(300.0, 200.0),
+            50.0,
+            0.0,
+            std::f64::consts::PI * 2.0,
+        );
         nanachi::draw_path::draw_arc(&mut b, Point(300.0, 200.0), 45.0, 1.0, 3.0);
-        nanachi::draw_path::draw_arc(&mut b, Point(300.0, 200.0), 10.0, 0.0, std::f64::consts::PI * 2.0);
+        nanachi::draw_path::draw_arc(
+            &mut b,
+            Point(300.0, 200.0),
+            10.0,
+            0.0,
+            std::f64::consts::PI * 2.0,
+        );
         nanachi::draw_path::copy_within(&mut img, &b, Rgb([200, 200, 20]));
     }
     {
         use nanachi::path2::{Path, PathAnchor};
-        let path = Path::new(vec![
-            PathAnchor::Point(Point(100.0, 200.0)),
-            PathAnchor::Point(Point(200.0, 200.0)),
-            PathAnchor::Arc{
-                center: Point(200.0, 300.0),
-                radius: 50.0,
-                angle1: 0.0,
-                angle2: 3.14,
-            },
-        ], true);
+        let path = Path::new(
+            vec![
+                PathAnchor::Point(Point(100.0, 200.0)),
+                PathAnchor::Point(Point(150.0, 150.0)),
+                PathAnchor::Point(Point(200.0, 200.0)),
+                PathAnchor::Arc {
+                    center: Point(200.0, 300.0),
+                    radius: 50.0,
+                    angle1: 0.0,
+                    angle2: 3.14,
+                },
+            ],
+            true,
+        );
         nanachi::draw_path::draw_path2(&mut img, &path, Rgb([200, 100, 0]));
-        let path = Path::new(vec![
-            PathAnchor::Point(Point(105.0, 205.0)),
-            PathAnchor::Point(Point(205.0, 205.0)),
-            PathAnchor::Arc{
-                center: Point(205.0, 305.0),
-                radius: 50.0,
-                angle1: 0.0,
-                angle2: 3.14,
-            },
-        ], true);
-        let edges = path.edges();
+        let path2 = Path::new(
+            vec![
+                PathAnchor::Point(Point(105.0, 205.0)),
+                PathAnchor::Point(Point(205.0, 205.0)),
+                PathAnchor::Arc {
+                    center: Point(205.0, 305.0),
+                    radius: 50.0,
+                    angle1: 0.0,
+                    angle2: 3.14,
+                },
+            ],
+            true,
+        );
+        let edges = path2.edges();
         nanachi::draw_path::draw_path_edge(&mut img, &edges, Rgb([150, 150, 0]));
+        
+        let paths = path.edge_path(10.0);
+        println!("{:?}", paths);
+        for path in paths {
+            nanachi::draw_path::draw_path2(&mut img, &path, Rgb([100, 0, 200]));
+        }
     }
 
     let res = img.save("./symbols.png");
