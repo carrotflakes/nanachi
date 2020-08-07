@@ -3,34 +3,66 @@ use crate::geometry::{
     intersect_line_and_horizon, intersect_line_and_vertical, intersect_segment_and_horizon,
     intersect_segment_and_vertical,
 };
+use crate::path2::{Path, PathAnchor, PathEdge};
 use crate::point::Point;
 use image::{ImageBuffer, Luma, Rgb};
-use crate::path2::{Path, PathAnchor, PathEdge};
 
-pub fn draw_path2(
-    buf: &mut ImageBuffer<Rgb<u8>, Vec<u8>>,
-    path: &Path,
-    pixel: Rgb<u8>,
-) {
+pub fn draw_path2(buf: &mut ImageBuffer<Rgb<u8>, Vec<u8>>, path: &Path, pixel: Rgb<u8>) {
     let mut b = ImageBuffer::from_pixel(buf.width(), buf.height(), Luma([0u8]));
     for i in 0..path.anchors.len() {
-        match (&path.anchors[i], &path.anchors[(i + 1) % path.anchors.len()]) {
+        match (
+            &path.anchors[i],
+            &path.anchors[(i + 1) % path.anchors.len()],
+        ) {
             (PathAnchor::Point(p1), PathAnchor::Point(p2)) => {
                 draw_line_(&mut b, *p1, *p2);
             }
-            (PathAnchor::Point(p), PathAnchor::Arc { center, radius, angle1, angle2 }) => {
+            (
+                PathAnchor::Point(p),
+                PathAnchor::Arc {
+                    center,
+                    radius,
+                    angle1,
+                    angle2,
+                },
+            ) => {
                 let (sin, cos) = angle1.sin_cos();
                 draw_line_(&mut b, *p, *center + Point(cos * radius, -sin * radius));
                 draw_arc(&mut b, *center, *radius, *angle1, *angle2);
             }
-            (PathAnchor::Arc { center, radius, angle1: _, angle2 }, PathAnchor::Point(p)) => {
+            (
+                PathAnchor::Arc {
+                    center,
+                    radius,
+                    angle1: _,
+                    angle2,
+                },
+                PathAnchor::Point(p),
+            ) => {
                 let (sin, cos) = angle2.sin_cos();
                 draw_line_(&mut b, *center + Point(cos * radius, -sin * radius), *p);
             }
-            (PathAnchor::Arc { center: c1, radius: r1, angle1: _, angle2: a12 }, PathAnchor::Arc { center: c2, radius: r2, angle1: a21, angle2: a22 }) => {
+            (
+                PathAnchor::Arc {
+                    center: c1,
+                    radius: r1,
+                    angle1: _,
+                    angle2: a12,
+                },
+                PathAnchor::Arc {
+                    center: c2,
+                    radius: r2,
+                    angle1: a21,
+                    angle2: a22,
+                },
+            ) => {
                 let (sin1, cos1) = a12.sin_cos();
                 let (sin2, cos2) = a21.sin_cos();
-                draw_line_(&mut b, *c1 + Point(cos1 * r1, -sin1 * r1), *c2 + Point(cos2 * r2, -sin2 * r2));
+                draw_line_(
+                    &mut b,
+                    *c1 + Point(cos1 * r1, -sin1 * r1),
+                    *c2 + Point(cos2 * r2, -sin2 * r2),
+                );
                 draw_arc(&mut b, *c2, *r2, *a21, *a22);
             }
         }
@@ -49,7 +81,12 @@ pub fn draw_path_edge(
             PathEdge::Line(p1, p2) => {
                 draw_line_(&mut b, *p1, *p2);
             }
-            PathEdge::Arc { center, radius, angle1, angle2 } => {
+            PathEdge::Arc {
+                center,
+                radius,
+                angle1,
+                angle2,
+            } => {
                 draw_arc(&mut b, *center, *radius, *angle1, *angle2);
             }
         }
@@ -104,15 +141,15 @@ fn draw_line_(buf: &mut ImageBuffer<Luma<u8>, Vec<u8>>, p1: Point, p2: Point) {
             }
         }
         Direction::TopRight => {
-            let mut dx = intersect_line_and_horizon(p1, p2, p.1 as f64);
-            let mut dy = intersect_line_and_vertical(p1, p2, (p.0 + 1) as f64);
+            let mut dx = intersect_line_and_horizon(p1, p2, (p.1 + 1) as f64);
+            let mut dy = intersect_line_and_vertical(p1, p2, p.0 as f64);
             while p != end {
                 if (dx - p.0 as f64) < (p.1 as f64 - dy) {
                     p.1 -= 1;
-                    dx = intersect_line_and_horizon(p1, p2, p.1 as f64);
+                    dx = intersect_line_and_horizon(p1, p2, (p.1 + 1) as f64);
                 } else {
                     p.0 += 1;
-                    dy = intersect_line_and_vertical(p1, p2, (p.0 + 1) as f64);
+                    dy = intersect_line_and_vertical(p1, p2, p.0 as f64);
                 }
                 safe_put_pixel(buf, p.0, p.1, 255);
             }
