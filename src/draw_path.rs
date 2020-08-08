@@ -1,7 +1,5 @@
 use crate::draw::blend_rgb;
-use crate::geometry::{
-    intersect_line_and_horizon, intersect_line_and_vertical,
-};
+use crate::geometry::{intersect_line_and_horizon, intersect_line_and_vertical};
 use crate::path2::{Path, PathAnchor, PathEdge};
 use crate::point::Point;
 use image::{ImageBuffer, Luma, Rgb};
