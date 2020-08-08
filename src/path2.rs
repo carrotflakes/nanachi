@@ -177,58 +177,6 @@ impl Path {
                 &self.anchors[self.anchors.len() - 1],
                 path_anchor_right_point(&self.anchors[self.anchors.len() - 2]),
             ));
-            // match (left_anchors.last().unwrap().clone(), right_anchors.last().unwrap().clone()) {
-            //     (PathAnchor::Point(p1), PathAnchor::Point(p2)) => {
-            //         let angle = (p2.1 - p1.1).atan2(p1.0 - p2.0);
-            //         left_anchors.pop().unwrap();
-            //         right_anchors.pop().unwrap();
-            //         left_anchors.push(
-            //             PathAnchor::Arc{
-            //             center: (p1 + p2) / 2.0,
-            //             radius: (p1.0 - p2.0).hypot(p1.1 - p2.1) / 2.0,
-            //             angle1: angle,
-            //             angle2: angle + PI,
-            //         });
-            //     }
-            //     (PathAnchor::Arc { center: c, radius: r1, angle1: _, angle2: a12 }, PathAnchor::Arc { center: _, radius: r2, angle1: _, angle2: _ }) => {
-            //         let p1 = c + Point(a12.cos() * r1, -a12.sin() * r1);
-            //         let p2 = c + Point(a12.cos() * r2, -a12.sin() * r2);
-            //         left_anchors.push(
-            //             PathAnchor::Arc{
-            //             center: (p1 + p2) / 2.0,
-            //             radius: (p1.0 - p2.0).hypot(p1.1 - p2.1) / 2.0,
-            //             angle1: a12,
-            //             angle2: a12 + PI,
-            //         });
-            //     }
-            //     _ => unreachable!()
-            // }
-            // match (right_anchors[0].clone(), left_anchors[0].clone()) {
-            //     (PathAnchor::Point(p1), PathAnchor::Point(p2)) => {
-            //         let angle = (p2.1 - p1.1).atan2(p1.0 - p2.0);
-            //         left_anchors.remove(0);
-            //         right_anchors.remove(0);
-            //         right_anchors.push(
-            //             PathAnchor::Arc{
-            //             center: (p1 + p2) / 2.0,
-            //             radius: (p1.0 - p2.0).hypot(p1.1 - p2.1) / 2.0,
-            //             angle1: angle,
-            //             angle2: angle + PI,
-            //         });
-            //     }
-            //     (PathAnchor::Arc { center: c, radius: r1, angle1: _, angle2: a12 }, PathAnchor::Arc { center: _, radius: r2, angle1: _, angle2: _ }) => {
-            //         let p1 = c + Point(a12.cos() * r1, -a12.sin() * r1);
-            //         let p2 = c + Point(a12.cos() * r2, -a12.sin() * r2);
-            //         left_anchors.push(
-            //             PathAnchor::Arc{
-            //             center: (p1 + p2) / 2.0,
-            //             radius: (p1.0 - p2.0).hypot(p1.1 - p2.1) / 2.0,
-            //             angle1: a12,
-            //             angle2: a12 + PI,
-            //         });
-            //     }
-            //     _ => unreachable!()
-            // }
             left_anchors.extend(right_anchors);
             vec![Path {
                 anchors: left_anchors,
@@ -248,22 +196,11 @@ fn edge_path_(
     let right = path_anchor_left_point(a3);
     match a1 {
         PathAnchor::Point(p) => {
-            println!("{:?} {:?} {:?}", left, p, right);
             let a1 = (left.1 - p.1).atan2(p.0 - left.0);
             let a2 = (right.1 - p.1).atan2(p.0 - right.0);
             let a = (a2 + a1) / 2.0;
             let aa = ((a2 - a1 + PI) / 2.0).abs();
             let r = width / aa.cos();
-            println!(
-                "!a:{:?} a.cos:{:?} a1:{} a2:{} a:{} aa:{} r:{}",
-                a,
-                a.cos(),
-                a1,
-                a2,
-                a,
-                aa,
-                r
-            );
             let dp = Point(a.cos() * r, -a.sin() * r);
             (PathAnchor::Point(*p + dp), PathAnchor::Point(*p - dp))
         }

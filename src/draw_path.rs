@@ -144,14 +144,7 @@ fn draw_line_(buf: &mut ImageBuffer<Luma<u8>, Vec<u8>>, p1: Point, p2: Point) {
         Direction::TopRight => {
             let mut dx = intersect_line_and_horizon(p1, p2, p.1 as f64);
             let mut dy = intersect_line_and_vertical(p1, p2, (p.0 + 1) as f64);
-            // println!("{:?}", (p1, p2));
-            // let mut ii = 0;
             while p != end {
-                // println!("{:?}", (p1, p2, p));
-                // ii += 1;
-                // if ii == 500 {
-                //     panic!();
-                // }
                 if (dx - p.0 as f64) < (p.1 as f64 - dy) {
                     p.1 -= 1;
                     dx = intersect_line_and_horizon(p1, p2, p.1 as f64);
