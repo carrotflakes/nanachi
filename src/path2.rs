@@ -55,7 +55,7 @@ impl Path {
 
     pub fn edges(&self) -> Vec<PathEdge> {
         let mut edges = Vec::new();
-        for i in 0..self.anchors.len() - if self.close { 1 } else { 0 } {
+        for i in 0..self.anchors.len() - if self.close { 0 } else { 1 } {
             match (
                 &self.anchors[i],
                 &self.anchors[(i + 1) % self.anchors.len()],
@@ -294,7 +294,7 @@ fn edge_path_(
 fn cap(width: f64, a: &PathAnchor, p: Point) -> Vec<PathAnchor> {
     match a {
         PathAnchor::Point(p1) => {
-            let a = (p.1 - p1.1).atan2(p1.0 - p.0) - PI * 0.5;
+            let a = ((p.1 - p1.1).atan2(p1.0 - p.0) + PI * 1.5) % (PI * 2.0);
             vec![PathAnchor::Arc {
                 center: *p1,
                 radius: width,

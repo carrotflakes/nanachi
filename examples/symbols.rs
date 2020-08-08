@@ -218,6 +218,7 @@ fn main() {
                 PathAnchor::Point(Point(100.0, 200.0)),
                 PathAnchor::Point(Point(150.0, 150.0)),
                 PathAnchor::Point(Point(200.0, 200.0)),
+                PathAnchor::Point(Point(300.0, 250.0)),
                 PathAnchor::Arc {
                     center: Point(200.0, 300.0),
                     radius: 50.0,
@@ -246,6 +247,15 @@ fn main() {
 
         let paths = path.edge_path(10.0);
         println!("{:?}", paths);
+        println!(
+            "!!!{:?}",
+            paths.iter().flat_map(|p| p.edges()).collect::<Vec<_>>()
+        );
+        nanachi::fill_path::draw_fill(
+            &mut img,
+            &paths.iter().flat_map(|p| p.edges()).collect(),
+            &position_color::Constant::new(Rgb([200, 100, 250])),
+        );
         for path in paths {
             nanachi::draw_path::draw_path2(&mut img, &path, Rgb([100, 0, 200]));
         }
