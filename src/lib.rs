@@ -6,6 +6,7 @@ pub mod compositor;
 pub mod draw;
 pub mod draw_path;
 pub mod fill_path;
+pub mod fill_path2;
 pub mod geometry;
 pub mod k_curve;
 pub mod path;

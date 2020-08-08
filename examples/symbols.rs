@@ -260,6 +260,53 @@ fn main() {
             nanachi::draw_path::draw_path2(&mut img, &path, Rgb([100, 0, 200]));
         }
     }
+    {
+        let t = std::time::Instant::now();
+        use nanachi::path2::{Path, PathAnchor};
+        let path = Path::new(
+            vec![
+                PathAnchor::Point(Point(100.0, 450.0)),
+                PathAnchor::Point(Point(140.0, 460.0)),
+                PathAnchor::Point(Point(160.0, 460.0)),
+                PathAnchor::Point(Point(200.0, 450.0)),
+                PathAnchor::Point(Point(210.0, 410.0)),
+                PathAnchor::Point(Point(210.0, 390.0)),
+                PathAnchor::Point(Point(200.0, 350.0)),
+                PathAnchor::Point(Point(160.0, 340.0)),
+                PathAnchor::Point(Point(140.0, 340.0)),
+                PathAnchor::Point(Point(100.0, 350.0)),
+                PathAnchor::Point(Point(90.0, 390.0)),
+                PathAnchor::Point(Point(90.0, 410.0)),
+            ],
+            true,
+        );
+
+        nanachi::fill_path2::draw_fill(
+            &mut img,
+            &path.edges(),
+            &position_color::Constant::new(Rgb([200, 100, 20])),
+        );
+
+        let path = Path::new(
+            vec![
+                PathAnchor::Point(Point(300.5, 350.5)),
+                PathAnchor::Point(Point(350.5, 351.5)),
+                PathAnchor::Point(Point(349.5, 400.5)),
+                PathAnchor::Point(Point(299.5, 399.5)),
+            ]
+            .into_iter()
+            .rev()
+            .collect(),
+            true,
+        );
+
+        nanachi::fill_path2::draw_fill(
+            &mut img,
+            &path.edges(),
+            &position_color::Constant::new(Rgb([100, 200, 20])),
+        );
+        println!("{:?}", t.elapsed());
+    }
 
     let res = img.save("./symbols.png");
     println!("save: {:?}", res);
