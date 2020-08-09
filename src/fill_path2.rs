@@ -29,10 +29,11 @@ pub fn draw_fill<X, C: PositionColor<X>>(
                         radius,
                         angle1,
                         angle2,
-                    } => 0.0,
+                    } => arc_area(*center, *radius, *angle1, *angle2, y as f64, x as f64 + 1.0) - arc_area(*center, *radius, *angle1, *angle2, y as f64, x as f64),
                 })
                 .sum();
-            img_blend_pixel(img, position_color, x as i32, y as i32, r.min(1.0).max(0.0));
+            img_blend_pixel(img, position_color, x as i32, y as i32, r);//.min(1.0).max(0.0)
+            //img_blend_pixel(img, position_color, x as i32, y as i32, r.min(1.0).max(0.0));
         }
     }
 }
@@ -59,6 +60,151 @@ fn scan(edges: &Vec<PathEdge>, y: f64) -> Vec<f64> {
         }
     }
     vec
+}
+
+fn arc_area(center: Point, radius: f64, angle1: f64, angle2: f64, y: f64, x: f64) -> f64 {
+    let (a1, a2) = angle_norm(angle1, angle2);
+    let upper = y.max(center.1 - radius);
+    let lower = (y + 1.0).min(center.1 + radius);
+    if upper >= lower {
+        return 0.0;
+    }
+    ({ // right
+        match
+            match (((a1 / FRAC_PI_2) as usize + 1) / 2, ((a2 / FRAC_PI_2) as usize + 1) / 2) {
+                (0, 0) | (2, 2) => Some((-a2.sin(), -a1.sin(), false)),
+                (0, 1) | (2, 3) => Some((-1.0, -a1.sin(), false)),
+                (0, 2) | (2, 4) => Some((-a2.sin(), -a1.sin(), true)),
+                (1, 1) => None,
+                (1, 2) => Some((-a2.sin(), 1.0, false)),
+                (1, 3) => Some((-1.0, 1.0, false)),
+                _ => unreachable!(),
+            } {
+                Some((y1, y2, false)) => {
+                    let u = upper.max(center.1 + y1 * radius);
+                    let l = lower.min(center.1 + y2 * radius);
+                    if u >= l { 0.0 } else {
+                        right_arc_area(center, radius, u, l, x)
+                    }
+                }
+                Some((y1, y2, true)) => {
+                    0.0 + {
+                        let u = upper.max(center.1 - radius);
+                        let l = lower.min(center.1 + y2 * radius);
+                        if u >= l { 0.0 } else {
+                            right_arc_area(center, radius, u, l, x)
+                        }
+                    } + {
+                        let u = upper.max(center.1 + y1 * radius);
+                        let l = lower.min(center.1 + radius);
+                        if u >= l { 0.0 } else {
+                            right_arc_area(center, radius, u, l, x)
+                        }
+                    }
+                }
+                None => 0.0
+            }
+        }
+    - { // left
+        match
+            match (((a1 / FRAC_PI_2) as usize + 1) / 2, ((a2 / FRAC_PI_2) as usize + 1) / 2) {
+                (0, 0) | (2, 2) => None,
+                (0, 1) | (2, 3) => Some((-1.0, -a2.sin(), false)),
+                (0, 2) | (2, 4) => Some((-1.0, 1.0, false)),
+                (1, 1) => Some((-a1.sin(), -a2.sin(), false)),
+                (1, 2) => Some((-a1.sin(), 1.0, false)),
+                (1, 3) => Some((-a2.sin(), -a1.sin(), true)),
+                _ => unreachable!(),
+            } {
+                Some((y1, y2, false)) => {
+                    let u = upper.max(center.1 + y1 * radius);
+                    let l = lower.min(center.1 + y2 * radius);
+                    if u >= l { 0.0 } else {
+                    left_arc_area(center, radius, u, l, x)
+                    }
+                }
+                Some((y1, y2, true)) => {
+                    0.0 + {
+                        let u = upper.max(center.1 - radius);
+                        let l = lower.min(center.1 + y1 * radius);
+                        if u >= l { 0.0 } else {
+                            left_arc_area(center, radius, u, l, x)
+                        }
+                    } + {
+                        let u = upper.max(center.1 + y2 * radius);
+                        let l = lower.min(center.1 + radius);
+                        if u >= l { 0.0 } else {
+                            left_arc_area(center, radius, u, l, x)
+                        }
+                    }
+                }
+                None => 0.0
+            }
+    }) * (angle2 - angle1).signum()
+}
+
+#[test]
+fn arc_area_test() {
+    assert_eq!(arc_area(Point(10.0, 10.0), 5.0, 0.0, PI*2.0, 0.0, 10.0), 0.0);
+    assert_eq!(arc_area(Point(10.0, 10.0), 5.0, 0.0, PI*2.0, 10.0, 5.0), -5.0);
+    assert_eq!(arc_area(Point(10.0, 10.0), 5.0, 0.0, PI*2.0, 10.0, 6.0), -6.0);
+}
+
+fn left_arc_area(center: Point, radius: f64, upper: f64, lower: f64, x: f64) -> f64 {
+    if x < center.0 - radius {
+        x * (lower - upper)
+    } else if x < center.0 {
+        x * (lower - upper) - ((cliped_arc_area(center, radius, upper, x) - cliped_arc_area(center, radius, lower, x)))
+    } else {
+        center.0 * (lower - upper) - (cliped_arc_area(center, radius, upper, center.0) - cliped_arc_area(center, radius, lower, center.0))
+    }
+}
+
+#[test]
+fn left_arc_area_test() {
+    assert_eq!(left_arc_area(Point(10.0, 10.0), 5.0, 10.0, 11.0, 5.0), 5.0);
+    assert_eq!(left_arc_area(Point(10.0, 10.0), 5.0, 10.0, 11.0, 6.0), 5.0);
+}
+
+fn right_arc_area(center: Point, radius: f64, upper: f64, lower: f64, x: f64) -> f64 {
+    if x < center.0 {
+        x * (lower - upper)
+    } else if x < center.0 + radius {
+        center.0 * (lower - upper) + (cliped_arc_area(center, radius, upper, x) - cliped_arc_area(center, radius, lower, x)) - (cliped_arc_area(center, radius, upper, center.0) - cliped_arc_area(center, radius, lower, center.0))
+    } else {
+        center.0 * (lower - upper) + (cliped_arc_area(center, radius, upper, center.0) - cliped_arc_area(center, radius, lower, center.0))
+    }
+}
+
+fn cliped_arc_area(center: Point, radius: f64, upper: f64, right: f64) -> f64 {
+    fn f(d: f64) -> f64 {
+        d.acos() - (1.0 - d * d).sqrt() * d
+    }
+    let w = (center.0 - right) / radius;
+    let h = (upper - center.1) / radius;
+
+    radius.powi(2) *
+    if w.powi(2) + h.powi(2) >= 1.0 {
+        match (0.0 <= w, 0.0 <= h) {
+            (true, true) => 0.0,
+            (true, false) => f(w),
+            (false, true) => f(h),
+            (false, false) => PI - f(-w) - f(-h),
+        }
+    } else {
+        match (0.0 <= w, 0.0 <= h) {
+            (true, true) => -1.0 * PI / 4.0 + f(w) / 2.0 + f(h) / 2.0 + w * h,
+            (true, false) => 1.0 * PI / 4.0 + f(w) / 2.0 - f(-h) / 2.0 + w * h,
+            (false, true) => 1.0 * PI / 4.0 - f(-w) / 2.0 + f(h) / 2.0 + w * h,
+            (false, false) => 3.0 * PI / 4.0 - f(-w) / 2.0 - f(-h) / 2.0 + w * h,
+        }
+    }
+}
+
+#[test]
+fn cliped_arc_area_test() {
+    assert_eq!(cliped_arc_area(Point(0.0, 0.0), 1.0, 0.0, 0.0), PI / 4.0);
+    assert_eq!(cliped_arc_area(Point(0.0, 0.0), 1.0, 0.5, 0.0), (0.5f64.acos() - (1.0f64 - 0.5 * 0.5).sqrt() * 0.5) / 2.0);
 }
 
 fn area(p1: Point, p2: Point, y: f64, x: f64) -> f64 {
@@ -121,7 +267,7 @@ fn area(p1: Point, p2: Point, y: f64, x: f64) -> f64 {
                     }
             }
         }
-        (None, None) => 0.0,
+        (None, None) => 0.0, // TODO この間に存在するパターンがある
     }
     .copysign(p1.1 - p2.1)
 }

@@ -251,14 +251,14 @@ fn main() {
             "!!!{:?}",
             paths.iter().flat_map(|p| p.edges()).collect::<Vec<_>>()
         );
-        nanachi::fill_path::draw_fill(
+        nanachi::fill_path2::draw_fill(
             &mut img,
             &paths.iter().flat_map(|p| p.edges()).collect(),
             &position_color::Constant::new(Rgb([200, 100, 250])),
         );
-        for path in paths {
-            nanachi::draw_path::draw_path2(&mut img, &path, Rgb([100, 0, 200]));
-        }
+        // for path in paths {
+        //     nanachi::draw_path::draw_path2(&mut img, &path, Rgb([100, 0, 200]));
+        // }
     }
     {
         let t = std::time::Instant::now();
@@ -306,6 +306,29 @@ fn main() {
             &position_color::Constant::new(Rgb([100, 200, 20])),
         );
         println!("{:?}", t.elapsed());
+    }
+
+    {
+        use nanachi::path2::{Path, PathAnchor};
+        let path = Path::new(
+            vec![
+                PathAnchor::Arc { // 方向(法線)に注意
+                    center: Point(430.0, 430.0),
+                    radius: 50.0,
+                    angle1: PI * 0.1,
+                    angle2: PI * 1.6,
+                },//.flip(),
+            ],
+            true,
+        );
+        let mut e = path.edges();
+        println!("{:?}", path.edges());
+        //e.remove(0);
+        nanachi::fill_path2::draw_fill(
+            &mut img,
+            &e,
+            &position_color::Constant::new(Rgb([200, 100, 250])),
+        );
     }
 
     let res = img.save("./symbols.png");
