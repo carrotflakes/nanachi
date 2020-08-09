@@ -1,21 +1,15 @@
 use nanachi::{
-    affine::AugmentedMatrix,
-    bezier::{Bezier2, Bezier3},
-    draw, geometry,
-    image::{ImageBuffer, Luma, Rgb},
-    k_curve,
-    path::Path,
+    image::{ImageBuffer, Rgb},
+    path2::{Path, PathAnchor},
     point::Point,
-    position_color, primitives,
+    position_color,
 };
-use std::f64::consts::PI;
 
 fn main() {
     let (width, height) = (512, 512);
     let mut img = ImageBuffer::from_pixel(width, height, Rgb([250u8, 250, 250]));
 
     {
-        use nanachi::path2::{Path, PathAnchor};
         let x = -100.5;
         let y = 0.5;
         let path = Path::new(
@@ -31,9 +25,20 @@ fn main() {
             false,
         );
         let paths = path.edge_path(0.5);
+        for p in paths[0].anchors.iter() {
+            println!("{:?}", p);
+        }
+        let e: Vec<_> = paths.iter().flat_map(|p| p.edges()).collect();
+        for p in e.iter() {
+            match p {
+                nanachi::path2::PathEdge::Line(p1, p2) => {if (p1.1 - p2.1).abs() < 0.1 {println!("!{:?}", p);};}
+                nanachi::path2::PathEdge::Arc { center, radius, angle1, angle2 } => {();}
+            }
+            //println!("e: {:?}", p);
+        }
         nanachi::fill_path2::draw_fill(
             &mut img,
-            &paths.iter().flat_map(|p| p.edges()).collect(),
+            &e,
             &position_color::Constant::new(Rgb([40, 40, 250])),
         );
 
@@ -135,7 +140,7 @@ fn main() {
             ],
             false,
         );
-        let paths = path.edge_path(1.5);
+        let paths = path.edge_path(6.5);
         nanachi::fill_path2::draw_fill(
             &mut img,
             &paths.iter().flat_map(|p| p.edges()).collect(),
@@ -143,6 +148,6 @@ fn main() {
         );
     }
 
-    let res = img.save("./symbols.png");
+    let res = img.save("./path.png");
     println!("save: {:?}", res);
 }

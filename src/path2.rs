@@ -277,7 +277,13 @@ fn path_anchor_right_point(a: &PathAnchor) -> Point {
             radius,
             angle1,
             angle2,
-        } => *center + Point(angle1.min(*angle2).cos() * radius, -angle1.min(*angle2).sin() * radius),
+        } => {
+            *center
+                + Point(
+                    angle1.min(*angle2).cos() * radius,
+                    -angle1.min(*angle2).sin() * radius,
+                )
+        }
     }
 }
 
@@ -289,6 +295,12 @@ fn path_anchor_left_point(a: &PathAnchor) -> Point {
             radius,
             angle1,
             angle2,
-        } => *center + Point(angle1.max(*angle2).cos() * radius, -angle1.max(*angle2).sin() * radius),
+        } => {
+            *center
+                + Point(
+                    angle1.max(*angle2).cos() * radius,
+                    -angle1.max(*angle2).sin() * radius,
+                )
+        }
     }
 }

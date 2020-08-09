@@ -312,12 +312,13 @@ fn main() {
         use nanachi::path2::{Path, PathAnchor};
         let path = Path::new(
             vec![
-                PathAnchor::Arc { // 方向(法線)に注意
+                PathAnchor::Arc {
+                    // 方向(法線)に注意
                     center: Point(430.0, 430.0),
                     radius: 50.0,
                     angle1: PI * 0.1,
                     angle2: PI * 1.6,
-                },//.flip(),
+                }, //.flip(),
             ],
             true,
         );

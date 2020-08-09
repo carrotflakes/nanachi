@@ -267,7 +267,20 @@ fn area(p1: Point, p2: Point, y: f64, x: f64) -> f64 {
                     }
             }
         }
-        (None, None) => 0.0, // TODO この間に存在するパターンがある
+        (None, None) => {
+            if y <= p1.1 && p1.1 < y + 1.0 && y <= p2.1 && p2.1 < y + 1.0 {
+                (p2.1 - p1.1)
+                    * if x < p2.0.min(p1.0) {
+                        x
+                    } else if x < p2.0.max(p1.0) {
+                        x - (x - p2.0.min(p1.0)).powi(2) / (p2.0 - p1.0).abs() / 2.0
+                    } else {
+                        (p2.0 + p1.0) / 2.0
+                    }
+            } else {
+                0.0
+            }
+        },
     }
     .copysign(p1.1 - p2.1)
 }
