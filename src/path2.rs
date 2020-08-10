@@ -1,5 +1,5 @@
 use crate::point::Point;
-use std::f64::consts::PI;
+use std::f64::consts::{FRAC_PI_2, PI};
 
 #[derive(Debug, Clone)]
 pub enum PathAnchor {
@@ -131,6 +131,7 @@ impl Path {
         edges
     }
 
+    // path の輪郭を Vec<path> として取得
     pub fn edge_path(&self, width: f64) -> Vec<Path> {
         let mut left_anchors = Vec::new();
         let mut right_anchors = Vec::new();
@@ -202,7 +203,27 @@ fn edge_path_(
             let aa = ((a2 - a1 + PI) / 2.0).abs();
             let r = width / aa.cos();
             let dp = Point(a.cos() * r, -a.sin() * r);
-            (PathAnchor::Point(*p + dp), PathAnchor::Point(*p - dp))
+            if FRAC_PI_2 < aa % PI {
+                (
+                    PathAnchor::Point(*p + dp),
+                    PathAnchor::Arc {
+                        center: *p,
+                        radius: width,
+                        angle1: a2 - FRAC_PI_2,
+                        angle2: a1 + FRAC_PI_2,
+                    },
+                )
+            } else {
+                (
+                    PathAnchor::Arc {
+                        center: *p,
+                        radius: width,
+                        angle1: a1 - FRAC_PI_2,
+                        angle2: a2 + FRAC_PI_2,
+                    },
+                    PathAnchor::Point(*p - dp),
+                )
+            }
         }
         PathAnchor::Arc {
             center,

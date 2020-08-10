@@ -288,7 +288,7 @@ fn area(p1: Point, p2: Point, y: f64, x: f64) -> f64 {
 fn angle_norm(a1: f64, a2: f64) -> (f64, f64) {
     let (a1, a2) = if a1 < a2 { (a1, a2) } else { (a2, a1) };
     let a = a1.rem_euclid(PI * 2.0);
-    (a, a2 + a - a1)
+    (a, (a2 - a).rem_euclid(PI * 2.0) + a)
 }
 
 pub fn img_blend_pixel<X, C: PositionColor<X>>(
