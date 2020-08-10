@@ -198,6 +198,8 @@ fn main() {
     {
         let t = std::time::Instant::now();
         use nanachi::path2::{Path, PathAnchor};
+
+        // 膨らんだ四角形
         let path = Path::new(
             vec![
                 PathAnchor::Point(Point(100.0, 450.0)),
@@ -222,6 +224,7 @@ fn main() {
             &position_color::Constant::new(Rgb([200, 100, 20])),
         );
 
+        // わずかに傾いた正方形
         let path = Path::new(
             vec![
                 PathAnchor::Point(Point(300.5, 350.5)),
@@ -240,11 +243,8 @@ fn main() {
             &path.edges(),
             &position_color::Constant::new(Rgb([100, 200, 20])),
         );
-        println!("{:?}", t.elapsed());
-    }
 
-    {
-        use nanachi::path2::{Path, PathAnchor};
+        //欠けた円
         let path = Path::new(
             vec![
                 PathAnchor::Arc {
@@ -264,6 +264,7 @@ fn main() {
             &e,
             &position_color::Constant::new(Rgb([200, 100, 250])),
         );
+        println!("fill_path elapsed: {:?}", t.elapsed());
     }
 
     let res = img.save("./symbols.png");
