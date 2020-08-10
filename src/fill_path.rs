@@ -155,7 +155,7 @@ impl ElmContainer {
                     x * h
                 } else {
                     let x = x.min(arc.center.0);
-                    x * h - circle_area(arc.center, arc.radius, y, x)
+                    x * h - circle_area(arc.center, arc.radius, y, x) + circle_area(arc.center, arc.radius, self.bound.0, x)
                 }
             }
             Elm::RightArc { ref arc } => {
@@ -164,9 +164,9 @@ impl ElmContainer {
                 if x < arc.center.0 {
                     x * h
                 } else if x < arc.center.0 + arc.radius {
-                    arc.center.0 * h + circle_area(arc.center, arc.radius, y, x) - circle_area(arc.center, arc.radius, y, arc.center.0)
+                    arc.center.0 * h + circle_area(arc.center, arc.radius, y, x) - circle_area(arc.center, arc.radius, y, arc.center.0) - circle_area(arc.center, arc.radius, self.bound.0, x) + circle_area(arc.center, arc.radius, self.bound.0, arc.center.0)
                 } else {
-                    arc.center.0 * h + circle_area(arc.center, arc.radius, y, arc.center.0)
+                    arc.center.0 * h + circle_area(arc.center, arc.radius, y, arc.center.0) - circle_area(arc.center, arc.radius, self.bound.0, arc.center.0)
                 }
             }
         }
@@ -239,5 +239,5 @@ pub fn blend_pixel<X>(p1: X, p2: X, r: f64) -> X
 where
     X: Pixel<Subpixel = u8> + 'static,
 {
-    p1.map2(&p2, |a, b| (a as f64 * (1.0 - r) + b as f64 * r) as u8)
+    p1.map2(&p2, |a, b| (a as f64 * (1.0 - r) + b as f64 * r).round() as u8)
 }
