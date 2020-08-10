@@ -162,55 +162,7 @@ fn main() {
     );
     println!("{:?}", time.elapsed());
 
-    let time = std::time::Instant::now();
-    nanachi::draw_path::draw_line(&mut img, (100, 100), (50, 100), Rgb([20, 20, 200]));
-    nanachi::draw_path::draw_line(&mut img, (100, 100), (50, 50), Rgb([20, 20, 200]));
-    nanachi::draw_path::draw_line(&mut img, (100, 100), (100, 50), Rgb([20, 20, 200]));
-    nanachi::draw_path::draw_line(&mut img, (100, 100), (150, 50), Rgb([20, 20, 200]));
-    nanachi::draw_path::draw_line(&mut img, (100, 100), (150, 100), Rgb([20, 20, 200]));
-    nanachi::draw_path::draw_line(&mut img, (100, 100), (150, 150), Rgb([20, 20, 200]));
-    nanachi::draw_path::draw_line(&mut img, (100, 100), (100, 150), Rgb([20, 20, 200]));
-    nanachi::draw_path::draw_line(&mut img, (100, 100), (50, 150), Rgb([20, 20, 200]));
-    nanachi::draw_path::draw_path(
-        &mut img,
-        &[
-            (100, 100),
-            (100, 400),
-            (300, 450),
-            (450, 300),
-            (400, 100),
-            (100, 100),
-        ],
-        Rgb([20, 200, 200]),
-    );
-    println!("{:?}", time.elapsed());
 
-    {
-        let mut b = ImageBuffer::from_pixel(img.width(), img.height(), Luma([0u8]));
-        nanachi::draw_path::draw_arc(
-            &mut b,
-            Point(300.0, 200.0),
-            90.0,
-            0.0,
-            std::f64::consts::PI * 2.0,
-        );
-        nanachi::draw_path::draw_arc(
-            &mut b,
-            Point(300.0, 200.0),
-            50.0,
-            0.0,
-            std::f64::consts::PI * 2.0,
-        );
-        nanachi::draw_path::draw_arc(&mut b, Point(300.0, 200.0), 45.0, 1.0, 3.0);
-        nanachi::draw_path::draw_arc(
-            &mut b,
-            Point(300.0, 200.0),
-            10.0,
-            0.0,
-            std::f64::consts::PI * 2.0,
-        );
-        nanachi::draw_path::copy_within(&mut img, &b, Rgb([200, 200, 20]));
-    }
     {
         use nanachi::path2::{Path, PathAnchor};
         let path = Path::new(
@@ -228,30 +180,13 @@ fn main() {
             ],
             false,
         );
-        nanachi::draw_path::draw_path2(&mut img, &path, Rgb([200, 100, 0]));
-        let path2 = Path::new(
-            vec![
-                PathAnchor::Point(Point(105.0, 205.0)),
-                PathAnchor::Point(Point(205.0, 205.0)),
-                PathAnchor::Arc {
-                    center: Point(205.0, 305.0),
-                    radius: 50.0,
-                    angle1: 0.0,
-                    angle2: 3.14,
-                },
-            ],
-            true,
-        );
-        let edges = path2.edges();
-        nanachi::draw_path::draw_path_edge(&mut img, &edges, Rgb([150, 150, 0]));
-
         let paths = path.edge_path(10.0);
         println!("{:?}", paths);
         println!(
             "!!!{:?}",
             paths.iter().flat_map(|p| p.edges()).collect::<Vec<_>>()
         );
-        nanachi::fill_path2::draw_fill(
+        nanachi::fill_path::draw_fill(
             &mut img,
             &paths.iter().flat_map(|p| p.edges()).collect(),
             &position_color::Constant::new(Rgb([200, 100, 250])),
@@ -281,7 +216,7 @@ fn main() {
             true,
         );
 
-        nanachi::fill_path2::draw_fill(
+        nanachi::fill_path::draw_fill(
             &mut img,
             &path.edges(),
             &position_color::Constant::new(Rgb([200, 100, 20])),
@@ -300,7 +235,7 @@ fn main() {
             true,
         );
 
-        nanachi::fill_path2::draw_fill(
+        nanachi::fill_path::draw_fill(
             &mut img,
             &path.edges(),
             &position_color::Constant::new(Rgb([100, 200, 20])),
@@ -322,10 +257,9 @@ fn main() {
             ],
             true,
         );
-        let mut e = path.edges();
+        let e = path.edges();
         println!("{:?}", path.edges());
-        //e.remove(0);
-        nanachi::fill_path2::draw_fill(
+        nanachi::fill_path::draw_fill(
             &mut img,
             &e,
             &position_color::Constant::new(Rgb([200, 100, 250])),

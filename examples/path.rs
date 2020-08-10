@@ -26,7 +26,7 @@ fn main() {
         );
         let paths = path.edge_path(0.5);
 
-        nanachi::fill_path2::draw_fill(
+        nanachi::fill_path::draw_fill(
             &mut img,
             &paths.iter().flat_map(|p| p.edges()).collect(),
             &position_color::Constant::new(Rgb([40, 40, 250])),
@@ -47,7 +47,7 @@ fn main() {
             false,
         );
         let paths = path.edge_path(1.0);
-        nanachi::fill_path2::draw_fill(
+        nanachi::fill_path::draw_fill(
             &mut img,
             &paths.iter().flat_map(|p| p.edges()).collect(),
             &position_color::Constant::new(Rgb([40, 40, 250])),
@@ -68,7 +68,7 @@ fn main() {
             false,
         );
         let paths = path.edge_path(1.5);
-        nanachi::fill_path2::draw_fill(
+        nanachi::fill_path::draw_fill(
             &mut img,
             &paths.iter().flat_map(|p| p.edges()).collect(),
             &position_color::Constant::new(Rgb([40, 40, 250])),
@@ -89,7 +89,7 @@ fn main() {
             false,
         );
         let paths = path.edge_path(0.5);
-        nanachi::fill_path2::draw_fill(
+        nanachi::fill_path::draw_fill(
             &mut img,
             &paths.iter().flat_map(|p| p.edges()).collect(),
             &position_color::Constant::new(Rgb([40, 40, 250])),
@@ -110,7 +110,7 @@ fn main() {
             false,
         );
         let paths = path.edge_path(1.0);
-        nanachi::fill_path2::draw_fill(
+        nanachi::fill_path::draw_fill(
             &mut img,
             &paths.iter().flat_map(|p| p.edges()).collect(),
             &position_color::Constant::new(Rgb([40, 40, 250])),
@@ -131,7 +131,7 @@ fn main() {
             false,
         );
         let paths = path.edge_path(6.5);
-        nanachi::fill_path2::draw_fill(
+        nanachi::fill_path::draw_fill(
             &mut img,
             &paths.iter().flat_map(|p| p.edges()).collect(),
             &position_color::Constant::new(Rgb([40, 40, 250])),
