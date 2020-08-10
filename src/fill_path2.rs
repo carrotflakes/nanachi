@@ -247,7 +247,7 @@ fn area(p1: Point, p2: Point, y: f64, x: f64) -> f64 {
         }
         (None, Some(x2)) => {
             let y = y + 1.0;
-            if p1.1 < y {
+            if p1.1 <= y {
                 (y - p1.1)
                     * if x < x2.min(p1.0) {
                         x
