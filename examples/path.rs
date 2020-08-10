@@ -20,25 +20,15 @@ fn main() {
                 PathAnchor::Point(Point(250. + x, 100. + y)),
                 PathAnchor::Point(Point(200. + x, 100. + y)),
                 PathAnchor::Point(Point(270. + x, 140. + y)),
-                PathAnchor::Point(Point(280. + x, 40. + y)),
+                PathAnchor::Point(Point(275. + x, 39. + y)),
             ],
             false,
         );
         let paths = path.edge_path(0.5);
-        for p in paths[0].anchors.iter() {
-            println!("{:?}", p);
-        }
-        let e: Vec<_> = paths.iter().flat_map(|p| p.edges()).collect();
-        for p in e.iter() {
-            match p {
-                nanachi::path2::PathEdge::Line(p1, p2) => {if (p1.1 - p2.1).abs() < 0.1 {println!("!{:?}", p);};}
-                nanachi::path2::PathEdge::Arc { center, radius, angle1, angle2 } => {();}
-            }
-            //println!("e: {:?}", p);
-        }
+
         nanachi::fill_path2::draw_fill(
             &mut img,
-            &e,
+            &paths.iter().flat_map(|p| p.edges()).collect(),
             &position_color::Constant::new(Rgb([40, 40, 250])),
         );
 
@@ -52,7 +42,7 @@ fn main() {
                 PathAnchor::Point(Point(250. + x, 100. + y)),
                 PathAnchor::Point(Point(200. + x, 100. + y)),
                 PathAnchor::Point(Point(270. + x, 140. + y)),
-                PathAnchor::Point(Point(280. + x, 40. + y)),
+                PathAnchor::Point(Point(275. + x, 39. + y)),
             ],
             false,
         );
@@ -73,7 +63,7 @@ fn main() {
                 PathAnchor::Point(Point(250. + x, 100. + y)),
                 PathAnchor::Point(Point(200. + x, 100. + y)),
                 PathAnchor::Point(Point(270. + x, 140. + y)),
-                PathAnchor::Point(Point(280. + x, 40. + y)),
+                PathAnchor::Point(Point(275. + x, 39. + y)),
             ],
             false,
         );
@@ -94,7 +84,7 @@ fn main() {
                 PathAnchor::Point(Point(250. + x, 100. + y)),
                 PathAnchor::Point(Point(200. + x, 100. + y)),
                 PathAnchor::Point(Point(270. + x, 140. + y)),
-                PathAnchor::Point(Point(280. + x, 40. + y)),
+                PathAnchor::Point(Point(275. + x, 39. + y)),
             ],
             false,
         );
@@ -115,7 +105,7 @@ fn main() {
                 PathAnchor::Point(Point(250. + x, 100. + y)),
                 PathAnchor::Point(Point(200. + x, 100. + y)),
                 PathAnchor::Point(Point(270. + x, 140. + y)),
-                PathAnchor::Point(Point(280. + x, 40. + y)),
+                PathAnchor::Point(Point(275. + x, 39. + y)),
             ],
             false,
         );
@@ -136,7 +126,7 @@ fn main() {
                 PathAnchor::Point(Point(250. + x, 100. + y)),
                 PathAnchor::Point(Point(200. + x, 100. + y)),
                 PathAnchor::Point(Point(270. + x, 140. + y)),
-                PathAnchor::Point(Point(280. + x, 40. + y)),
+                PathAnchor::Point(Point(275. + x, 39. + y)),
             ],
             false,
         );
