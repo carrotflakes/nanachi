@@ -8,6 +8,12 @@ use std::f64::{
     NAN,
 };
 
+enum Status {
+    Upper,
+    Lower,
+    Intersected(f64),
+}
+
 pub fn draw_fill<X, C: PositionColor<X>>(
     img: &mut ImageBuffer<X, Vec<u8>>,
     edges: &Vec<PathEdge>,
@@ -24,12 +30,7 @@ pub fn draw_fill<X, C: PositionColor<X>>(
                         area(*p1, *p2, y as f64, x as f64 + 1.0)
                             - area(*p1, *p2, y as f64, x as f64)
                     }
-                    PathEdge::Arc {
-                        center,
-                        radius,
-                        angle1,
-                        angle2,
-                    } => arc_area(*center, *radius, *angle1, *angle2, y as f64, x as f64 + 1.0) - arc_area(*center, *radius, *angle1, *angle2, y as f64, x as f64),
+                    PathEdge::Arc(arc) => arc_area(arc.center, arc.radius, arc.angle1, arc.angle2, y as f64, x as f64 + 1.0) - arc_area(arc.center, arc.radius, arc.angle1, arc.angle2, y as f64, x as f64),
                 })
                 .sum();
             img_blend_pixel(img, position_color, x as i32, y as i32, r);//.min(1.0).max(0.0)
@@ -48,12 +49,7 @@ fn scan(edges: &Vec<PathEdge>, y: f64) -> Vec<f64> {
                         .unwrap_or(NAN),
                 );
             }
-            PathEdge::Arc {
-                center,
-                radius,
-                angle1,
-                angle2,
-            } => {
+            PathEdge::Arc(_arc) => {
                 // ittann mushi
                 vec.push(NAN);
             }

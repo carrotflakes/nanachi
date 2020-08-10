@@ -164,19 +164,19 @@ fn main() {
 
 
     {
-        use nanachi::path2::{Path, PathAnchor};
+        use nanachi::path2::{Path, PathAnchor, Arc};
         let path = Path::new(
             vec![
                 PathAnchor::Point(Point(100.0, 200.0)),
                 PathAnchor::Point(Point(150.0, 150.0)),
                 PathAnchor::Point(Point(200.0, 200.0)),
                 PathAnchor::Point(Point(300.0, 250.0)),
-                PathAnchor::Arc {
+                PathAnchor::Arc(Arc {
                     center: Point(200.0, 300.0),
                     radius: 50.0,
                     angle1: 0.0,
                     angle2: 3.14,
-                },
+                }),
             ],
             false,
         );
@@ -197,7 +197,7 @@ fn main() {
     }
     {
         let t = std::time::Instant::now();
-        use nanachi::path2::{Path, PathAnchor};
+        use nanachi::path2::{Path, PathAnchor, Arc};
 
         // 膨らんだ四角形
         let path = Path::new(
@@ -247,13 +247,13 @@ fn main() {
         //欠けた円
         let path = Path::new(
             vec![
-                PathAnchor::Arc {
+                PathAnchor::Arc(Arc {
                     // 方向(法線)に注意
                     center: Point(430.0, 430.0),
                     radius: 50.0,
                     angle1: PI * 0.1,
                     angle2: PI * 1.6,
-                }, //.flip(),
+                }), //.flip(),
             ],
             true,
         );
