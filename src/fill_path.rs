@@ -8,11 +8,6 @@ use std::f64::{
     NAN,
 };
 
-enum Status {
-    Upper,
-    Lower,
-    Intersected(f64),
-}
 
 pub fn draw_fill<X, C: PositionColor<X>>(
     img: &mut ImageBuffer<X, Vec<u8>>,
@@ -22,17 +17,25 @@ pub fn draw_fill<X, C: PositionColor<X>>(
     X: Pixel<Subpixel = u8> + 'static,
 {
     for y in 0..img.height() {
+        let mut accs: Vec<_> = edges.iter().map(|e| {
+            match e {
+                PathEdge::Line(p1, p2) => {
+                    area(*p1, *p2, y as f64, 0.0)
+                }
+                PathEdge::Arc(arc) => arc_area(arc.center, arc.radius, arc.angle1, arc.angle2, y as f64, 0.0),
+            }
+        }).collect();
         for x in 0..img.width() {
-            let r: f64 = edges
-                .iter()
-                .map(|e| match e {
-                    PathEdge::Line(p1, p2) => {
-                        area(*p1, *p2, y as f64, x as f64 + 1.0)
-                            - area(*p1, *p2, y as f64, x as f64)
-                    }
-                    PathEdge::Arc(arc) => arc_area(arc.center, arc.radius, arc.angle1, arc.angle2, y as f64, x as f64 + 1.0) - arc_area(arc.center, arc.radius, arc.angle1, arc.angle2, y as f64, x as f64),
-                })
-                .sum();
+            let mut r = 0.0;
+            for (i, e) in edges.iter().enumerate() {
+                let a = match e {
+                    PathEdge::Line(p1, p2) =>
+                        area(*p1, *p2, y as f64, x as f64 + 1.0),
+                    PathEdge::Arc(arc) => arc_area(arc.center, arc.radius, arc.angle1, arc.angle2, y as f64, x as f64 + 1.0),
+                };
+                r += a - accs[i];
+                accs[i] = a;
+            }
             img_blend_pixel(img, position_color, x as i32, y as i32, r);//.min(1.0).max(0.0)
             //img_blend_pixel(img, position_color, x as i32, y as i32, r.min(1.0).max(0.0));
         }
@@ -139,13 +142,6 @@ fn arc_area(center: Point, radius: f64, angle1: f64, angle2: f64, y: f64, x: f64
     }) * (angle2 - angle1).signum()
 }
 
-#[test]
-fn arc_area_test() {
-    assert_eq!(arc_area(Point(10.0, 10.0), 5.0, 0.0, PI*2.0, 0.0, 10.0), 0.0);
-    assert_eq!(arc_area(Point(10.0, 10.0), 5.0, 0.0, PI*2.0, 10.0, 5.0), -5.0);
-    assert_eq!(arc_area(Point(10.0, 10.0), 5.0, 0.0, PI*2.0, 10.0, 6.0), -6.0);
-}
-
 fn left_arc_area(center: Point, radius: f64, upper: f64, lower: f64, x: f64) -> f64 {
     if x < center.0 - radius {
         x * (lower - upper)
@@ -154,12 +150,6 @@ fn left_arc_area(center: Point, radius: f64, upper: f64, lower: f64, x: f64) -> 
     } else {
         center.0 * (lower - upper) - (cliped_arc_area(center, radius, upper, center.0) - cliped_arc_area(center, radius, lower, center.0))
     }
-}
-
-#[test]
-fn left_arc_area_test() {
-    assert_eq!(left_arc_area(Point(10.0, 10.0), 5.0, 10.0, 11.0, 5.0), 5.0);
-    assert_eq!(left_arc_area(Point(10.0, 10.0), 5.0, 10.0, 11.0, 6.0), 5.0);
 }
 
 fn right_arc_area(center: Point, radius: f64, upper: f64, lower: f64, x: f64) -> f64 {
@@ -185,100 +175,30 @@ fn cliped_arc_area(center: Point, radius: f64, upper: f64, right: f64) -> f64 {
             (true, true) => 0.0,
             (true, false) => f(w),
             (false, true) => f(h),
-            (false, false) => PI - f(-w) - f(-h),
+            (false, false) => -PI + f(w) + f(h),
         }
     } else {
-        match (0.0 <= w, 0.0 <= h) {
-            (true, true) => -1.0 * PI / 4.0 + f(w) / 2.0 + f(h) / 2.0 + w * h,
-            (true, false) => 1.0 * PI / 4.0 + f(w) / 2.0 - f(-h) / 2.0 + w * h,
-            (false, true) => 1.0 * PI / 4.0 - f(-w) / 2.0 + f(h) / 2.0 + w * h,
-            (false, false) => 3.0 * PI / 4.0 - f(-w) / 2.0 - f(-h) / 2.0 + w * h,
-        }
+        (-0.5 * PI + f(w) + f(h)) / 2.0 + w * h
     }
-}
-
-#[test]
-fn cliped_arc_area_test() {
-    assert_eq!(cliped_arc_area(Point(0.0, 0.0), 1.0, 0.0, 0.0), PI / 4.0);
-    assert_eq!(cliped_arc_area(Point(0.0, 0.0), 1.0, 0.5, 0.0), (0.5f64.acos() - (1.0f64 - 0.5 * 0.5).sqrt() * 0.5) / 2.0);
 }
 
 fn area(p1: Point, p2: Point, y: f64, x: f64) -> f64 {
-    // // giji
-    // if let Some(xx) = geometry::intersect_segment_and_horizon(p1.0, p1.1, p2.0, p2.1, y) {
-    //     xx.min(x).copysign(p1.1 - p2.1)
-    // } else {
-    //     0.0
-    // }
-    match (
-        geometry::intersect_segment_and_horizon(p1.0, p1.1, p2.0, p2.1, y),
-        geometry::intersect_segment_and_horizon(p1.0, p1.1, p2.0, p2.1, y + 1.0),
-    ) {
-        (Some(x1), Some(x2)) => match (x < x1, x < x2) {
-            (true, true) => x,
-            (false, true) => x - (x - x1).powi(2) / (x2 - x1) / 2.0,
-            (true, false) => x - (x - x2).powi(2) / (x1 - x2) / 2.0,
-            (false, false) => (x1 + x2) / 2.0,
-        },
-        (Some(x1), None) => {
-            if y <= p1.1 {
-                (p1.1 - y)
-                    * if x < x1.min(p1.0) {
-                        x
-                    } else if x < x1.max(p1.0) {
-                        x - (x - x1.min(p1.0)).powi(2) / (x1 - p1.0).abs() / 2.0
-                    } else {
-                        (x1 + p1.0) / 2.0
-                    }
-            } else {
-                (p2.1 - y)
-                    * if x < x1.min(p2.0) {
-                        x
-                    } else if x < x1.max(p2.0) {
-                        x - (x - x1.min(p2.0)).powi(2) / (x1 - p2.0).abs() / 2.0
-                    } else {
-                        (x1 + p2.0) / 2.0
-                    }
-            }
-        }
-        (None, Some(x2)) => {
-            let y = y + 1.0;
-            if p1.1 <= y {
-                (y - p1.1)
-                    * if x < x2.min(p1.0) {
-                        x
-                    } else if x < x2.max(p1.0) {
-                        x - (x - x2.min(p1.0)).powi(2) / (x2 - p1.0).abs() / 2.0
-                    } else {
-                        (x2 + p1.0) / 2.0
-                    }
-            } else {
-                (y - p2.1)
-                    * if x < x2.min(p2.0) {
-                        x
-                    } else if x < x2.max(p2.0) {
-                        x - (x - x2.min(p2.0)).powi(2) / (x2 - p2.0).abs() / 2.0
-                    } else {
-                        (x2 + p2.0) / 2.0
-                    }
-            }
-        }
-        (None, None) => {
-            if y <= p1.1 && p1.1 < y + 1.0 && y <= p2.1 && p2.1 < y + 1.0 {
-                (p2.1 - p1.1)
-                    * if x < p2.0.min(p1.0) {
-                        x
-                    } else if x < p2.0.max(p1.0) {
-                        x - (x - p2.0.min(p1.0)).powi(2) / (p2.0 - p1.0).abs() / 2.0
-                    } else {
-                        (p2.0 + p1.0) / 2.0
-                    }
-            } else {
-                0.0
-            }
-        },
+    let y1 = p1.1.min(p2.1).max(y);
+    let y2 = p1.1.max(p2.1).min(y + 1.0);
+    if y1 < y2 {
+        let x1 = geometry::intersect_line_and_horizon(p1, p2, y1);
+        let x2 = geometry::intersect_line_and_horizon(p1, p2, y2);
+        let (x1, x2) = if x1 < x2 {(x1, x2)} else {(x2, x1)};
+        ((y2 - y1) * if x < x1 {
+            x
+        } else if x < x2 {
+            x - (x - x1).powi(2) / (x2 - x1) / 2.0
+        } else {
+            (x1 + x2) / 2.0
+        }).copysign(p1.1 - p2.1)
+    } else {
+        0.0
     }
-    .copysign(p1.1 - p2.1)
 }
 
 fn angle_norm(a1: f64, a2: f64) -> (f64, f64) {
