@@ -116,22 +116,17 @@ pub fn draw_fill<X, C: PositionColor<X>>(
     for ec in ecs.iter_mut() {
         ec.max = ec.area(img.height() as f64, img.width() as f64);
     }
-    let ecslen = ecs.len();
     let ww = width + 2;
-    let mut acc = vec![0.0; ecslen * ww];
+    let mut acc = vec![0.0; ww];
     for y in 0..img.height() {
-        for i in 0..ecslen {
-            acc[i * ww + (-(y as i32)).rem_euclid(ww as i32) as usize] = 0.0;
-        }
+        acc[(-(y as i32)).rem_euclid(ww as i32) as usize] = 0.0;
         for x in 0..img.width() as usize {
-            let mut r = 0.0;
-            for (i, e) in ecs.iter().enumerate() {
-                let offset = i * ww;
-                let a = e.area((y + 1) as f64, (x + 1) as f64);
-                r += a + acc[offset + (x as i32 + 1 - y as i32).rem_euclid(ww as i32) as usize] - acc[offset + (x as i32 + 2 - y as i32).rem_euclid(ww as i32) as usize] - acc[offset + (x as i32 - y as i32).rem_euclid(ww as i32) as usize];
-                acc[offset + (x as i32 + 1 - y as i32).rem_euclid(ww as i32) as usize] = a;
-                //r += e.area((y + 1) as f64, (x + 1) as f64) - e.area((y + 1) as f64, x as f64) - e.area(y as f64, (x + 1) as f64) + e.area(y as f64, x as f64)
+            let mut a = 0.0;
+            for e in ecs.iter() {
+                a += e.area((y + 1) as f64, (x + 1) as f64);
             }
+            let r = a + acc[(x as i32 + 1 - y as i32).rem_euclid(ww as i32) as usize] - acc[(x as i32 + 2 - y as i32).rem_euclid(ww as i32) as usize] - acc[(x as i32 - y as i32).rem_euclid(ww as i32) as usize];
+            acc[(x as i32 + 1 - y as i32).rem_euclid(ww as i32) as usize] = a;
             img_blend_pixel(img, position_color, x as i32, y as i32, r);//.min(1.0).max(0.0)
             //img_blend_pixel(img, position_color, x as i32, y as i32, r.min(1.0).max(0.0));
         }
