@@ -5,6 +5,36 @@ use crate::position_color::PositionColor;
 use image::{ImageBuffer, Pixel};
 use std::f64::consts::{FRAC_PI_2, PI};
 
+pub fn bench() -> f64 {
+    use crate::path2::Arc;
+    let t = std::time::Instant::now();
+    let ec = vec![
+        PathEdge::Line(Point(10.0, 20.0), Point(100.0, 200.0)),
+        PathEdge::Line(Point(20.0, 20.0), Point(100.0, 210.0)),
+        PathEdge::Line(Point(30.0, 20.0), Point(100.0, 220.0)),
+        PathEdge::Line(Point(40.0, 20.0), Point(100.0, 230.0)),
+        PathEdge::Arc(Arc{center: Point(50., 50.), radius: 30., angle1: 0.0, angle2: 4.0}),
+        PathEdge::Arc(Arc{center: Point(50., 50.), radius: 30., angle1: 1.0, angle2: 4.0}),
+        PathEdge::Arc(Arc{center: Point(50., 50.), radius: 30., angle1: 2.0, angle2: 5.0}),
+        PathEdge::Arc(Arc{center: Point(50., 50.), radius: 30., angle1: 3.0, angle2: 6.0}),
+    ];
+    println!("{:?}", ec.len());
+    let mut a = 0.0;
+    for _ in 0..1000000 {
+        for e in ec.iter() {
+            a +=
+            match e {
+                PathEdge::Line(p1, p2) => {
+                    area(*p1, *p2, 200.0, 200.0)
+                }
+                PathEdge::Arc(arc) => arc_area(arc.center, arc.radius, arc.angle1, arc.angle2, 200.0, 200.0),
+            }
+        }
+    }
+    println!("{:?}", t.elapsed());
+    a
+}
+
 
 pub fn draw_fill<X, C: PositionColor<X>>(
     img: &mut ImageBuffer<X, Vec<u8>>,
