@@ -34,67 +34,43 @@ fn path_edges_to_elms(es: &Vec<PathEdge>) -> Vec<ElmContainer> {
                 });
             }
             PathEdge::Arc(arc) => {
+                fn left_arc(arc: &Arc, upper: f64, lower: f64) -> ElmContainer {
+                    ElmContainer {
+                        bound: (arc.center.1 + upper * arc.radius, arc.center.1 + lower * arc.radius),
+                        elm: Elm::LeftArc{arc: arc.clone()}, signum: (arc.angle1 - arc.angle2).signum()
+                    }
+                }
+                fn right_arc(arc: &Arc, upper: f64, lower: f64) -> ElmContainer {
+                    ElmContainer {
+                        bound: (arc.center.1 + upper * arc.radius, arc.center.1 + lower * arc.radius),
+                        elm: Elm::RightArc{arc: arc.clone()}, signum: (arc.angle2 - arc.angle1).signum()
+                    }
+                }
                 let (a1, a2) = angle_norm(arc.angle1, arc.angle2);
                 match (((a1 / FRAC_PI_2) as usize + 1) / 2, ((a2 / FRAC_PI_2) as usize + 1) / 2) {
                     (0, 0) | (2, 2) => {
-                        elms.push(ElmContainer {
-                            bound: (arc.center.1 - a2.sin() * arc.radius, arc.center.1 - a1.sin() * arc.radius),
-                            elm: Elm::RightArc{arc: arc.clone()}, signum: (arc.angle2 - arc.angle1).signum()
-                        });
+                        elms.push(right_arc(arc, -a2.sin(), -a1.sin()));
                     }
                     (0, 1) | (2, 3) => {
-                        elms.push(ElmContainer {
-                            bound: (arc.center.1 - arc.radius, arc.center.1 - a2.sin() * arc.radius),
-                            elm: Elm::LeftArc{arc: arc.clone()}, signum: (arc.angle1 - arc.angle2).signum()
-                        });
-                        elms.push(ElmContainer {
-                            bound: (arc.center.1 - arc.radius, arc.center.1 - a1.sin() * arc.radius),
-                            elm: Elm::RightArc{arc: arc.clone()}, signum: (arc.angle2 - arc.angle1).signum()
-                        });
+                        elms.push(left_arc(arc, -1.0, -a2.sin()));
+                        elms.push(right_arc(arc, -1.0, -a1.sin()));
                     }
                     (0, 2) | (2, 4) => {
-                        elms.push(ElmContainer {
-                            bound: (arc.center.1 - arc.radius, arc.center.1 + arc.radius),
-                            elm: Elm::LeftArc{arc: arc.clone()}, signum: (arc.angle1 - arc.angle2).signum()
-                        });
-                        elms.push(ElmContainer {
-                            bound: (arc.center.1 - arc.radius, arc.center.1 - a1.sin() * arc.radius),
-                            elm: Elm::RightArc{arc: arc.clone()}, signum: (arc.angle2 - arc.angle1).signum()
-                        });
-                        elms.push(ElmContainer {
-                            bound: (arc.center.1 - a2.sin() * arc.radius, arc.center.1 + arc.radius),
-                            elm: Elm::RightArc{arc: arc.clone()}, signum: (arc.angle2 - arc.angle1).signum()
-                        });
+                        elms.push(left_arc(arc, -1.0, 1.0));
+                        elms.push(right_arc(arc, -1.0, -a1.sin()));
+                        elms.push(right_arc(arc, -a2.sin(), 1.0));
                     }
                     (1, 1) => {
-                        elms.push(ElmContainer {
-                            bound: (arc.center.1 - a1.sin() * arc.radius, arc.center.1 - a2.sin() * arc.radius),
-                            elm: Elm::LeftArc{arc: arc.clone()}, signum: (arc.angle1 - arc.angle2).signum()
-                        });
+                        elms.push(left_arc(arc, -a1.sin(), -a2.sin()));
                     }
                     (1, 2) => {
-                        elms.push(ElmContainer {
-                            bound: (arc.center.1 - a1.sin() * arc.radius, arc.center.1 + arc.radius),
-                            elm: Elm::LeftArc{arc: arc.clone()}, signum: (arc.angle1 - arc.angle2).signum()
-                        });
-                        elms.push(ElmContainer {
-                            bound: (arc.center.1 - a2.sin() * arc.radius, arc.center.1 + arc.radius),
-                            elm: Elm::RightArc{arc: arc.clone()}, signum: (arc.angle2 - arc.angle1).signum()
-                        });
+                        elms.push(left_arc(arc, -a1.sin(), 1.0));
+                        elms.push(right_arc(arc, -a2.sin(), 1.0));
                     }
                     (1, 3) => {
-                        elms.push(ElmContainer {
-                            bound: (arc.center.1 - arc.radius, arc.center.1 - a1.sin() * arc.radius),
-                            elm: Elm::LeftArc{arc: arc.clone()}, signum: (arc.angle1 - arc.angle2).signum()
-                        });
-                        elms.push(ElmContainer {
-                            bound: (arc.center.1 - a2.sin() * arc.radius, arc.center.1 + arc.radius),
-                            elm: Elm::LeftArc{arc: arc.clone()}, signum: (arc.angle1 - arc.angle2).signum()
-                        });
-                        elms.push(ElmContainer {
-                            bound: (arc.center.1 - arc.radius, arc.center.1 + arc.radius),
-                            elm: Elm::RightArc{arc: arc.clone()}, signum: (arc.angle2 - arc.angle1).signum()
-                        });
+                        elms.push(left_arc(arc, -1.0, -a1.sin()));
+                        elms.push(left_arc(arc, -a2.sin(), 1.0));
+                        elms.push(right_arc(arc, -1.0, 1.0));
                     }
                     _ => unreachable!(),
                 }
