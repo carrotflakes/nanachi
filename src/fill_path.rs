@@ -134,10 +134,15 @@ impl ElmContainer {
         if lower <= upper {
             return 0.0;
         }
-        self.signum *
-        match self.elm {
+        self.elm.area(upper, lower, x) * self.signum
+    }
+}
+
+impl Elm {
+    fn area(&self, upper: f64, lower: f64, x: f64) -> f64 {
+        match self {
             Elm::Line(p1, p2) => {
-                segment_area(p1, p2, upper, lower, x)
+                segment_area(*p1, *p2, upper, lower, x)
             }
             Elm::LeftArc { ref arc } => {
                 let h = lower - upper;
