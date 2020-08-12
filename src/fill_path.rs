@@ -20,7 +20,6 @@ enum Elm {
 struct ElmContainer {
     bound: (f64, f64),
     elm: Elm,
-    max: f64,
 }
 
 fn path_edges_to_elms(es: &Vec<PathEdge>) -> Vec<ElmContainer> {
@@ -30,7 +29,7 @@ fn path_edges_to_elms(es: &Vec<PathEdge>) -> Vec<ElmContainer> {
             PathEdge::Line(p1, p2) => {
                 elms.push(ElmContainer {
                     bound: (p1.1.min(p2.1), p1.1.max(p2.1)),
-                    elm: Elm::Line(*p1, *p2), max: 0.0
+                    elm: Elm::Line(*p1, *p2)
                 });
             }
             PathEdge::Arc(arc) => {
@@ -39,61 +38,61 @@ fn path_edges_to_elms(es: &Vec<PathEdge>) -> Vec<ElmContainer> {
                     (0, 0) | (2, 2) => {
                         elms.push(ElmContainer {
                             bound: (arc.center.1 - a2.sin() * arc.radius, arc.center.1 - a1.sin() * arc.radius),
-                            elm: Elm::RightArc{arc: arc.clone()}, max: 0.0
+                            elm: Elm::RightArc{arc: arc.clone()}
                         });
                     }
                     (0, 1) | (2, 3) => {
                         elms.push(ElmContainer {
                             bound: (arc.center.1 - arc.radius, arc.center.1 - a2.sin() * arc.radius),
-                            elm: Elm::LeftArc{arc: arc.clone()}, max: 0.0
+                            elm: Elm::LeftArc{arc: arc.clone()}
                         });
                         elms.push(ElmContainer {
                             bound: (arc.center.1 - arc.radius, arc.center.1 - a1.sin() * arc.radius),
-                            elm: Elm::RightArc{arc: arc.clone()}, max: 0.0
+                            elm: Elm::RightArc{arc: arc.clone()}
                         });
                     }
                     (0, 2) | (2, 4) => {
                         elms.push(ElmContainer {
                             bound: (arc.center.1 - arc.radius, arc.center.1 + arc.radius),
-                            elm: Elm::LeftArc{arc: arc.clone()}, max: 0.0
+                            elm: Elm::LeftArc{arc: arc.clone()}
                         });
                         elms.push(ElmContainer {
                             bound: (arc.center.1 - arc.radius, arc.center.1 - a1.sin() * arc.radius),
-                            elm: Elm::RightArc{arc: arc.clone()}, max: 0.0
+                            elm: Elm::RightArc{arc: arc.clone()}
                         });
                         elms.push(ElmContainer {
                             bound: (arc.center.1 - a2.sin() * arc.radius, arc.center.1 + arc.radius),
-                            elm: Elm::RightArc{arc: arc.clone()}, max: 0.0
+                            elm: Elm::RightArc{arc: arc.clone()}
                         });
                     }
                     (1, 1) => {
                         elms.push(ElmContainer {
                             bound: (arc.center.1 - a1.sin() * arc.radius, arc.center.1 - a2.sin() * arc.radius),
-                            elm: Elm::LeftArc{arc: arc.clone()}, max: 0.0
+                            elm: Elm::LeftArc{arc: arc.clone()}
                         });
                     }
                     (1, 2) => {
                         elms.push(ElmContainer {
                             bound: (arc.center.1 - a1.sin() * arc.radius, arc.center.1 + arc.radius),
-                            elm: Elm::LeftArc{arc: arc.clone()}, max: 0.0
+                            elm: Elm::LeftArc{arc: arc.clone()}
                         });
                         elms.push(ElmContainer {
                             bound: (arc.center.1 - a2.sin() * arc.radius, arc.center.1 + arc.radius),
-                            elm: Elm::RightArc{arc: arc.clone()}, max: 0.0
+                            elm: Elm::RightArc{arc: arc.clone()}
                         });
                     }
                     (1, 3) => {
                         elms.push(ElmContainer {
                             bound: (arc.center.1 - arc.radius, arc.center.1 - a1.sin() * arc.radius),
-                            elm: Elm::LeftArc{arc: arc.clone()}, max: 0.0
+                            elm: Elm::LeftArc{arc: arc.clone()}
                         });
                         elms.push(ElmContainer {
                             bound: (arc.center.1 - a2.sin() * arc.radius, arc.center.1 + arc.radius),
-                            elm: Elm::LeftArc{arc: arc.clone()}, max: 0.0
+                            elm: Elm::LeftArc{arc: arc.clone()}
                         });
                         elms.push(ElmContainer {
                             bound: (arc.center.1 - arc.radius, arc.center.1 + arc.radius),
-                            elm: Elm::RightArc{arc: arc.clone()}, max: 0.0
+                            elm: Elm::RightArc{arc: arc.clone()}
                         });
                     }
                     _ => unreachable!(),
@@ -112,10 +111,7 @@ pub fn draw_fill<X, C: PositionColor<X>>(
     X: Pixel<Subpixel = u8> + 'static,
 {
     let width = img.width() as usize;
-    let mut ecs = path_edges_to_elms(edges);
-    for ec in ecs.iter_mut() {
-        ec.max = ec.area(img.height() as f64, img.width() as f64);
-    }
+    let ecs = path_edges_to_elms(edges);
     let ww = width as i32 + 2;
     let mut acc = vec![0.0; ww as usize];
     for y in 0..img.height() as i32 {
