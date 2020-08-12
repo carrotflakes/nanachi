@@ -111,19 +111,16 @@ pub fn draw_fill<X, C: PositionColor<X>>(
 ) where
     X: Pixel<Subpixel = u8> + 'static,
 {
-    let width = img.width() as usize;
     let ecs = path_edges_to_elms(edges);
-    let ww = width as i32 + 2;
-    let mut acc = vec![0.0; ww as usize];
     for y in 0..img.height() as i32 {
-        acc[(-y).rem_euclid(ww) as usize] = 0.0;
+        let mut acc = 0.0;
         for x in 0..img.width() as i32 {
             let mut a = 0.0;
             for e in ecs.iter() {
-                a += e.area((y + 1) as f64, (x + 1) as f64);
+                a += e.area(y as f64, (y + 1) as f64, (x + 1) as f64);
             }
-            let r = a + acc[(x + 1 - y).rem_euclid(ww) as usize] - acc[(x + 2 - y).rem_euclid(ww) as usize] - acc[(x - y).rem_euclid(ww) as usize];
-            acc[(x + 1 - y).rem_euclid(ww) as usize] = a;
+            let r = a - acc;
+            acc = a;
             img_blend_pixel(img, position_color, x, y, r);//.min(1.0).max(0.0)
             //img_blend_pixel(img, position_color, x as i32, y as i32, r.min(1.0).max(0.0));
         }
@@ -131,61 +128,65 @@ pub fn draw_fill<X, C: PositionColor<X>>(
 }
 
 impl ElmContainer {
-    fn area(&self, y: f64, x: f64) -> f64 {
-        if y <= self.bound.0 {
+    fn area(&self, upper: f64, lower: f64, x: f64) -> f64 {
+        let upper = upper.max(self.bound.0);
+        let lower = lower.min(self.bound.1);
+        if lower <= upper {
             return 0.0;
         }
-        let y = y.min(self.bound.1);
         self.signum *
         match self.elm {
             Elm::Line(p1, p2) => {
-                segment_area(p1, p2, y, x)
+                segment_area(p1, p2, upper, lower, x)
             }
             Elm::LeftArc { ref arc } => {
-                let h = y - self.bound.0;
+                let h = lower - upper;
                 if x < arc.center.0 - arc.radius {
                     x * h
                 } else {
                     let x = x.min(arc.center.0);
-                    x * h - circle_area(arc.center, arc.radius, y, x) + circle_area(arc.center, arc.radius, self.bound.0, x)
+                    x * h - circle_area(arc.center, arc.radius, upper, lower, x)
                 }
             }
             Elm::RightArc { ref arc } => {
-                let h = y - self.bound.0;
+                let h = lower - upper;
                 if x < arc.center.0 {
                     x * h
                 } else if x < arc.center.0 + arc.radius {
-                    arc.center.0 * h + circle_area(arc.center, arc.radius, y, x) - circle_area(arc.center, arc.radius, y, arc.center.0) - circle_area(arc.center, arc.radius, self.bound.0, x) + circle_area(arc.center, arc.radius, self.bound.0, arc.center.0)
+                    arc.center.0 * h + circle_area(arc.center, arc.radius, upper, lower, x) - circle_area(arc.center, arc.radius, upper, lower, arc.center.0)
                 } else {
-                    arc.center.0 * h + circle_area(arc.center, arc.radius, y, arc.center.0) - circle_area(arc.center, arc.radius, self.bound.0, arc.center.0)
+                    arc.center.0 * h + circle_area(arc.center, arc.radius, upper, lower, arc.center.0)
                 }
             }
         }
     }
 }
 
-fn circle_area(center: Point, radius: f64, lower: f64, right: f64) -> f64 {
+fn circle_area(center: Point, radius: f64, upper: f64, lower: f64, right: f64) -> f64 {
     fn f(d: f64) -> f64 {
         d.acos() - (1.0 - d * d).sqrt() * d
     }
-    let w = (center.0 - right) / radius;
-    let h = (center.1 - lower) / radius;
-
-    radius.powi(2) *
-    if w.powi(2) + h.powi(2) >= 1.0 {
-        match (0.0 <= w, 0.0 <= h) {
-            (true, true) => 0.0,
-            (true, false) => f(w),
-            (false, true) => f(h),
-            (false, false) => -PI + f(w) + f(h),
+    fn g(w: f64, h: f64) -> f64 {
+        if w.powi(2) + h.powi(2) >= 1.0 {
+            match (0.0 <= w, 0.0 <= h) {
+                (true, true) => 0.0,
+                (true, false) => f(w),
+                (false, true) => f(h),
+                (false, false) => -PI + f(w) + f(h),
+            }
+        } else {
+            (-0.5 * PI + f(w) + f(h)) / 2.0 + w * h
         }
-    } else {
-        (-0.5 * PI + f(w) + f(h)) / 2.0 + w * h
     }
+    let w = (center.0 - right) / radius;
+    let upper = (center.1 - upper) / radius;
+    let lower = (center.1 - lower) / radius;
+
+    radius.powi(2) * (g(w, lower) - g(w, upper))
 }
 
-fn segment_area(p1: Point, p2: Point, lower: f64, right: f64) -> f64 {
-    let y1 = p1.1.min(p2.1);
+fn segment_area(p1: Point, p2: Point, upper: f64, lower: f64, right: f64) -> f64 {
+    let y1 = p1.1.min(p2.1).max(upper);
     let y2 = p1.1.max(p2.1).min(lower);
     if y1 < y2 {
         let x1 = geometry::intersect_line_and_horizon(p1, p2, y1);
