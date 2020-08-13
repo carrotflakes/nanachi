@@ -80,6 +80,26 @@ fn path_edges_to_elms(es: &Vec<PathEdge>) -> Vec<ElmContainer> {
     elms.into_iter().filter(|e| e.bound.0 < e.bound.1).collect()
 }
 
+pub fn draw_fill2<F: FnMut(u32, u32, f64)>(
+    width: u32,
+    height: u32,
+    edges: &Vec<PathEdge>,
+    writer: &mut F,
+) {
+    let ecs = path_edges_to_elms(edges);
+    for y in 0..height as i32 {
+        let mut acc = 0.0;
+        for x in 0..width as i32 {
+            let a = ecs.iter().map(|e|
+                e.area(y as f64, (y + 1) as f64, (x + 1) as f64)
+            ).sum();
+            let v = a - acc;
+            acc = a;
+            writer(x as u32, y as u32, v);
+        }
+    }
+}
+
 pub fn draw_fill<X, C: PositionColor<X>>(
     img: &mut ImageBuffer<X, Vec<u8>>,
     edges: &Vec<PathEdge>,
