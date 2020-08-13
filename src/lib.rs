@@ -13,3 +13,4 @@ pub mod path2;
 pub mod point;
 pub mod position_color;
 pub mod primitives;
+pub mod writer;
