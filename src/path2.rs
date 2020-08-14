@@ -32,6 +32,32 @@ impl PathAnchor {
             }),
         }
     }
+
+    fn right_point(&self) -> Point {
+        match self {
+            PathAnchor::Point(p) => *p,
+            PathAnchor::Arc(arc) => {
+                arc.center
+                    + Point(
+                        arc.angle1.min(arc.angle2).cos() * arc.radius,
+                        -arc.angle1.min(arc.angle2).sin() * arc.radius,
+                    )
+            }
+        }
+    }
+
+    fn left_point(&self) -> Point {
+        match self {
+            PathAnchor::Point(p) => *p,
+            PathAnchor::Arc(arc) => {
+                arc.center
+                    + Point(
+                        arc.angle1.max(arc.angle2).cos() * arc.radius,
+                        -arc.angle1.max(arc.angle2).sin() * arc.radius,
+                    )
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -139,12 +165,12 @@ impl Path {
             right_anchors.extend(cap(
                 width,
                 &self.anchors[0].flip(),
-                path_anchor_left_point(&self.anchors[1]),
+                self.anchors[1].left_point(),
             ));
             left_anchors.extend(cap(
                 width,
                 &self.anchors[self.anchors.len() - 1],
-                path_anchor_right_point(&self.anchors[self.anchors.len() - 2]),
+                self.anchors[self.anchors.len() - 2].right_point(),
             ));
             left_anchors.extend(right_anchors);
             vec![Path {
@@ -161,8 +187,8 @@ fn edge_path_(
     a2: &PathAnchor,
     a3: &PathAnchor,
 ) -> (PathAnchor, PathAnchor) {
-    let left = path_anchor_right_point(a2);
-    let right = path_anchor_left_point(a3);
+    let left = a2.right_point();
+    let right = a3.left_point();
     match a1 {
         PathAnchor::Point(p) => {
             let a1 = (left.1 - p.1).atan2(p.0 - left.0);
@@ -249,32 +275,6 @@ fn cap(width: f64, a: &PathAnchor, p: Point) -> Vec<PathAnchor> {
                     angle2: *angle1,
                 }),
             ]
-        }
-    }
-}
-
-fn path_anchor_right_point(a: &PathAnchor) -> Point {
-    match a {
-        PathAnchor::Point(p) => *p,
-        PathAnchor::Arc(arc) => {
-            arc.center
-                + Point(
-                    arc.angle1.min(arc.angle2).cos() * arc.radius,
-                    -arc.angle1.min(arc.angle2).sin() * arc.radius,
-                )
-        }
-    }
-}
-
-fn path_anchor_left_point(a: &PathAnchor) -> Point {
-    match a {
-        PathAnchor::Point(p) => *p,
-        PathAnchor::Arc(arc) => {
-            arc.center
-                + Point(
-                    arc.angle1.max(arc.angle2).cos() * arc.radius,
-                    -arc.angle1.max(arc.angle2).sin() * arc.radius,
-                )
         }
     }
 }
