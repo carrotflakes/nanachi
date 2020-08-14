@@ -39,8 +39,8 @@ impl PathAnchor {
             PathAnchor::Arc(arc) => {
                 arc.center
                     + Point(
-                        arc.angle1.min(arc.angle2).cos() * arc.radius,
-                        -arc.angle1.min(arc.angle2).sin() * arc.radius,
+                        arc.angle2.cos() * arc.radius,
+                        -arc.angle2.sin() * arc.radius,
                     )
             }
         }
@@ -52,8 +52,8 @@ impl PathAnchor {
             PathAnchor::Arc(arc) => {
                 arc.center
                     + Point(
-                        arc.angle1.max(arc.angle2).cos() * arc.radius,
-                        -arc.angle1.max(arc.angle2).sin() * arc.radius,
+                        arc.angle1.cos() * arc.radius,
+                        -arc.angle1.sin() * arc.radius,
                     )
             }
         }
@@ -140,6 +140,7 @@ impl Path {
                 left_anchors.push(la);
                 right_anchors.push(ra);
             }
+            right_anchors.reverse();
             vec![
                 Path {
                     anchors: left_anchors,

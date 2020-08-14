@@ -68,8 +68,8 @@ fn path_edges_to_elms(es: &Vec<PathEdge>) -> Vec<ElmContainer> {
                         elms.push(right_arc(arc, -a2.sin(), 1.0));
                     }
                     (1, 3) => {
-                        elms.push(left_arc(arc, -1.0, -a1.sin()));
-                        elms.push(left_arc(arc, -a2.sin(), 1.0));
+                        elms.push(left_arc(arc, -1.0, -a2.sin()));
+                        elms.push(left_arc(arc, -a1.sin(), 1.0));
                         elms.push(right_arc(arc, -1.0, 1.0));
                     }
                     _ => unreachable!(),
