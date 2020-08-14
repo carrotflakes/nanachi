@@ -79,48 +79,19 @@ impl Path {
 
     pub fn edges(&self) -> Vec<PathEdge> {
         let mut edges = Vec::new();
+        let mut last_point = self.anchors.last().unwrap().right_point();
         for i in 0..self.anchors.len() - if self.close { 0 } else { 1 } {
-            match (
-                &self.anchors[i],
-                &self.anchors[(i + 1) % self.anchors.len()],
-            ) {
-                (PathAnchor::Point(p1), PathAnchor::Point(p2)) => {
-                    edges.push(PathEdge::Line(*p1, *p2));
-                }
-                (
-                    PathAnchor::Point(p),
-                    PathAnchor::Arc(arc),
-                ) => {
-                    let (sin, cos) = arc.angle1.sin_cos();
-                    edges.push(PathEdge::Line(
-                        *p,
-                        arc.center + Point(cos * arc.radius, -sin * arc.radius),
-                    ));
+            let point = self.anchors[i].left_point();
+            if last_point != point {
+                edges.push(PathEdge::Line(last_point, point));
+            }
+            match &self.anchors[i] {
+                PathAnchor::Point(_) => {}
+                PathAnchor::Arc(arc) => {
                     edges.push(PathEdge::Arc(arc.clone()));
                 }
-                (
-                    PathAnchor::Arc(arc),
-                    PathAnchor::Point(p),
-                ) => {
-                    let (sin, cos) = arc.angle2.sin_cos();
-                    edges.push(PathEdge::Line(
-                        arc.center + Point(cos * arc.radius, -sin * arc.radius),
-                        *p,
-                    ));
-                }
-                (
-                    PathAnchor::Arc(arc1),
-                    PathAnchor::Arc(arc2),
-                ) => {
-                    let (sin1, cos1) = arc1.angle2.sin_cos();
-                    let (sin2, cos2) = arc2.angle1.sin_cos();
-                    edges.push(PathEdge::Line(
-                        arc1.center + Point(cos1 * arc1.radius, -sin1 * arc1.radius),
-                        arc2.center + Point(cos2 * arc2.radius, -sin2 * arc2.radius),
-                    ));
-                    edges.push(PathEdge::Arc(arc2.clone()));
-                }
             }
+            last_point = self.anchors[i].right_point();
         }
         edges
     }
