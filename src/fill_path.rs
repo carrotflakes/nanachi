@@ -14,6 +14,18 @@ enum Elm {
     RightArc {
         arc: Arc,
     },
+    LeftEllipse {
+        center: Point,
+        radius_x: f64,
+        radius_y: f64,
+        rotation: f64,
+    },
+    RightEllipse {
+        center: Point,
+        radius_x: f64,
+        radius_y: f64,
+        rotation: f64,
+    },
 }
 
 #[derive(Debug, Clone)]
@@ -74,6 +86,9 @@ fn path_edges_to_elms(es: &Vec<PathEdge>) -> Vec<ElmContainer> {
                     }
                     _ => unreachable!(),
                 }
+            }
+            PathEdge::Ellipse(ellipse) => {
+                todo!()
             }
         }
     }
@@ -159,8 +174,20 @@ impl Elm {
                     arc.center.0 * h + circle_area(arc.center, arc.radius, upper, lower, arc.center.0)
                 }
             }
+            Elm::LeftEllipse {..} => {todo!()}
+            Elm::RightEllipse {..} => {todo!()}
         }
     }
+}
+
+fn half_circle_area(center: Point, radius: f64, upper: f64, lower: f64, right: f64) -> f64 {
+    let x = (center.0 - right) / radius;
+    (
+        ((1.0 - ((upper - center.1) / radius).powi(2)).sqrt() - x).max(0.0) +
+        ((1.0 - (((upper * 2.0 + lower) / 3.0 - center.1) / radius).powi(2)).sqrt() - x).max(0.0) +
+        ((1.0 - (((upper + lower * 2.0) / 3.0 - center.1) / radius).powi(2)).sqrt() - x).max(0.0) +
+        ((1.0 - ((lower - center.1) / radius).powi(2)).sqrt() - x).max(0.0)
+    ) / 4.0 * radius * (lower - upper)
 }
 
 fn circle_area(center: Point, radius: f64, upper: f64, lower: f64, right: f64) -> f64 {
@@ -203,6 +230,42 @@ fn segment_area(p1: Point, p2: Point, upper: f64, lower: f64, right: f64) -> f64
     } else {
         0.0
     }
+}
+
+fn ellipse_area(center: Point, radius_x: f64, radius_y: f64, rotation: f64, upper: f64, lower: f64, right: f64) -> f64 {
+    let x = right - center.0;
+    let y1 = upper - center.1;
+    let y2 = lower - center.1;
+    let (sin, cos) = (-rotation).sin_cos();
+    let (x1, y1, x2, y2, x3, y3, x4, y4, x5, y5) = (
+        (x * cos - y1 * sin) / radius_x,
+        (x * sin + y1 * cos) / radius_y,
+        (x * cos - y2 * sin) / radius_x,
+        (x * sin + y2 * cos) / radius_y,
+        ((x - 100.0) * cos - y1 * sin) / radius_x,
+        ((x - 100.0) * sin + y1 * cos) / radius_y,
+        ((x - 100.0) * cos - y2 * sin) / radius_x,
+        ((x - 100.0) * sin + y2 * cos) / radius_y,
+        (x * cos - (y1 - 100.0) * sin) / radius_x,
+        (x * sin + (y1 - 100.0) * cos) / radius_y,
+    );
+    (
+        geometry::circle_2segment_area_(Point(x2, -y2), Point(x5, -y5), Point(x4, -y4)) -
+        geometry::circle_2segment_area_(Point(x1, -y1), Point(x5, -y5), Point(x3, -y3))
+    ) * radius_x * radius_y
+}
+
+#[test]
+fn test() {
+    assert_eq!(
+        ellipse_area(Point(10.0, 10.0), 3.0, 3.0, 0.0, 9.0, 10.0, 10.0),
+        circle_area(Point(10.0, 10.0), 3.0, 9.0, 10.0, 10.0)
+    );
+    assert_eq!(
+        ellipse_area(Point(10.0, 10.0), 3.0, 3.0, 0.0, 9.0, 9.5, 10.0) +
+        ellipse_area(Point(10.0, 10.0), 3.0, 3.0, 0.0, 9.5, 10.0, 10.0),
+        circle_area(Point(10.0, 10.0), 3.0, 9.0, 10.0, 10.0)
+    );
 }
 
 fn angle_norm(a1: f64, a2: f64) -> (f64, f64) {

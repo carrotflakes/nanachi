@@ -10,25 +10,39 @@ pub struct Arc {
 }
 
 #[derive(Debug, Clone)]
+pub struct Ellipse {
+    pub center: Point,
+    pub radius_x: f64,
+    pub radius_y: f64,
+    pub rotation: f64,
+    pub angle1: f64,
+    pub angle2: f64,
+}
+
+#[derive(Debug, Clone)]
 pub enum PathAnchor {
     Point(Point),
     Arc(Arc),
+    Ellipse(Ellipse),
 }
 
 impl PathAnchor {
     pub fn flip(&self) -> PathAnchor {
         match self {
             PathAnchor::Point(_) => self.clone(),
-            PathAnchor::Arc(Arc {
-                center,
-                radius,
-                angle1,
-                angle2,
-            }) => PathAnchor::Arc(Arc{
-                center: *center,
-                radius: *radius,
-                angle1: *angle2,
-                angle2: *angle1,
+            PathAnchor::Arc(arc) => PathAnchor::Arc(Arc {
+                center: arc.center,
+                radius: arc.radius,
+                angle1: arc.angle2,
+                angle2: arc.angle1,
+            }),
+            PathAnchor::Ellipse(ellipse) => PathAnchor::Ellipse(Ellipse {
+                center: ellipse.center,
+                radius_x: ellipse.radius_x,
+                radius_y: ellipse.radius_y,
+                rotation: ellipse.rotation,
+                angle1: ellipse.angle2,
+                angle2: ellipse.angle1,
             }),
         }
     }
@@ -43,6 +57,12 @@ impl PathAnchor {
                         -arc.angle2.sin() * arc.radius,
                     )
             }
+            PathAnchor::Ellipse(ellipse) => {
+                let (sin, cos) = ellipse.rotation.sin_cos();
+                let x = ellipse.angle1.min(ellipse.angle2).cos() * ellipse.radius_x;
+                let y = -ellipse.angle1.min(ellipse.angle2).sin() * ellipse.radius_y;
+                ellipse.center + Point(x * cos - y * sin, x * sin + y * cos)
+            }
         }
     }
 
@@ -55,6 +75,12 @@ impl PathAnchor {
                         arc.angle1.cos() * arc.radius,
                         -arc.angle1.sin() * arc.radius,
                     )
+            }
+            PathAnchor::Ellipse(ellipse) => {
+                let (sin, cos) = ellipse.rotation.sin_cos();
+                let x = ellipse.angle1.max(ellipse.angle2).cos() * ellipse.radius_x;
+                let y = -ellipse.angle1.max(ellipse.angle2).sin() * ellipse.radius_y;
+                ellipse.center + Point(x * cos - y * sin, x * sin + y * cos)
             }
         }
     }
@@ -70,6 +96,7 @@ pub struct Path {
 pub enum PathEdge {
     Line(Point, Point),
     Arc(Arc),
+    Ellipse(Ellipse),
 }
 
 impl Path {
@@ -89,6 +116,9 @@ impl Path {
                 PathAnchor::Point(_) => {}
                 PathAnchor::Arc(arc) => {
                     edges.push(PathEdge::Arc(arc.clone()));
+                }
+                PathAnchor::Ellipse(ellipse) => {
+                    edges.push(PathEdge::Ellipse(ellipse.clone()));
                 }
             }
             last_point = self.anchors[i].right_point();
@@ -207,6 +237,26 @@ fn edge_path_(
                 })),
             )
         }
+        PathAnchor::Ellipse(ellipse) => {
+            (
+                PathAnchor::Ellipse(Ellipse {
+                    center: ellipse.center,
+                    radius_x: ellipse.radius_x + width,
+                    radius_y: ellipse.radius_y + width,
+                    rotation: ellipse.rotation,
+                    angle1: ellipse.angle1,
+                    angle2: ellipse.angle2,
+                }),
+                (PathAnchor::Ellipse(Ellipse {
+                    center: ellipse.center,
+                    radius_x: ellipse.radius_x - width,
+                    radius_y: ellipse.radius_y - width,
+                    rotation: ellipse.rotation,
+                    angle1: ellipse.angle2,
+                    angle2: ellipse.angle1,
+                })),
+            )
+        }
     }
 }
 
@@ -243,6 +293,40 @@ fn cap(width: f64, a: &PathAnchor, p: Point) -> Vec<PathAnchor> {
                 PathAnchor::Arc(Arc {
                     center: *center,
                     radius: radius - width,
+                    angle1: *angle2,
+                    angle2: *angle1,
+                }),
+            ]
+        }
+        PathAnchor::Ellipse(Ellipse {
+            center,
+            radius_x,
+            radius_y,
+            rotation,
+            angle1,
+            angle2,
+        }) => {
+            vec![
+                PathAnchor::Ellipse(Ellipse {
+                    center: *center,
+                    radius_x: radius_x + width,
+                    radius_y: radius_y + width,
+                    rotation: *rotation,
+                    angle1: *angle1,
+                    angle2: *angle2, // fixme
+                }),
+                //TODO
+                // PathAnchor::Ellipse(Ellipse {
+                //     center: *center + Point(angle2.cos() * radius, -angle2.sin() * radius),
+                //     radius: width,
+                //     angle1: *angle2,
+                //     angle2: angle2 + PI,
+                // }), 
+                PathAnchor::Ellipse(Ellipse {
+                    center: *center,
+                    radius_x: radius_x - width,
+                    radius_y: radius_y - width,
+                    rotation: *rotation,
                     angle1: *angle2,
                     angle2: *angle1,
                 }),
