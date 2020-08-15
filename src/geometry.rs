@@ -139,6 +139,25 @@ pub fn circle_2segment_area(p: Point, p1: Point, p2: Point) -> f64 { // p1 < p2
     }
 }
 
+pub fn circle_2segment_area_(p: Point, p1: Point, p2: Point) -> f64 {
+    if p.norm() < 1.0 {
+        circle_2segment_area(p, p1, p2)
+    } else {
+        fn f(d: f64) -> f64 {
+            if d <= -1.0 {
+                std::f64::consts::PI
+            } else if 1.0 <= d {
+                0.0
+            } else {
+                d.acos() - (1.0 - d * d).sqrt() * d
+            }
+        }
+        let d1 = (p.0 * p1.1 - p.1 * p1.0) / (p.1 - p1.1).hypot(p.0 - p1.0);
+        let d2 = (p.0 * p2.1 - p.1 * p2.0) / (p.1 - p2.1).hypot(p.0 - p2.0);
+        f(d1) - f(d2)
+    }
+}
+
 pub fn tri_area2(p: Point, p1: Point, p2: Point) -> f64 {
     tri_area(p1 - p, p2 - p)
 }

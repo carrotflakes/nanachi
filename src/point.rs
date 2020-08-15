@@ -9,6 +9,18 @@ impl Point {
     pub fn lerp(self, rhs: Self, v: f64) -> Self {
         self * (1.0 - v) + rhs * v
     }
+
+    pub fn norm(self) -> f64 {
+        self.0.hypot(self.1)
+    }
+
+    pub fn rotate(self, angle: f64) -> Self {
+        let (sin, cos) = angle.sin_cos();
+        Point(
+            self.0 * cos - self.1 * sin,
+            self.0 * sin + self.1 * cos,
+        )
+    }
 }
 
 impl std::ops::Add for Point {
