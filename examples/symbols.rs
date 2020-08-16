@@ -162,9 +162,8 @@ fn main() {
     );
     println!("{:?}", time.elapsed());
 
-
     {
-        use nanachi::path2::{Path, PathAnchor, Arc};
+        use nanachi::path2::{Arc, Path, PathAnchor};
         let path = Path::new(
             vec![
                 PathAnchor::Point(Point(100.0, 200.0)),
@@ -177,6 +176,8 @@ fn main() {
                     angle1: 0.0,
                     angle2: 3.14,
                 }),
+                PathAnchor::Point(Point(180.0, 320.0)),
+                PathAnchor::Point(Point(120.0, 340.0)),
             ],
             false,
         );
@@ -197,7 +198,7 @@ fn main() {
     }
     {
         let t = std::time::Instant::now();
-        use nanachi::path2::{Path, PathAnchor, Arc};
+        use nanachi::path2::{Arc, Path, PathAnchor};
 
         // 膨らんだ四角形
         let path = Path::new(
@@ -257,7 +258,19 @@ fn main() {
             ],
             true,
         );
-        let e = path.edges();
+        let path2 = Path::new(
+            vec![
+                PathAnchor::Arc(Arc {
+                    center: Point(430.0, 430.0),
+                    radius: 25.0,
+                    angle1: PI * 2.5,
+                    angle2: PI * 1.0,
+                }),
+            ],
+            true,
+        );
+        let mut e = path.edges();
+        e.extend(path2.edges());
         println!("{:?}", path.edges());
         nanachi::fill_path::draw_fill(
             &mut img,
@@ -265,6 +278,37 @@ fn main() {
             &position_color::Constant::new(Rgb([200, 100, 250])),
         );
         println!("fill_path elapsed: {:?}", t.elapsed());
+    }
+
+    {
+        use nanachi::path2::{Ellipse, Path, PathAnchor};
+        let path = Path::new(
+            vec![
+                PathAnchor::Ellipse(Ellipse {
+                    center: Point(400.0, 100.0),
+                    radius_x: 50.0,
+                    radius_y: 80.0,
+                    rotation: PI * 0.4,
+                    angle1: PI * 0.0,
+                    angle2: PI * 1.9,
+                }),
+            ],
+            true,
+        );
+        // let se: nanachi::fill_path::SkewEllipse = Ellipse {
+        //     center: Point(430.0, 100.0),
+        //     radius_x: 50.0,
+        //     radius_y: 10.0,
+        //     rotation: 0.0,
+        //     angle1: PI * 0.,
+        //     angle2: PI * 2.0,
+        // }.into();
+        // dbg!(se);
+        nanachi::fill_path::draw_fill(
+            &mut img,
+            &path.edges(),
+            &position_color::Constant::new(Rgb([200, 200, 50])),
+        );
     }
 
     let res = img.save("./symbols.png");
