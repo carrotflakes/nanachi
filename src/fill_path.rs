@@ -238,8 +238,17 @@ impl Elm {
                 } else {
                     let upper_right = x - (upper - se.center.1) * se.dx_dy;
                     let lower_right = x - (lower - se.center.1) * se.dx_dy;
-                    ((x.min(se.center.0 + (upper - se.center.1) * se.dx_dy) + x.min(se.center.0 + (lower - se.center.1) * se.dx_dy)) / 2.0) * h
-                    + right_skewed_half_circle_area(se.center, se.radius_x, se.radius_y, upper, lower, upper_right, lower_right)
+                    let upper_x = se.center.0 + (upper - se.center.1) * se.dx_dy;
+                    let lower_x = se.center.0 + (lower - se.center.1) * se.dx_dy;
+                    match (x < upper_x, x < lower_x) {
+                        (true, true) => x * h,
+                        (false, false) => (upper_x + lower_x) / 2.0 * h + right_skewed_half_circle_area(se.center, se.radius_x, se.radius_y, upper, lower, upper_right, lower_right),
+                        (true, false) => (x - (x - lower_x).powi(2) / (upper_x - lower_x) / 2.0) * h + right_skewed_half_circle_area(se.center, se.radius_x, se.radius_y, upper, lower, upper_right, lower_right),
+                        (false, true) => (x - (x - upper_x).powi(2) / (lower_x - upper_x) / 2.0) * h + right_skewed_half_circle_area(se.center, se.radius_x, se.radius_y, upper, lower, upper_right, lower_right),
+                        //(_, _) => (upper_x + lower_x) / 2.0 * h + right_skewed_half_circle_area(se.center, se.radius_x, se.radius_y, upper, lower, upper_right, lower_right),
+                    }
+                    //((x.min(upper_x) + x.min(lower_x)) / 2.0) * h // FIXME
+                    //+ right_skewed_half_circle_area(se.center, se.radius_x, se.radius_y, upper, lower, upper_right, lower_right)
                 }
             }
         }
@@ -258,8 +267,8 @@ fn half_circle_area(center: Point, radius: f64, upper: f64, lower: f64, right: f
 
 fn skewed_half_circle_area(center: Point, radius_x: f64, radius_y: f64, upper: f64, lower: f64, upper_right: f64, lower_right: f64) -> f64 {
     radius_y * radius_x * skewed_half_unit_circle_area(
-        (upper - center.1) / radius_y,
-        (lower - center.1) / radius_y,
+        ((upper - center.1) / radius_y).max(-1.0),
+        ((lower - center.1) / radius_y).min(1.0),
         (upper_right - center.0) / radius_x,
         (lower_right - center.0) / radius_x,
     )
@@ -297,8 +306,8 @@ fn skewed_half_unit_circle_area(upper: f64, lower: f64, upper_right: f64, lower_
 
 fn right_skewed_half_circle_area(center: Point, radius_x: f64, radius_y: f64, upper: f64, lower: f64, upper_right: f64, lower_right: f64) -> f64 {
     radius_y * radius_x * right_skewed_half_unit_circle_area(
-        (upper - center.1) / radius_y,
-        (lower - center.1) / radius_y,
+        ((upper - center.1) / radius_y).max(-1.0),
+        ((lower - center.1) / radius_y).min(1.0),
         (upper_right - center.0) / radius_x,
         (lower_right - center.0) / radius_x,
     )
@@ -313,7 +322,13 @@ fn right_skewed_half_unit_circle_area(upper: f64, lower: f64, upper_right: f64, 
     let lower_x = (1.0 - lower.powi(2)).sqrt();
     match (upper_right < upper_x, lower_right < lower_x) {
         (true, true) => {
-            (upper_right + lower_right).max(0.0) * (lower - upper) / 2.0
+            //(upper_right + lower_right).max(0.0) * (lower - upper) / 2.0
+            (upper_right + lower_right) * (lower - upper) / 2.0 + match (0. <= upper_right, 0. <= lower_right) {
+                (true, true) => 0.0,
+                (false, false) => unreachable!(),
+                (true, false) => (lower_right).powi(2) / (upper_right - lower_right) / 2.0 * (lower - upper),
+                (false, true) => (upper_right).powi(2) / (lower_right - upper_right) / 2.0 * (lower - upper),
+            }
         }
         (false, false) => {
             let d = (lower_right * upper - lower * upper_right).abs() / (lower - upper).hypot(lower_right - upper_right);
