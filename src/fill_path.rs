@@ -1,9 +1,18 @@
 use crate::geometry;
-use crate::path2::{PathEdge, Arc};
+use crate::path2::{PathEdge, Arc, Ellipse};
 use crate::point::Point;
 use crate::position_color::PositionColor;
 use image::{ImageBuffer, Pixel};
 use std::f64::consts::{FRAC_PI_2, PI};
+
+#[derive(Debug, Clone)]
+pub struct SkewEllipse {
+    center: Point,
+    radius_x: f64,
+    radius_y: f64,
+    dx_dy: f64,
+    half_width: f64,
+}
 
 #[derive(Debug, Clone)]
 enum Elm {
@@ -14,18 +23,8 @@ enum Elm {
     RightArc {
         arc: Arc,
     },
-    LeftEllipse {
-        center: Point,
-        radius_x: f64,
-        radius_y: f64,
-        rotation: f64,
-    },
-    RightEllipse {
-        center: Point,
-        radius_x: f64,
-        radius_y: f64,
-        rotation: f64,
-    },
+    LeftEllipse(SkewEllipse),
+    RightEllipse(SkewEllipse),
 }
 
 #[derive(Debug, Clone)]
@@ -88,7 +87,53 @@ fn path_edges_to_elms(es: &Vec<PathEdge>) -> Vec<ElmContainer> {
                 }
             }
             PathEdge::Ellipse(ellipse) => {
-                todo!()
+                fn left_ellipse(ellipse: &Ellipse, upper: f64, lower: f64) -> ElmContainer {
+                    ElmContainer {
+                        bound: (upper, lower),
+                        elm: Elm::LeftEllipse(ellipse.clone().into()),
+                        signum: (ellipse.angle1 - ellipse.angle2).signum()
+                    }
+                }
+                fn right_ellipse(ellipse: &Ellipse, upper: f64, lower: f64) -> ElmContainer {
+                    ElmContainer {
+                        bound: (upper, lower),
+                        elm: Elm::RightEllipse(ellipse.clone().into()),
+                        signum: (ellipse.angle2 - ellipse.angle1).signum()
+                    }
+                }
+                let bound = ellipse.bound();
+                let (a1, a2) = angle_norm(ellipse.angle1, ellipse.angle2);
+                // let aa = (ellipse.rotation.tan() * ellipse.radius_x / ellipse.radius_y).atan();
+                let aa = ellipse.angle_offset() - FRAC_PI_2;
+                dbg!(&aa);
+                dbg!((((a1 - aa) / FRAC_PI_2), ((a2 - aa) / FRAC_PI_2)));
+                match ((((a1 - aa) / FRAC_PI_2) as usize + 1) / 2, (((a2 - aa) / FRAC_PI_2) as usize + 1) / 2) {
+                    (0, 0) | (2, 2) => {
+                        elms.push(right_ellipse(ellipse, ellipse.pos(-a2).1, ellipse.pos(-a1).1));
+                    }
+                    (0, 1) | (2, 3) => {
+                        elms.push(left_ellipse(ellipse, bound.2, ellipse.pos(-a2).1));
+                        elms.push(right_ellipse(ellipse, bound.2, ellipse.pos(-a1).1));
+                    }
+                    (0, 2) | (2, 4) => {
+                        elms.push(left_ellipse(ellipse, bound.2, bound.3));
+                        elms.push(right_ellipse(ellipse, bound.2, ellipse.pos(-a1).1));
+                        elms.push(right_ellipse(ellipse, ellipse.pos(-a2).1, bound.3));
+                    }
+                    (1, 1) => {
+                        elms.push(left_ellipse(ellipse, ellipse.pos(-a1).1, ellipse.pos(-a2).1));
+                    }
+                    (1, 2) => {
+                        elms.push(left_ellipse(ellipse, ellipse.pos(-a1).1, bound.3));
+                        elms.push(right_ellipse(ellipse, ellipse.pos(-a2).1, bound.3));
+                    }
+                    (1, 3) => {
+                        elms.push(left_ellipse(ellipse, bound.2, ellipse.pos(-a2).1));
+                        elms.push(left_ellipse(ellipse, ellipse.pos(-a1).1, bound.3));
+                        elms.push(right_ellipse(ellipse, bound.2, bound.3));
+                    }
+                    _ => unreachable!(),
+                }
             }
         }
     }
@@ -123,6 +168,7 @@ pub fn draw_fill<X, C: PositionColor<X>>(
     X: Pixel<Subpixel = u8> + 'static,
 {
     let ecs = path_edges_to_elms(edges);
+    dbg!(&ecs);
     for y in 0..img.height() as i32 {
         let mut acc = 0.0;
         for x in 0..img.width() as i32 {
@@ -174,8 +220,28 @@ impl Elm {
                     arc.center.0 * h + circle_area(arc.center, arc.radius, upper, lower, arc.center.0)
                 }
             }
-            Elm::LeftEllipse {..} => {todo!()}
-            Elm::RightEllipse {..} => {todo!()}
+            Elm::LeftEllipse(se) => {
+                let h = lower - upper;
+                if x < se.center.0 - se.half_width {
+                    x * h
+                } else {
+                    let upper_right = x - (upper - se.center.1) * se.dx_dy;
+                    let lower_right = x - (lower - se.center.1) * se.dx_dy;
+                    //(lower_right + upper_right) / 2.0
+                    x * h - skewed_half_circle_area(se.center, se.radius_x, se.radius_y, upper, lower, upper_right, lower_right)
+                }
+            }
+            Elm::RightEllipse(se) => {
+                let h = lower - upper;
+                if x < se.center.0 - se.half_width {
+                    x * h
+                } else {
+                    let upper_right = x - (upper - se.center.1) * se.dx_dy;
+                    let lower_right = x - (lower - se.center.1) * se.dx_dy;
+                    ((x.min(se.center.0 + (upper - se.center.1) * se.dx_dy) + x.min(se.center.0 + (lower - se.center.1) * se.dx_dy)) / 2.0) * h
+                    + right_skewed_half_circle_area(se.center, se.radius_x, se.radius_y, upper, lower, upper_right, lower_right)
+                }
+            }
         }
     }
 }
@@ -188,6 +254,93 @@ fn half_circle_area(center: Point, radius: f64, upper: f64, lower: f64, right: f
         ((1.0 - (((upper + lower * 2.0) / 3.0 - center.1) / radius).powi(2)).sqrt() - x).max(0.0) +
         ((1.0 - ((lower - center.1) / radius).powi(2)).sqrt() - x).max(0.0)
     ) / 4.0 * radius * (lower - upper)
+}
+
+fn skewed_half_circle_area(center: Point, radius_x: f64, radius_y: f64, upper: f64, lower: f64, upper_right: f64, lower_right: f64) -> f64 {
+    radius_y * radius_x * skewed_half_unit_circle_area(
+        (upper - center.1) / radius_y,
+        (lower - center.1) / radius_y,
+        (upper_right - center.0) / radius_x,
+        (lower_right - center.0) / radius_x,
+    )
+}
+
+fn skewed_half_unit_circle_area(upper: f64, lower: f64, upper_right: f64, lower_right: f64) -> f64 {
+    let upper_x = -(1.0 - upper.powi(2)).sqrt();
+    let lower_x = -(1.0 - lower.powi(2)).sqrt();
+    match (upper_x < upper_right, lower_x < lower_right) {
+        (true, true) => {
+            let d = (lower_x * upper - lower * upper_x).abs() / (lower - upper).hypot(lower_x - upper_x);
+            let s1 = d.acos() - (1.0 - d * d).sqrt() * d;
+            (s1 + ((upper_right - upper_x) + (lower_right - lower_x)) * (lower - upper) / 2.0).max(0.0)
+        }
+        (false, false) => {
+            let d = (lower_right * upper - lower * upper_right).abs() / (lower - upper).hypot(lower_right - upper_right);
+            if d < 1.0 {
+                d.acos() - (1.0 - d * d).sqrt() * d
+            } else {
+                0.0
+            };0.
+        }
+        (true, false) => geometry::circle_2segment_area(
+            Point(upper_right, upper),
+            Point(lower_right, lower), // p1とp2逆じゃないの？
+            Point(upper_x, upper),
+        ),
+        (false, true) => geometry::circle_2segment_area(
+            Point(lower_right, lower),
+            Point(lower_x, lower), // p1とp2逆じゃないの？
+            Point(upper_right, upper),
+        ),
+    }
+}
+
+fn right_skewed_half_circle_area(center: Point, radius_x: f64, radius_y: f64, upper: f64, lower: f64, upper_right: f64, lower_right: f64) -> f64 {
+    radius_y * radius_x * right_skewed_half_unit_circle_area(
+        (upper - center.1) / radius_y,
+        (lower - center.1) / radius_y,
+        (upper_right - center.0) / radius_x,
+        (lower_right - center.0) / radius_x,
+    )
+}
+
+
+fn right_skewed_half_unit_circle_area(upper: f64, lower: f64, upper_right: f64, lower_right: f64) -> f64 {
+    fn f(d: f64) -> f64 {
+        d.acos() - (1.0 - d * d).sqrt() * d
+    }
+    let upper_x = (1.0 - upper.powi(2)).sqrt();
+    let lower_x = (1.0 - lower.powi(2)).sqrt();
+    match (upper_right < upper_x, lower_right < lower_x) {
+        (true, true) => {
+            (upper_right + lower_right).max(0.0) * (lower - upper) / 2.0
+        }
+        (false, false) => {
+            let d = (lower_right * upper - lower * upper_right).abs() / (lower - upper).hypot(lower_right - upper_right);
+            if d < 1.0 {
+                d.acos() - (1.0 - d * d).sqrt() * d
+            } else {
+                0.0
+            };
+            (f(upper) - f(lower)) / 2.0
+        }
+        (true, false) => {
+            (f(upper) - f(lower)) / 2.0 -
+            geometry::circle_2segment_area_(
+                Point(upper_right, upper),
+                Point(upper_x, upper), // p1とp2逆じゃないの？
+                Point(lower_right, lower),
+            )
+        },
+        (false, true) => {
+            (f(upper) - f(lower)) / 2.0 -
+            geometry::circle_2segment_area_(
+                Point(lower_right, lower),
+                Point(upper_right, upper), // p1とp2逆じゃないの？
+                Point(lower_x, lower),
+            )
+        },
+    }
 }
 
 fn circle_area(center: Point, radius: f64, upper: f64, lower: f64, right: f64) -> f64 {
@@ -258,6 +411,22 @@ fn ellipse_area(center: Point, radius_x: f64, radius_y: f64, rotation: f64, uppe
 #[test]
 fn test() {
     assert_eq!(
+        skewed_half_unit_circle_area(-1.0, -0.9, -0.9, -0.9),
+        0.0,
+    );
+    assert_eq!(
+        skewed_half_unit_circle_area(-1.0, 1.0, 0.0, 0.0),
+        FRAC_PI_2,
+    );
+    assert_eq!(
+        skewed_half_unit_circle_area(-1.0, 0.0, 0.0, 0.0),
+        FRAC_PI_2 / 2.0,
+    );
+    assert_eq!(
+        skewed_half_unit_circle_area(0.0, 1.0, 0.0, 0.0),
+        FRAC_PI_2 / 2.0,
+    );
+    assert_eq!(
         ellipse_area(Point(10.0, 10.0), 3.0, 3.0, 0.0, 9.0, 10.0, 10.0),
         circle_area(Point(10.0, 10.0), 3.0, 9.0, 10.0, 10.0)
     );
@@ -271,7 +440,7 @@ fn test() {
 fn angle_norm(a1: f64, a2: f64) -> (f64, f64) {
     let (a1, a2) = if a1 < a2 { (a1, a2) } else { (a2, a1) };
     let a = a1.rem_euclid(PI * 2.0);
-    (a, (a2 - a).rem_euclid(PI * 2.0) + a)
+    (a, if a2 - a < 0.0 { a2 + PI * 2.0 } else { a2 })
 }
 
 pub fn img_blend_pixel<X, C: PositionColor<X>>(
@@ -296,4 +465,29 @@ where
     X: Pixel<Subpixel = u8> + 'static,
 {
     p1.map2(&p2, |a, b| (a as f64 * (1.0 - r) + b as f64 * r).round() as u8)
+}
+
+impl Into<SkewEllipse> for Ellipse {
+    fn into(self) -> SkewEllipse {
+        // let radius_x = (self.radius_x * self.rotation.cos()).hypot(self.radius_y * (self.rotation + FRAC_PI_2).cos());
+        // let rr = (self.radius_y / self.radius_x * (-self.rotation).tan()).atan() + FRAC_PI_2;
+        // let radius_y = self.radius_y * rr.sin() * self.rotation.cos() + self.radius_x * rr.cos() * self.rotation.sin();
+        let radius_y = (self.radius_x * self.rotation.sin()).hypot(self.radius_y * (self.rotation + FRAC_PI_2).sin());
+        let rr = (self.radius_x / self.radius_y * (-self.rotation).tan()).atan();
+        let radius_x = self.radius_x * rr.cos() * self.rotation.cos() - self.radius_y * rr.sin() * self.rotation.sin();
+        let half_width = (self.radius_x * self.rotation.cos()).hypot(self.radius_y * (self.rotation + FRAC_PI_2).cos());
+        
+let aa = -(self.radius_y / self.radius_x * (self.rotation + FRAC_PI_2).tan()).atan();
+let x = aa.cos() * self.radius_x;
+let y = aa.sin() * self.radius_y;
+let (sin, cos) = self.rotation.sin_cos();
+        let dx_dy = (x * cos - y * sin) / (x * sin + y * cos);
+        SkewEllipse{
+            center: self.center,
+            radius_x,
+            radius_y,
+            dx_dy,
+            half_width,
+        }
+    }
 }
