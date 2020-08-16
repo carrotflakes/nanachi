@@ -19,6 +19,22 @@ pub struct Ellipse {
     pub angle2: f64,
 }
 
+impl Ellipse {
+    pub fn bound(&self) -> (f64, f64, f64, f64) {
+        let ux = self.radius_x * self.rotation.cos();
+        let uy = self.radius_x * self.rotation.sin();
+        let vx = self.radius_y * (self.rotation + FRAC_PI_2).cos();
+        let vy = self.radius_y * (self.rotation + FRAC_PI_2).sin();
+        let dx = ux.hypot(vx);
+        let dy = uy.hypot(vy);
+        (self.center.0 - dx, self.center.0 + dy, self.center.1 - dy, self.center.1 + dy)
+    }
+
+    pub fn pos(&self, angle: f64) -> Point {
+        self.center + Point(self.radius_x * angle.cos(), self.radius_y * angle.sin()).rotate(self.rotation)
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum PathAnchor {
     Point(Point),
