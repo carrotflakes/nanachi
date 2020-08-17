@@ -26,10 +26,12 @@ fn main() {
         );
         let paths = path.edge_path(0.5);
 
+        let pc = position_color::Constant::new(Rgb([40, 40, 250]));
         nanachi::fill_path::draw_fill(
-            &mut img,
+            img.width() as u32,
+            img.height() as u32,
             &paths.iter().flat_map(|p| p.edges()).collect(),
-            &position_color::Constant::new(Rgb([40, 40, 250])),
+            &mut nanachi::writer::alpha_blend(&mut img, &pc),
         );
 
         let x = -100.5;
@@ -47,10 +49,13 @@ fn main() {
             false,
         );
         let paths = path.edge_path(1.0);
+
+        let pc = position_color::Constant::new(Rgb([40, 40, 250]));
         nanachi::fill_path::draw_fill(
-            &mut img,
+            img.width() as u32,
+            img.height() as u32,
             &paths.iter().flat_map(|p| p.edges()).collect(),
-            &position_color::Constant::new(Rgb([40, 40, 250])),
+            &mut nanachi::writer::alpha_blend(&mut img, &pc),
         );
 
         let x = -100.5;
@@ -68,10 +73,13 @@ fn main() {
             false,
         );
         let paths = path.edge_path(1.5);
+
+        let pc = position_color::Constant::new(Rgb([40, 40, 250]));
         nanachi::fill_path::draw_fill(
-            &mut img,
+            img.width() as u32,
+            img.height() as u32,
             &paths.iter().flat_map(|p| p.edges()).collect(),
-            &position_color::Constant::new(Rgb([40, 40, 250])),
+            &mut nanachi::writer::alpha_blend(&mut img, &pc),
         );
 
         let x = 100.0;
@@ -89,10 +97,13 @@ fn main() {
             false,
         );
         let paths = path.edge_path(0.5);
+
+        let pc = position_color::Constant::new(Rgb([40, 40, 250]));
         nanachi::fill_path::draw_fill(
-            &mut img,
+            img.width() as u32,
+            img.height() as u32,
             &paths.iter().flat_map(|p| p.edges()).collect(),
-            &position_color::Constant::new(Rgb([40, 40, 250])),
+            &mut nanachi::writer::alpha_blend(&mut img, &pc),
         );
 
         let x = 100.0;
@@ -110,10 +121,13 @@ fn main() {
             false,
         );
         let paths = path.edge_path(1.0);
+
+        let pc = position_color::Constant::new(Rgb([40, 40, 250]));
         nanachi::fill_path::draw_fill(
-            &mut img,
+            img.width() as u32,
+            img.height() as u32,
             &paths.iter().flat_map(|p| p.edges()).collect(),
-            &position_color::Constant::new(Rgb([40, 40, 250])),
+            &mut nanachi::writer::alpha_blend(&mut img, &pc),
         );
 
         let x = 100.0;
@@ -131,10 +145,13 @@ fn main() {
             false,
         );
         let paths = path.edge_path(6.5);
+
+        let pc = position_color::Constant::new(Rgb([40, 40, 250]));
         nanachi::fill_path::draw_fill(
-            &mut img,
+            img.width() as u32,
+            img.height() as u32,
             &paths.iter().flat_map(|p| p.edges()).collect(),
-            &position_color::Constant::new(Rgb([40, 40, 250])),
+            &mut nanachi::writer::alpha_blend(&mut img, &pc),
         );
     }
 

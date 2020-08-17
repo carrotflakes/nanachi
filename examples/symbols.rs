@@ -7,6 +7,7 @@ use nanachi::{
     path::Path,
     point::Point,
     position_color, primitives,
+    models::{Arc, Ellipse},
 };
 use std::f64::consts::PI;
 
@@ -163,7 +164,7 @@ fn main() {
     println!("{:?}", time.elapsed());
 
     {
-        use nanachi::path2::{Arc, Path, PathAnchor};
+        use nanachi::path2::{Path, PathAnchor};
         let path = Path::new(
             vec![
                 PathAnchor::Point(Point(100.0, 200.0)),
@@ -187,7 +188,7 @@ fn main() {
             "!!!{:?}",
             paths.iter().flat_map(|p| p.edges()).collect::<Vec<_>>()
         );
-        nanachi::fill_path::draw_fill(
+        draw_fill(
             &mut img,
             &paths.iter().flat_map(|p| p.edges()).collect(),
             &position_color::Constant::new(Rgb([200, 100, 250])),
@@ -198,7 +199,7 @@ fn main() {
     }
     {
         let t = std::time::Instant::now();
-        use nanachi::path2::{Arc, Path, PathAnchor};
+        use nanachi::path2::{Path, PathAnchor};
 
         // 膨らんだ四角形
         let path = Path::new(
@@ -219,7 +220,7 @@ fn main() {
             true,
         );
 
-        nanachi::fill_path::draw_fill(
+        draw_fill(
             &mut img,
             &path.edges(),
             &position_color::Constant::new(Rgb([200, 100, 20])),
@@ -239,7 +240,7 @@ fn main() {
             true,
         );
 
-        nanachi::fill_path::draw_fill(
+        draw_fill(
             &mut img,
             &path.edges(),
             &position_color::Constant::new(Rgb([100, 200, 20])),
@@ -272,7 +273,7 @@ fn main() {
         let mut e = path.edges();
         e.extend(path2.edges());
         println!("{:?}", path.edges());
-        nanachi::fill_path::draw_fill(
+        draw_fill(
             &mut img,
             &e,
             &position_color::Constant::new(Rgb([200, 100, 250])),
@@ -281,16 +282,16 @@ fn main() {
     }
 
     {
-        use nanachi::path2::{Ellipse, Path, PathAnchor};
+        use nanachi::path2::{Path, PathAnchor};
         let path = Path::new(
             vec![
                 PathAnchor::Ellipse(Ellipse {
                     center: Point(400.0, 100.0),
-                    radius_x: 50.0,
+                    radius_x: 10.0,
                     radius_y: 80.0,
-                    rotation: PI * 0.4,
-                    angle1: PI * 0.0,
-                    angle2: PI * 1.9,
+                    rotation: PI * 0.2,
+                    angle1: PI * 0.6,
+                    angle2: PI * 1.3,
                 }),
             ],
             true,
@@ -304,7 +305,7 @@ fn main() {
         //     angle2: PI * 2.0,
         // }.into();
         // dbg!(se);
-        nanachi::fill_path::draw_fill(
+        draw_fill(
             &mut img,
             &path.edges(),
             &position_color::Constant::new(Rgb([200, 200, 50])),
@@ -313,4 +314,19 @@ fn main() {
 
     let res = img.save("./symbols.png");
     println!("save: {:?}", res);
+}
+
+fn draw_fill<X, C: nanachi::position_color::PositionColor<X>>(
+    img: &mut ImageBuffer<X, Vec<u8>>,
+    edges: &Vec<nanachi::path2::PathEdge>,
+    position_color: &C,
+) where
+    X: image::Pixel<Subpixel = u8> + 'static,
+{
+    nanachi::fill_path::draw_fill(
+        img.width() as u32,
+        img.height() as u32,
+        edges,
+        &mut nanachi::writer::alpha_blend(img, position_color),
+    );
 }

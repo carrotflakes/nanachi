@@ -1,5 +1,6 @@
 use crate::geometry;
-use crate::path2::{PathEdge, Arc, Ellipse};
+use crate::models::{Arc, Ellipse};
+use crate::path2::PathEdge;
 use crate::point::Point;
 use crate::position_color::PositionColor;
 use image::{ImageBuffer, Pixel};
@@ -140,7 +141,7 @@ fn path_edges_to_elms(es: &Vec<PathEdge>) -> Vec<ElmContainer> {
     elms.into_iter().filter(|e| e.bound.0 < e.bound.1).collect()
 }
 
-pub fn draw_fill2<F: FnMut(u32, u32, f64)>(
+pub fn draw_fill<F: FnMut(u32, u32, f64)>(
     width: u32,
     height: u32,
     edges: &Vec<PathEdge>,
@@ -156,30 +157,6 @@ pub fn draw_fill2<F: FnMut(u32, u32, f64)>(
             let v = a - acc;
             acc = a;
             writer(x as u32, y as u32, v);
-        }
-    }
-}
-
-pub fn draw_fill<X, C: PositionColor<X>>(
-    img: &mut ImageBuffer<X, Vec<u8>>,
-    edges: &Vec<PathEdge>,
-    position_color: &C,
-) where
-    X: Pixel<Subpixel = u8> + 'static,
-{
-    let ecs = path_edges_to_elms(edges);
-    dbg!(&ecs);
-    for y in 0..img.height() as i32 {
-        let mut acc = 0.0;
-        for x in 0..img.width() as i32 {
-            let mut a = 0.0;
-            for e in ecs.iter() {
-                a += e.area(y as f64, (y + 1) as f64, (x + 1) as f64);
-            }
-            let r = a - acc;
-            acc = a;
-            img_blend_pixel(img, position_color, x, y, r);//.min(1.0).max(0.0)
-            //img_blend_pixel(img, position_color, x as i32, y as i32, r.min(1.0).max(0.0));
         }
     }
 }
@@ -456,30 +433,6 @@ fn angle_norm(a1: f64, a2: f64) -> (f64, f64) {
     let (a1, a2) = if a1 < a2 { (a1, a2) } else { (a2, a1) };
     let a = a1.rem_euclid(PI * 2.0);
     (a, if a2 - a < 0.0 { a2 + PI * 2.0 } else { a2 })
-}
-
-pub fn img_blend_pixel<X, C: PositionColor<X>>(
-    buf: &mut ImageBuffer<X, Vec<u8>>,
-    position_color: &C,
-    x: i32,
-    y: i32,
-    r: f64,
-) where
-    X: Pixel<Subpixel = u8> + 'static,
-{
-    if 0 <= x && x < buf.width() as i32 && 0 <= y && y < buf.height() as i32 {
-        let pixel = position_color.position_color((x, y).into());
-        let (x, y) = (x as u32, y as u32);
-        let pixel = blend_pixel(*buf.get_pixel(x, y), pixel, r);
-        buf.put_pixel(x, y, pixel);
-    }
-}
-
-pub fn blend_pixel<X>(p1: X, p2: X, r: f64) -> X
-where
-    X: Pixel<Subpixel = u8> + 'static,
-{
-    p1.map2(&p2, |a, b| (a as f64 * (1.0 - r) + b as f64 * r).round() as u8)
 }
 
 impl Into<SkewEllipse> for Ellipse {

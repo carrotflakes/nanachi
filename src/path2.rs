@@ -1,39 +1,6 @@
 use crate::point::Point;
+use crate::models::{Arc, Ellipse};
 use std::f64::consts::{FRAC_PI_2, PI};
-
-#[derive(Debug, Clone)]
-pub struct Arc {
-    pub center: Point,
-    pub radius: f64,
-    pub angle1: f64,
-    pub angle2: f64,
-}
-
-#[derive(Debug, Clone)]
-pub struct Ellipse {
-    pub center: Point,
-    pub radius_x: f64,
-    pub radius_y: f64,
-    pub rotation: f64,
-    pub angle1: f64,
-    pub angle2: f64,
-}
-
-impl Ellipse {
-    pub fn bound(&self) -> (f64, f64, f64, f64) {
-        let ux = self.radius_x * self.rotation.cos();
-        let uy = self.radius_x * self.rotation.sin();
-        let vx = self.radius_y * (self.rotation + FRAC_PI_2).cos();
-        let vy = self.radius_y * (self.rotation + FRAC_PI_2).sin();
-        let dx = ux.hypot(vx);
-        let dy = uy.hypot(vy);
-        (self.center.0 - dx, self.center.0 + dy, self.center.1 - dy, self.center.1 + dy)
-    }
-
-    pub fn pos(&self, angle: f64) -> Point {
-        self.center + Point(self.radius_x * angle.cos(), self.radius_y * angle.sin()).rotate(self.rotation)
-    }
-}
 
 #[derive(Debug, Clone)]
 pub enum PathAnchor {
@@ -75,8 +42,8 @@ impl PathAnchor {
             }
             PathAnchor::Ellipse(ellipse) => {
                 let (sin, cos) = ellipse.rotation.sin_cos();
-                let x = ellipse.angle1.min(ellipse.angle2).cos() * ellipse.radius_x;
-                let y = -ellipse.angle1.min(ellipse.angle2).sin() * ellipse.radius_y;
+                let x = ellipse.angle2.cos() * ellipse.radius_x;
+                let y = -ellipse.angle2.sin() * ellipse.radius_y;
                 ellipse.center + Point(x * cos - y * sin, x * sin + y * cos)
             }
         }
@@ -94,8 +61,8 @@ impl PathAnchor {
             }
             PathAnchor::Ellipse(ellipse) => {
                 let (sin, cos) = ellipse.rotation.sin_cos();
-                let x = ellipse.angle1.max(ellipse.angle2).cos() * ellipse.radius_x;
-                let y = -ellipse.angle1.max(ellipse.angle2).sin() * ellipse.radius_y;
+                let x = ellipse.angle1.cos() * ellipse.radius_x;
+                let y = -ellipse.angle1.sin() * ellipse.radius_y;
                 ellipse.center + Point(x * cos - y * sin, x * sin + y * cos)
             }
         }
