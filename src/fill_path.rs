@@ -2,6 +2,7 @@ use crate::geometry;
 use crate::models::{Arc, Ellipse};
 use crate::path2::PathEdge;
 use crate::point::Point;
+use crate::bezier_area::QuadPart;
 use crate::position_color::PositionColor;
 use image::{ImageBuffer, Pixel};
 use std::f64::consts::{FRAC_PI_2, PI};
@@ -26,6 +27,7 @@ enum Elm {
     },
     LeftEllipse(SkewEllipse),
     RightEllipse(SkewEllipse),
+    Quad(QuadPart, f64, f64),
 }
 
 #[derive(Debug, Clone)]
@@ -136,6 +138,19 @@ fn path_edges_to_elms(es: &Vec<PathEdge>) -> Vec<ElmContainer> {
                     _ => unreachable!(),
                 }
             }
+            PathEdge::Quad(quad) => {
+                elms.extend(crate::bezier_area::separate_quad(quad).into_iter().map(|q| {
+                    dbg!(&q);
+                    //dbg!(crate::bezier_area::QuadPart::from_quad(&q).area(10.0, 30.0, 10.0));
+                    let bound = q.bound();
+                    dbg!(bound);
+                    ElmContainer {
+                        bound: (bound.2, bound.3),
+                        elm: Elm::Quad(crate::bezier_area::QuadPart::from_quad(&q), bound.0, bound.1),
+                        signum: (q.start.1 - q.end.1).signum(),
+                    }
+                }));
+            }
         }
     }
     elms.into_iter().filter(|e| e.bound.0 < e.bound.1).collect()
@@ -226,6 +241,13 @@ impl Elm {
                     }
                     //((x.min(upper_x) + x.min(lower_x)) / 2.0) * h // FIXME
                     //+ right_skewed_half_circle_area(se.center, se.radius_x, se.radius_y, upper, lower, upper_right, lower_right)
+                }
+            }
+            Elm::Quad(q, x1, x2) => {
+                if x <= *x1 {
+                    (lower - upper) * x
+                } else {
+                    q.area(upper, lower, x.min(*x2))
                 }
             }
         }

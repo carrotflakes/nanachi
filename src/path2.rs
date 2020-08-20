@@ -1,5 +1,5 @@
 use crate::point::Point;
-use crate::models::{Arc, Ellipse};
+use crate::models::{Arc, Ellipse, Quad};
 use std::f64::consts::{FRAC_PI_2, PI};
 
 #[derive(Debug, Clone)]
@@ -7,6 +7,7 @@ pub enum PathAnchor {
     Point(Point),
     Arc(Arc),
     Ellipse(Ellipse),
+    Quad(Quad),
 }
 
 impl PathAnchor {
@@ -27,6 +28,11 @@ impl PathAnchor {
                 angle1: ellipse.angle2,
                 angle2: ellipse.angle1,
             }),
+            PathAnchor::Quad(quad) => PathAnchor::Quad(Quad{
+                start: quad.end.clone(),
+                end: quad.start.clone(),
+                control1: quad.control1.clone(),
+            })
         }
     }
 
@@ -45,6 +51,9 @@ impl PathAnchor {
                 let x = ellipse.angle2.cos() * ellipse.radius_x;
                 let y = -ellipse.angle2.sin() * ellipse.radius_y;
                 ellipse.center + Point(x * cos - y * sin, x * sin + y * cos)
+            }
+            PathAnchor::Quad(quad) => {
+                quad.end
             }
         }
     }
@@ -65,6 +74,9 @@ impl PathAnchor {
                 let y = -ellipse.angle1.sin() * ellipse.radius_y;
                 ellipse.center + Point(x * cos - y * sin, x * sin + y * cos)
             }
+            PathAnchor::Quad(quad) => {
+                quad.start
+            }
         }
     }
 }
@@ -80,6 +92,7 @@ pub enum PathEdge {
     Line(Point, Point),
     Arc(Arc),
     Ellipse(Ellipse),
+    Quad(Quad),
 }
 
 impl Path {
@@ -102,6 +115,9 @@ impl Path {
                 }
                 PathAnchor::Ellipse(ellipse) => {
                     edges.push(PathEdge::Ellipse(ellipse.clone()));
+                }
+                PathAnchor::Quad(quad) => {
+                    edges.push(PathEdge::Quad(quad.clone()));
                 }
             }
             last_point = self.anchors[i].right_point();
@@ -240,6 +256,28 @@ fn edge_path_(
                 })),
             )
         }
+        PathAnchor::Quad(quad) => {
+            let dp = |p: Point| {
+                let a1 = (left.1 - p.1).atan2(p.0 - left.0);
+                let a2 = (right.1 - p.1).atan2(p.0 - right.0);
+                let a = (a2 + a1) / 2.0;
+                let aa = ((a2 - a1 + PI) / 2.0).abs();
+                let r = width / aa.cos();
+                Point(a.cos() * r, -a.sin() * r)
+            };
+            (
+                PathAnchor::Quad(Quad {
+                    start: quad.start + dp(quad.start),
+                    end: quad.end + dp(quad.end),
+                    control1: quad.control1 + dp(quad.control1),
+                }),
+                PathAnchor::Quad(Quad {
+                    start: quad.end - dp(quad.end),
+                    end: quad.start - dp(quad.start),
+                    control1: quad.control1 - dp(quad.control1),
+                }),
+            )
+        }
     }
 }
 
@@ -312,6 +350,27 @@ fn cap(width: f64, a: &PathAnchor, p: Point) -> Vec<PathAnchor> {
                     rotation: *rotation,
                     angle1: *angle2,
                     angle2: *angle1,
+                }),
+            ]
+        }
+        PathAnchor::Quad(quad) => {
+            vec![
+                PathAnchor::Quad(Quad {
+                    start: quad.start.clone(),
+                    end: quad.end.clone(),
+                    control1: quad.control1.clone(),
+                }),
+                //TODO
+                // PathAnchor::Quad(Quad {
+                //     center: *center + Point(angle2.cos() * radius, -angle2.sin() * radius),
+                //     radius: width,
+                //     angle1: *angle2,
+                //     angle2: angle2 + PI,
+                // }), 
+                PathAnchor::Quad(Quad {
+                    start: quad.end.clone(),
+                    end: quad.start.clone(),
+                    control1: quad.control1.clone(),
                 }),
             ]
         }

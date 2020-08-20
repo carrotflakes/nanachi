@@ -7,7 +7,7 @@ use nanachi::{
     path::Path,
     point::Point,
     position_color, primitives,
-    models::{Arc, Ellipse},
+    models::{Arc, Ellipse, Quad},
 };
 use std::f64::consts::PI;
 
@@ -309,6 +309,36 @@ fn main() {
             &mut img,
             &path.edges(),
             &position_color::Constant::new(Rgb([200, 200, 50])),
+        );
+    }
+
+    {
+        use nanachi::path2::{Path, PathAnchor};
+        let path = Path::new(
+            vec![
+                PathAnchor::Quad(Quad {
+                    start: Point(300.0, 60.0),
+                    end: Point(250.0, 10.0),
+                    control1: Point(300.0, 10.0),
+                }),
+                PathAnchor::Quad(Quad {
+                    start: Point(250.0, 10.0),
+                    end: Point(220.0, 50.0),
+                    control1: Point(200.0, 10.0),
+                }),
+                PathAnchor::Quad(Quad {
+                    start: Point(220.0, 50.0),
+                    end: Point(300.0, 60.0),
+                    control1: Point(260.0, 80.0),
+                }),
+            ],
+            true,
+        );
+
+        draw_fill(
+            &mut img,
+            &path.edges(),
+            &position_color::Constant::new(Rgb([50, 250, 10])),
         );
     }
 
