@@ -183,6 +183,9 @@ impl QuadPart {
 
     pub fn area(&self, upper: f64, lower: f64, right: f64) -> f64 {
         let right_t = self.qex.y2x(right);
+        if right_t.is_nan() {
+            return (lower - upper) * right; // daijoubu?
+        }
         let y = self.qey.x2y(right_t);
         // dbg!(upper_t);
         // dbg!(lower_t);
@@ -234,39 +237,65 @@ impl QuadPart {
 }
 
 pub fn separate_quad(quad: &Quad) -> Vec<Quad> {//dbg!(quad);
+    fn clip_x(mut quad: Quad) -> Quad {
+        if quad.control1.0 < quad.start.0.min(quad.end.0) {
+            quad.control1.0 = quad.start.0.min(quad.end.0);
+        } else if quad.start.0.max(quad.end.0) < quad.control1.0 {
+            quad.control1.0 = quad.start.0.max(quad.end.0);
+        }
+        quad
+    }
+    fn clip_y(mut quad: Quad) -> Quad {
+        if quad.control1.1 < quad.start.1.min(quad.end.1) {
+            quad.control1.1 = quad.start.1.min(quad.end.1);
+        } else if quad.start.1.max(quad.end.1) < quad.control1.1 {
+            quad.control1.1 = quad.start.1.max(quad.end.1);
+        }
+        quad
+    }
     //if n == 0 {panic!()}
     let Quad {start, end, control1} = quad;
     let qex = QuadEq::from_abc(start.0, end.0, control1.0);
     let qey = QuadEq::from_abc(start.1, end.1, control1.1);
     //dbg!((qex.top_x(), qey.top_x()));
-    if control1.1 < start.1.min(end.1) {
+    if control1.1 < start.1.min(end.1) || start.1.max(end.1) < control1.1 {
         //dbg!(qey.top_x());
         let (q1, q2) = quad.separate(qey.top_x());
-        let mut v = separate_quad(&q1);
-        v.extend(separate_quad(&q2));
+        let mut v = separate_quad(&clip_y(q1));
+        v.extend(separate_quad(&clip_y(q2)));
         v
-    } else if start.1.max(end.1) < control1.1 {
-        //dbg!(qey.top_x());
-        let (q1, q2) = quad.separate(qey.top_x());
-        let mut v = separate_quad(&q1);
-        v.extend(separate_quad(&q2));
-        v
-    } else if control1.0 < start.0.min(end.0) {
+    } else if control1.0 < start.0.min(end.0) || start.0.max(end.0) < control1.0 {
         //dbg!(qex.top_x());
         let (q1, q2) = quad.separate(qex.top_x());
-        let mut v = separate_quad(&q1);
-        v.extend(separate_quad(&q2));
-        v
-    } else if start.0.max(end.0) < control1.0 {
-        //dbg!(qex.top_x());
-        let (q1, q2) = quad.separate(qex.top_x());
-        let mut v = separate_quad(&q1);
-        v.extend(separate_quad(&q2));
+        let mut v = separate_quad(&clip_x(q1));
+        v.extend(separate_quad(&clip_y(q2)));
         v
     } else {
         vec![quad.clone()]
     }
 }
+// pub fn separate_quad_n(quad: &Quad, n: usize) -> Vec<Quad> {dbg!(quad);
+//     if n == 0 {panic!()}
+//     let Quad {start, end, control1} = quad;
+//     let qex = QuadEq::from_abc(start.0, end.0, control1.0);
+//     let qey = QuadEq::from_abc(start.1, end.1, control1.1);
+//     dbg!((qex.top_x(), qey.top_x()));
+//     if control1.1 < start.1.min(end.1) || start.1.max(end.1) < control1.1 {
+//         dbg!(qey.top_x());
+//         let (q1, q2) = quad.separate(qey.top_x());
+//         let mut v = separate_quad_n(&q1, n-1);
+//         v.extend(separate_quad_n(&q2, n-1));
+//         v
+//     } else if control1.0 < start.0.min(end.0) || start.0.max(end.0) < control1.0 {
+//         dbg!(qex.top_x());
+//         let (q1, q2) = quad.separate(qex.top_x());
+//         let mut v = separate_quad_n(&q1, n-1);
+//         v.extend(separate_quad_n(&q2, n-1));
+//         v
+//     } else {
+//         vec![quad.clone()]
+//     }
+// }
 
 // pub fn quad_area(quad: &Quad, upper: f64, lower: f64, right: f64) -> f64 {
 //     let Quad {
