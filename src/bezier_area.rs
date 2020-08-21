@@ -109,15 +109,23 @@ pub struct QuadEq(f64, f64, f64);
 
 impl QuadEq {
     pub fn from_abc(a: f64, b: f64, c: f64) -> QuadEq {
-        QuadEq(a + b - 2.0 * c, 2.0 * (c - a), a)
+        QuadEq(a + b - 2.0 * c, 2.0 * (c - a), a) // TODO a + b - 2.0 * c が 0 のとき?
     }
 
     pub fn y2x(&self, y: f64) -> f64 {
-        (-self.1 + (-4.0 * self.0 * (self.2 - y) + self.1.powi(2)).sqrt()) / (2.0 * self.0)
+        if self.0 == 0.0 {
+            (y - self.2) / self.1
+        } else {
+            (-self.1 + (-4.0 * self.0 * (self.2 - y) + self.1.powi(2)).sqrt()) / (2.0 * self.0)
+        }
     }
 
     pub fn y2x2(&self, y: f64) -> f64 {
-        (-self.1 - (-4.0 * self.0 * (self.2 - y) + self.1.powi(2)).sqrt()) / (2.0 * self.0)
+        if self.0 == 0.0 {
+            (y - self.2) / self.1
+        } else {
+            (-self.1 - (-4.0 * self.0 * (self.2 - y) + self.1.powi(2)).sqrt()) / (2.0 * self.0)
+        }
     }
 
     pub fn x2y(&self, x: f64) -> f64 {
