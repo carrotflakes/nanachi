@@ -135,7 +135,6 @@ fn path_edges_to_elms(path: &Path) -> Vec<ElmContainer> {
             PathItem::Quad(quad) => {
                 elms.extend(crate::bezier_area::separate_quad(quad).into_iter().map(|q| {
                     dbg!(&q);
-                    //dbg!(crate::bezier_area::QuadPart::from_quad(&q).area(10.0, 30.0, 10.0));
                     let bound = q.bound();
                     dbg!(bound);
                     ElmContainer {

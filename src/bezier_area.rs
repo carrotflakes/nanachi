@@ -1,108 +1,4 @@
 use crate::models::{Quad, Cubic};
-use crate::point::Point;
-
-// pub fn y2x(quad: &Quad, y: f64) -> f64 {
-//     let Quad {
-//         start,
-//         end,
-//         control1
-//     } = quad;
-//     let (a, b, c) = (start.1 + end.1 - 2.0 * control1.1, 2.0 * (control1.1 - end.1), end.1);
-//     let v = if a == 0.0 {
-//         (y - c) / b
-//     } else {
-//         let d = (-4.0 * a * (y - c) + b.powi(2)).sqrt();
-//         let r = (-b + d) / (2.0 * a);
-//         if 0.0 <= r && r <= 1.0 {
-//             r
-//         } else {
-//             (-b - d) / (2.0 * a)
-//         }
-//     };
-//     (start.0 + end.0 - 2.0 * control1.0) * v.powi(2) + 2.0 * (control1.0 - end.0) * v + end.0
-// }
-
-// pub fn x2y(quad: &Quad, x: f64) -> f64 {
-//     let Quad {
-//         start,
-//         end,
-//         control1
-//     } = quad;
-//     let (a, b, c) = (start.0 + end.0 - 2.0 * control1.0, 2.0 * (control1.0 - end.0), end.0);
-//     let v = if a == 0.0 {
-//         (x - c) / b
-//     } else {
-//         let d = (-4.0 * a * (x - c) + b.powi(2)).sqrt();
-//         let r = (-b + d) / (2.0 * a);
-//         if 0.0 <= r && r <= 1.0 {
-//             r
-//         } else {
-//             (-b - d) / (2.0 * a)
-//         }
-//     };
-//     (start.1 + end.1 - 2.0 * control1.1) * v.powi(2) + 2.0 * (control1.1 - end.1) * v + end.1
-// }
-
-// pub fn x2v1(b: f64, c: f64, x: f64) -> f64 {
-//     (c - x) / b
-// }
-// pub fn x2v2(a: f64, b: f64, c: f64, x: f64) -> f64 {
-//     (-b + (-4.0 * a * (c - x) + b.powi(2)).sqrt()) / (2.0 * a)
-// }
-// pub fn x2v3(a: f64, b: f64, c: f64, x: f64) -> f64 {
-//     (-b - (-4.0 * a * (c - x) + b.powi(2)).sqrt()) / (2.0 * a)
-// }
-
-// pub fn x2t(p: (f64, f64, f64), x: f64) -> f64 {
-//     (-p.1 + (-4.0 * p.0 * (p.2 - x) + p.1.powi(2)).sqrt()) / (2.0 * p.0)
-// }
-
-// pub fn zero_y(quad: &Quad) -> f64 {
-//     (quad.end.0 - quad.control1.0) / (quad.start.0 + quad.end.0 - 2.0 * quad.control1.0)
-// }
-
-// pub fn zero_x(quad: &Quad) -> f64 {
-//     (quad.end.1 - quad.control1.1) / (quad.start.1 + quad.end.1 - 2.0 * quad.control1.1)
-// }
-
-// pub fn t2x(p: (f64, f64, f64), t: f64) -> f64 {
-//     ((p.0 + p.1 - 2.0 * p.2) * t + 2.0 * (p.2 - p.0)) * t + p.0
-// }
-
-// pub fn integral(p: (f64, f64, f64), t: f64) -> f64 {
-//     ((((p.0 + p.1 - 2.0 * p.2) / 3.0 * t + (p.2 - p.0)) * t) + p.0) * t
-// }
-
-// pub struct QuadArea {
-//     top_left: Option<()>,
-//     top_right: Option<()>,
-//     bottom_left: Option<()>,
-//     bottom_right: Option<()>,
-//     sep_x: f64,
-//     sep_y: f64,
-// }
-
-// impl QuadArea {
-//     pub fn area(&self, upper: f64, lower: f64, right: f64) -> f64 {
-//         if let Some(()) = self.top_left {
-
-//         }
-//     }
-// }
-
-// pub fn quad_area(quad: &Quad, range: (f64, f64), upper: f64, lower: f64, right: f64) -> f64 {
-//     let upper_x = y2x(quad, upper);
-//     let lower_x = y2x(quad, lower);
-//     integral(quad.start.1, quad.end.1, quad.control1.1, lower_x) - integral(quad.start.1, quad.end.1, quad.control1.1, upper_x)
-//     // if (!upper_x.is_nan(), !lower_x.is_nan()) {
-//     //     // (true, true) => {
-            
-//     //     // }
-//     //     (false, false) => {
-            
-//     //     }
-//     // }
-// }
 
 #[derive(Debug, Clone)]
 pub struct QuadEq(f64, f64, f64);
@@ -128,29 +24,44 @@ impl QuadEq {
         }
     }
 
+    pub fn y2xd(&self, y: f64) -> f64 {
+        if self.0 == 0.0 {
+            1.0 / self.1
+        } else {
+            1.0 / (4.0 * self.0 * (y - self.2) + self.1.powi(2)).sqrt()
+        }
+    }
+
+    pub fn y2x2d(&self, y: f64) -> f64 {
+        if self.0 == 0.0 {
+            1.0 / self.1
+        } else {
+            -1.0 / (4.0 * self.0 * (y - self.2) + self.1.powi(2)).sqrt()
+        }
+    }
+
     pub fn x2y(&self, x: f64) -> f64 {
         (self.0 * x + self.1) * x + self.2
     }
 
-    pub fn integral(&self, x: f64) -> f64 {
-        (((self.0 / 3.0 * x + self.1 / 2.0) * x) + self.2) * x
+    pub fn x2yd(&self, x: f64) -> f64 {
+        2.0 * self.0 * x + self.1
+    }
+
+    pub fn x2yi(&self, x: f64) -> f64 {
+        ((self.0 / 3.0 * x + self.1 / 2.0) * x + self.2) * x
     }
 
     pub fn top_x(&self) -> f64 {
         -0.5 * self.1 / self.0
     }
-}//(a * x + b) * x + c
-// (-b + sqrt(-4 * a * (c - y) + b^2)) / (2 * a)
-
-pub fn zero_x_t(a: f64, b: f64) -> f64 {
-    -0.5 * b / a
 }
 
 #[derive(Debug, Clone)]
 pub struct QuadPart {
-    qex: QuadEq,
-    qey: QuadEq,
-    rising: bool,
+    pub qex: QuadEq,
+    pub qey: QuadEq,
+    pub rising: bool,
 }
 
 impl QuadPart {
@@ -187,51 +98,34 @@ impl QuadPart {
             return (lower - upper) * right; // daijoubu?
         }
         let y = self.qey.x2y(right_t);
-        // dbg!(upper_t);
-        // dbg!(lower_t);
-        // dbg!(right_t);
-        // dbg!(y);
+        // dbg!(upper_t, lower_t, right_t, y);
         if self.rising {
             let upper_t = self.qey.y2x2(upper);
             let lower_t = self.qey.y2x2(lower);
-            // if self.qex.x2y(lower_t) < right {
-            //     (lower - upper) * right
-            // } else {
-            //     (self.qex.integral(lower_t) - self.qex.integral(right_t)) * (lower - y) / (lower_t - right_t) // approximate
-            //     + (y - upper) * right
-            // }
-            
+
             if y <= upper {
                 (lower - upper) * (self.qex.x2y(upper_t) + self.qex.x2y(lower_t)) / 2.0
             } else if lower <= y {
                 (lower - upper) * right
             } else {
-                if !((self.qex.x2y(lower_t) - right).abs() < 40.0) {
-                    dbg!((self.qex.x2y(upper_t), self.qex.x2y(lower_t), right));
-                    panic!();
-                }
                 (lower - y) * (self.qex.x2y(lower_t) + right) / 2.0
                 + (y - upper) * right
             }
         } else {
             let upper_t = self.qey.y2x(upper);
             let lower_t = self.qey.y2x(lower);
-            // dbg!(self.qex.integral(right_t));
-            // dbg!(self.qex.integral(upper_t));
-            // dbg!(self.qex.integral(right_t) - self.qex.integral(upper_t));
-            // dbg!((lower - y) * right);
-            //if right <= self.qex.x2y(upper_t) {
             if y <= upper {
                 (lower - upper) * right
-            //if self.qex.x2y(lower_t) <= right {
             } else if lower <= y {
                 (lower - upper) * (self.qex.x2y(upper_t) + self.qex.x2y(lower_t)) / 2.0
             } else {
-                //(self.qex.integral(right_t) - self.qex.integral(upper_t)) * (y - upper) / (right_t - upper_t) // approximate
-                (y - upper) * (self.qex.x2y(upper_t) + right) / 2.0
-                + (lower - y) * right
+                //(y - upper) * (self.qex.x2y(upper_t) + right) / 2.0 + (lower - y) * right
+
+                let a = (y - upper) * (self.qex.x2y(upper_t) + right) / 2.0;
+                //let b = (self.qex.x2yi(right_t) / self.qex.y2xd(right) - self.qex.x2yi(upper_t) / self.qey.y2xd(upper));
+                //dbg!(upper, right, a, b, (a - b).abs());
+                a + (lower - y) * right
             }
-            //(lower - upper) * right.min(self.qex.x2y(upper_t))
         }
     }
 }
@@ -274,66 +168,16 @@ pub fn separate_quad(quad: &Quad) -> Vec<Quad> {//dbg!(quad);
         vec![quad.clone()]
     }
 }
-// pub fn separate_quad_n(quad: &Quad, n: usize) -> Vec<Quad> {dbg!(quad);
-//     if n == 0 {panic!()}
-//     let Quad {start, end, control1} = quad;
-//     let qex = QuadEq::from_abc(start.0, end.0, control1.0);
-//     let qey = QuadEq::from_abc(start.1, end.1, control1.1);
-//     dbg!((qex.top_x(), qey.top_x()));
-//     if control1.1 < start.1.min(end.1) || start.1.max(end.1) < control1.1 {
-//         dbg!(qey.top_x());
-//         let (q1, q2) = quad.separate(qey.top_x());
-//         let mut v = separate_quad_n(&q1, n-1);
-//         v.extend(separate_quad_n(&q2, n-1));
-//         v
-//     } else if control1.0 < start.0.min(end.0) || start.0.max(end.0) < control1.0 {
-//         dbg!(qex.top_x());
-//         let (q1, q2) = quad.separate(qex.top_x());
-//         let mut v = separate_quad_n(&q1, n-1);
-//         v.extend(separate_quad_n(&q2, n-1));
-//         v
-//     } else {
-//         vec![quad.clone()]
-//     }
-// }
-
-// pub fn quad_area(quad: &Quad, upper: f64, lower: f64, right: f64) -> f64 {
-//     let Quad {
-//         start,
-//         end,
-//         control1
-//     } = quad;
-//     let integral = |x| (start.1 + end.1 - 2.0 * control1.1) / 3.0 * x.powi(3) - (2.0 * control1.1 + 2.0 * end.1) / 2.0 * x.powi(2) + end.1 * x;
-//     if control1.1 < start.1.min(end.1) { // Convex upward
-
-//     } else if start.1.max(end.1) < control1.1 { // Convex downward
-
-//     } else {
-//         let (a, b, c) = (start.1 + end.1 - 2.0 * control1.1, -2.0 * (control1.1 - end.1), end.1);
-//         let f = |y| { // y から x 座標を求める
-//             let d = (-4.0 * a * (y - c) + b.powi(2)).sqrt();
-//             let r = (-b + d) / 2 * a;
-//             let v= if 0.0 <= r && r <= 1.0 {
-//                 r
-//             } else {
-//                 (-b - d) / 2 * a
-//             };
-//             (start.0 + end.0 - 2.0 * control1.0) * v.powi(2) - 2.0 * (control1.0 - end.0) * v + end.0
-//         };
-//     }
-// }
 
 #[test]
 fn test() {
+    use crate::point::Point;
+
     // let q = Quad{
     //     start: Point(0.0, 0.0),
     //     end: Point(0.0, 10.0),
     //     control1: Point(5.0, 6.0),
     // };
-    // dbg!(zero_y(&q));
-    // let a = zero_y(&q);
-    // dbg!(y2x(&q, a));
-    // dbg!((q.pos(a), q.pos(a-0.1), q.pos(a+0.1)));
     let qex = QuadEq(2.0, -2.0, 3.0);
     assert_eq!(qex.top_x(), 0.5);
     assert_eq!(qex.x2y(qex.top_x()), 2.5);
