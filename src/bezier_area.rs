@@ -103,31 +103,39 @@ impl QuadPart {
             let upper_t = self.qey.y2x2(upper);
             let lower_t = self.qey.y2x2(lower);
 
-            if y <= upper {
+            if y < upper {
                 (lower - upper) * (self.qex.x2y(upper_t) + self.qex.x2y(lower_t)) / 2.0
-            } else if lower <= y {
+            } else if lower < y {
                 (lower - upper) * right
             } else {
-                (lower - y) * (self.qex.x2y(lower_t) + right) / 2.0
-                + (y - upper) * right
+                //let a = (lower - y) * (self.qex.x2y(lower_t) + right) / 2.0;
+                let b = integral(&self.qex, &self.qey, lower_t) - integral(&self.qex, &self.qey, right_t);
+                //dbg!(upper, right, a, b, (a - b).abs());
+                b + (y - upper) * right
             }
         } else {
             let upper_t = self.qey.y2x(upper);
             let lower_t = self.qey.y2x(lower);
-            if y <= upper {
+            if y < upper {
                 (lower - upper) * right
-            } else if lower <= y {
+            } else if lower < y {
                 (lower - upper) * (self.qex.x2y(upper_t) + self.qex.x2y(lower_t)) / 2.0
             } else {
-                //(y - upper) * (self.qex.x2y(upper_t) + right) / 2.0 + (lower - y) * right
-
-                let a = (y - upper) * (self.qex.x2y(upper_t) + right) / 2.0;
-                //let b = (self.qex.x2yi(right_t) / self.qex.y2xd(right) - self.qex.x2yi(upper_t) / self.qey.y2xd(upper));
+                //let a = (y - upper) * (self.qex.x2y(upper_t) + right) / 2.0;
+                let b = integral(&self.qex, &self.qey, right_t) - integral(&self.qex, &self.qey, upper_t);
                 //dbg!(upper, right, a, b, (a - b).abs());
-                a + (lower - y) * right
+                b + (lower - y) * right
             }
         }
     }
+}
+
+fn integral(x: &QuadEq, y: &QuadEq, t: f64) -> f64 {
+    let a = x.0 * y.0 / 2.0;
+    let b = (2.0 * x.1 * y.0 + x.0 * y.1) / 3.0;
+    let c = (2.0 * x.2 * y.0 + x.1 * y.1) / 2.0;
+    let d = x.2 * y.1;
+    (((a * t + b) * t + c) * t + d) * t
 }
 
 pub fn separate_quad(quad: &Quad) -> Vec<Quad> {//dbg!(quad);
