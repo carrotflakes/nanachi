@@ -103,9 +103,9 @@ impl QuadPart {
             let upper_t = self.qey.y2x2(upper);
             let lower_t = self.qey.y2x2(lower);
 
-            if y < upper {
-                (lower - upper) * (self.qex.x2y(upper_t) + self.qex.x2y(lower_t)) / 2.0
-            } else if lower < y {
+            if y <= upper {
+                integral(&self.qex, &self.qey, lower_t) - integral(&self.qex, &self.qey, upper_t)
+            } else if lower <= y {
                 (lower - upper) * right
             } else {
                 //let a = (lower - y) * (self.qex.x2y(lower_t) + right) / 2.0;
@@ -116,10 +116,10 @@ impl QuadPart {
         } else {
             let upper_t = self.qey.y2x(upper);
             let lower_t = self.qey.y2x(lower);
-            if y < upper {
+            if y <= upper {
                 (lower - upper) * right
-            } else if lower < y {
-                (lower - upper) * (self.qex.x2y(upper_t) + self.qex.x2y(lower_t)) / 2.0
+            } else if lower <= y {
+                integral(&self.qex, &self.qey, lower_t) - integral(&self.qex, &self.qey, upper_t)
             } else {
                 //let a = (y - upper) * (self.qex.x2y(upper_t) + right) / 2.0;
                 let b = integral(&self.qex, &self.qey, right_t) - integral(&self.qex, &self.qey, upper_t);
