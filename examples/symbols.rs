@@ -314,7 +314,7 @@ fn main() {
 
     {
         use nanachi::path2::{Path, PathAnchor};
-        let path = Path::new(
+        let paths = vec![Path::new(
             vec![
                 PathAnchor::Quad(Quad {
                     start: Point(300.0, 60.0),
@@ -333,11 +333,38 @@ fn main() {
                 }),
             ],
             true,
-        );
+        ), Path::new(
+            vec![
+                PathAnchor::Quad(Quad {
+                    start: Point(250.0, 20.0),
+                    end: Point(290.0, 60.0),
+                    control1: Point(300.0, 10.0),
+                }),
+                PathAnchor::Quad(Quad {
+                    start: Point(290.0, 60.0),
+                    end: Point(230.0, 50.0),
+                    control1: Point(260.0, 70.0),
+                }),
+                PathAnchor::Quad(Quad {
+                    start: Point(230.0, 50.0),
+                    end: Point(250.0, 20.0),
+                    control1: Point(200.0, 10.0),
+                }),
+            ],
+            true,
+        )];
+
+        // dbg!(nanachi::bezier_area::separate_quad_n(&Quad {
+        //     start: Point(250.0, 20.0),
+        //     end: Point(290.0, 60.0),
+        //     control1: Point(300.0, 10.0),
+        // }, 3));
 
         draw_fill(
             &mut img,
-            &path.edges(),
+            //&path.edge_path(5.0)[0..1].iter().flat_map(|p| p.edges()).collect(),
+            //&path.edges(),
+            &paths.iter().flat_map(|p| p.edges()).collect(),
             &position_color::Constant::new(Rgb([50, 250, 10])),
         );
     }

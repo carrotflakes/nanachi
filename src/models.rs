@@ -2,6 +2,9 @@ use crate::point::Point;
 use std::f64::consts::FRAC_PI_2;
 
 #[derive(Debug, Clone)]
+pub struct Line(pub Point, pub Point);
+
+#[derive(Debug, Clone)]
 pub struct Arc {
     pub center: Point,
     pub radius: f64,

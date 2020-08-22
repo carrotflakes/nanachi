@@ -257,7 +257,7 @@ fn edge_path_(
             )
         }
         PathAnchor::Quad(quad) => {
-            let dp = |p: Point| {
+            let dp = |p: Point, left: Point, right: Point| {
                 let a1 = (left.1 - p.1).atan2(p.0 - left.0);
                 let a2 = (right.1 - p.1).atan2(p.0 - right.0);
                 let a = (a2 + a1) / 2.0;
@@ -267,14 +267,14 @@ fn edge_path_(
             };
             (
                 PathAnchor::Quad(Quad {
-                    start: quad.start + dp(quad.start),
-                    end: quad.end + dp(quad.end),
-                    control1: quad.control1 + dp(quad.control1),
+                    start: quad.start + dp(quad.start, left, quad.control1),
+                    end: quad.end + dp(quad.end, quad.control1, right),
+                    control1: quad.control1 + dp(quad.control1, quad.start, quad.end),
                 }),
                 PathAnchor::Quad(Quad {
-                    start: quad.end - dp(quad.end),
-                    end: quad.start - dp(quad.start),
-                    control1: quad.control1 - dp(quad.control1),
+                    start: quad.end - dp(quad.end, quad.control1, right),
+                    end: quad.start - dp(quad.start, left, quad.control1),
+                    control1: quad.control1 - dp(quad.control1, quad.start, quad.end),
                 }),
             )
         }
