@@ -14,6 +14,10 @@ impl Point {
         self.0.hypot(self.1)
     }
 
+    pub fn atan2(self) -> f64 {
+        self.1.atan2(self.0)
+    }
+
     pub fn rotate(self, angle: f64) -> Self {
         let (sin, cos) = angle.sin_cos();
         Point(

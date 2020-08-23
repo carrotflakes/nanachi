@@ -1,5 +1,5 @@
 use crate::point::Point;
-use std::f64::consts::FRAC_PI_2;
+use std::f64::consts::{FRAC_PI_2, PI};
 
 #[derive(Debug, Clone)]
 pub struct Line(pub Point, pub Point);
@@ -10,6 +10,14 @@ pub struct Arc {
     pub radius: f64,
     pub angle1: f64,
     pub angle2: f64,
+}
+
+impl Arc {
+    pub fn angle_norm(&self) -> (f64, f64) {
+        let (a1, a2) = if self.angle1 < self.angle2 { (self.angle1, self.angle2) } else { (self.angle2, self.angle1) };
+        let a = a1.rem_euclid(PI * 2.0);
+        (a, if a2 - a < 0.0 { a2 + PI * 2.0 } else { a2 })
+    }
 }
 
 #[derive(Debug, Clone)]
