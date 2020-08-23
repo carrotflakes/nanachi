@@ -146,7 +146,7 @@ pub fn intersect_segment_and_arc(line: &Line, arc: &Arc) -> Option<Point> {
     let angle = p.atan2().rem_euclid(2.0 * std::f64::consts::PI);
     let (a1, a2) = arc.angle_norm();
     if a1 <= angle && angle <= a2 {
-        Some(p)
+        Some(p * arc.radius)
     } else {
         None
     }
