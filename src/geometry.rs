@@ -87,6 +87,18 @@ pub fn intersect_line_and_line(p1: Point, p2: Point, p3: Point, p4: Point) -> Po
   Point(x, y)
 }
 
+pub fn intersect_segment_and_segment(p1: Point, p2: Point, p3: Point, p4: Point) -> Option<Point> {
+  let det = (p1.0 - p2.0) * (p4.1 - p3.1) - (p4.0 - p3.0) * (p1.1 - p2.1);
+  let t = ((p4.1 - p3.1) * (p4.0 - p2.0) + (p3.0 - p4.0) * (p4.1 - p2.1)) / det;
+  if 0.0 <= t && t <= 1.0 {
+    let x = t * p1.0 + (1.0 - t) * p2.0;
+    let y = t * p1.1 + (1.0 - t) * p2.1;
+    Some(Point(x, y))
+  } else {
+    None
+  }
+}
+
 pub fn point_is_right_side_of_line(p1: Point, p2: Point) -> bool {
     p1.0 * p2.1 < p1.1 * p2.0
 }
@@ -108,15 +120,10 @@ pub fn intersect_circle_and_segment(p1: Point, p2: Point) -> Point {
     let a = (p2.1 - p1.1) / det;
     let b = (p1.0 - p2.0) / det;
     let c = a.powi(2) + b.powi(2);
-    if 0.0 < det {
-        let x = (a - b * (c - 1.0).sqrt()) / c;
-        let y = (b + a * (c - 1.0).sqrt()) / c;
-        Point(x, y)
-    } else {
-        let x = (a + b * (c - 1.0).sqrt()) / c;
-        let y = (b - a * (c - 1.0).sqrt()) / c;
-        Point(x, y)
-    }
+    let sign = det.signum();
+    let x = (a - b * sign * (c - 1.0).sqrt()) / c;
+    let y = (b + a * sign * (c - 1.0).sqrt()) / c;
+    Point(x, y)
 }
 
 pub fn circle_2segment_area(p: Point, p1: Point, p2: Point) -> f64 { // p1 < p2

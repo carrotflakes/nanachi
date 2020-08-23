@@ -287,11 +287,11 @@ fn main() {
             vec![
                 PathAnchor::Ellipse(Ellipse {
                     center: Point(400.0, 100.0),
-                    radius_x: 10.0,
+                    radius_x: 40.0,
                     radius_y: 80.0,
                     rotation: PI * 0.2,
-                    angle1: PI * 0.6,
-                    angle2: PI * 1.3,
+                    angle1: PI * 0.2,
+                    angle2: PI * 1.6,
                 }),
             ],
             true,
