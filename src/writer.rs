@@ -18,7 +18,7 @@ where
     move |x: u32, y: u32, v: f64| {
         let v = match fill_rule {
             FillRule::NonZero => v.abs().min(1.0),
-            FillRule::EvenOdd => 1.0 - (v % 2.0 - 1.0).abs(),
+            FillRule::EvenOdd => 1.0 - (v.rem_euclid(2.0) - 1.0).abs(),
             FillRule::NoClip => v,
         };
         img_blend_pixel(buf, position_color, x, y, v)
