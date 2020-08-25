@@ -95,7 +95,17 @@ impl QuadPart {
     pub fn area(&self, upper: f64, lower: f64, right: f64) -> f64 {
         let right_t = self.qex.y2x(right);
         if right_t.is_nan() {
-            return (lower - upper) * right; // daijoubu?
+            return if 0.0 < self.qex.0 {
+                (lower - upper) * right
+            } else if self.rising {
+                let upper_t = self.qey.y2x2(upper);
+                let lower_t = self.qey.y2x2(lower);
+                integral(&self.qex, &self.qey, lower_t) - integral(&self.qex, &self.qey, upper_t)
+            } else {
+                let upper_t = self.qey.y2x(upper);
+                let lower_t = self.qey.y2x(lower);
+                integral(&self.qex, &self.qey, lower_t) - integral(&self.qex, &self.qey, upper_t)
+            };
         }
         let y = self.qey.x2y(right_t);
         // dbg!(upper_t, lower_t, right_t, y);
