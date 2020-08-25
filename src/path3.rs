@@ -43,13 +43,13 @@ impl PathItem {
                 arc.center
                     + Point(
                         arc.angle2.cos() * arc.radius,
-                        -arc.angle2.sin() * arc.radius,
+                        arc.angle2.sin() * arc.radius,
                     )
             }
             PathItem::Ellipse(ellipse) => {
                 let (sin, cos) = ellipse.rotation.sin_cos();
                 let x = ellipse.angle2.cos() * ellipse.radius_x;
-                let y = -ellipse.angle2.sin() * ellipse.radius_y;
+                let y = ellipse.angle2.sin() * ellipse.radius_y;
                 ellipse.center + Point(x * cos - y * sin, x * sin + y * cos)
             }
             PathItem::Quad(quad) => {
@@ -65,13 +65,13 @@ impl PathItem {
                 arc.center
                     + Point(
                         arc.angle1.cos() * arc.radius,
-                        -arc.angle1.sin() * arc.radius,
+                        arc.angle1.sin() * arc.radius,
                     )
             }
             PathItem::Ellipse(ellipse) => {
                 let (sin, cos) = ellipse.rotation.sin_cos();
                 let x = ellipse.angle1.cos() * ellipse.radius_x;
-                let y = -ellipse.angle1.sin() * ellipse.radius_y;
+                let y = ellipse.angle1.sin() * ellipse.radius_y;
                 ellipse.center + Point(x * cos - y * sin, x * sin + y * cos)
             }
             PathItem::Quad(quad) => {

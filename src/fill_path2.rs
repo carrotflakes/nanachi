@@ -45,39 +45,39 @@ fn path_edges_to_elms(path: &Path) -> Vec<ElmContainer> {
                 fn left_arc(arc: &Arc, upper: f64, lower: f64) -> ElmContainer {
                     ElmContainer {
                         bound: (arc.center.1 + upper * arc.radius, arc.center.1 + lower * arc.radius),
-                        elm: Elm::LeftArc(arc.clone()), signum: (arc.angle2 - arc.angle1).signum()
+                        elm: Elm::LeftArc(arc.clone()), signum: (arc.angle1 - arc.angle2).signum()
                     }
                 }
                 fn right_arc(arc: &Arc, upper: f64, lower: f64) -> ElmContainer {
                     ElmContainer {
                         bound: (arc.center.1 + upper * arc.radius, arc.center.1 + lower * arc.radius),
-                        elm: Elm::RightArc(arc.clone()), signum: (arc.angle1 - arc.angle2).signum()
+                        elm: Elm::RightArc(arc.clone()), signum: (arc.angle2 - arc.angle1).signum()
                     }
                 }
                 let (a1, a2) = angle_norm(arc.angle1, arc.angle2);
                 match (((a1 / FRAC_PI_2) as usize + 1) / 2, ((a2 / FRAC_PI_2) as usize + 1) / 2) {
                     (0, 0) | (2, 2) => {
-                        elms.push(right_arc(arc, -a2.sin(), -a1.sin()));
+                        elms.push(right_arc(arc, a1.sin(), a2.sin()));
                     }
                     (0, 1) | (2, 3) => {
-                        elms.push(left_arc(arc, -1.0, -a2.sin()));
-                        elms.push(right_arc(arc, -1.0, -a1.sin()));
+                        elms.push(left_arc(arc, a2.sin(), 1.0));
+                        elms.push(right_arc(arc, a1.sin(), 1.0));
                     }
                     (0, 2) | (2, 4) => {
                         elms.push(left_arc(arc, -1.0, 1.0));
-                        elms.push(right_arc(arc, -1.0, -a1.sin()));
-                        elms.push(right_arc(arc, -a2.sin(), 1.0));
+                        elms.push(right_arc(arc, a1.sin(), 1.0));
+                        elms.push(right_arc(arc, -1.0, a2.sin()));
                     }
                     (1, 1) => {
-                        elms.push(left_arc(arc, -a1.sin(), -a2.sin()));
+                        elms.push(left_arc(arc, a2.sin(), a1.sin()));
                     }
                     (1, 2) => {
-                        elms.push(left_arc(arc, -a1.sin(), 1.0));
-                        elms.push(right_arc(arc, -a2.sin(), 1.0));
+                        elms.push(left_arc(arc, -1.0, a1.sin()));
+                        elms.push(right_arc(arc, -1.0, a2.sin()));
                     }
                     (1, 3) => {
-                        elms.push(left_arc(arc, -1.0, -a2.sin()));
-                        elms.push(left_arc(arc, -a1.sin(), 1.0));
+                        elms.push(left_arc(arc, a2.sin(), 1.0));
+                        elms.push(left_arc(arc, -1.0, a1.sin()));
                         elms.push(right_arc(arc, -1.0, 1.0));
                     }
                     _ => unreachable!(),
@@ -88,14 +88,14 @@ fn path_edges_to_elms(path: &Path) -> Vec<ElmContainer> {
                     ElmContainer {
                         bound: (upper, lower),
                         elm: Elm::LeftEllipse(ellipse.clone().into()),
-                        signum: (ellipse.angle2 - ellipse.angle1).signum()
+                        signum: (ellipse.angle1 - ellipse.angle2).signum()
                     }
                 }
                 fn right_ellipse(ellipse: &Ellipse, upper: f64, lower: f64) -> ElmContainer {
                     ElmContainer {
                         bound: (upper, lower),
                         elm: Elm::RightEllipse(ellipse.clone().into()),
-                        signum: (ellipse.angle1 - ellipse.angle2).signum()
+                        signum: (ellipse.angle2 - ellipse.angle1).signum()
                     }
                 }
                 let bound = ellipse.bound();
@@ -106,27 +106,27 @@ fn path_edges_to_elms(path: &Path) -> Vec<ElmContainer> {
                 dbg!((((a1 - aa) / FRAC_PI_2), ((a2 - aa) / FRAC_PI_2)));
                 match ((((a1 - aa) / FRAC_PI_2) as usize + 1) / 2, (((a2 - aa) / FRAC_PI_2) as usize + 1) / 2) {
                     (0, 0) | (2, 2) => {
-                        elms.push(right_ellipse(ellipse, ellipse.pos(-a2).1, ellipse.pos(-a1).1));
+                        elms.push(right_ellipse(ellipse, ellipse.pos(a1).1, ellipse.pos(a2).1));
                     }
                     (0, 1) | (2, 3) => {
-                        elms.push(left_ellipse(ellipse, bound.2, ellipse.pos(-a2).1));
-                        elms.push(right_ellipse(ellipse, bound.2, ellipse.pos(-a1).1));
+                        elms.push(left_ellipse(ellipse, ellipse.pos(a2).1, bound.3,));
+                        elms.push(right_ellipse(ellipse, ellipse.pos(a1).1, bound.3));
                     }
                     (0, 2) | (2, 4) => {
                         elms.push(left_ellipse(ellipse, bound.2, bound.3));
-                        elms.push(right_ellipse(ellipse, bound.2, ellipse.pos(-a1).1));
-                        elms.push(right_ellipse(ellipse, ellipse.pos(-a2).1, bound.3));
+                        elms.push(right_ellipse(ellipse, ellipse.pos(a1).1, bound.3));
+                        elms.push(right_ellipse(ellipse, bound.2, ellipse.pos(a2).1));
                     }
                     (1, 1) => {
-                        elms.push(left_ellipse(ellipse, ellipse.pos(-a1).1, ellipse.pos(-a2).1));
+                        elms.push(left_ellipse(ellipse, ellipse.pos(a2).1, ellipse.pos(a1).1));
                     }
                     (1, 2) => {
-                        elms.push(left_ellipse(ellipse, ellipse.pos(-a1).1, bound.3));
-                        elms.push(right_ellipse(ellipse, ellipse.pos(-a2).1, bound.3));
+                        elms.push(left_ellipse(ellipse, bound.2, ellipse.pos(a1).1));
+                        elms.push(right_ellipse(ellipse, bound.2, ellipse.pos(a2).1));
                     }
                     (1, 3) => {
-                        elms.push(left_ellipse(ellipse, bound.2, ellipse.pos(-a2).1));
-                        elms.push(left_ellipse(ellipse, ellipse.pos(-a1).1, bound.3));
+                        elms.push(left_ellipse(ellipse, ellipse.pos(a2).1, bound.3));
+                        elms.push(left_ellipse(ellipse, bound.2, ellipse.pos(a1).1));
                         elms.push(right_ellipse(ellipse, bound.2, bound.3));
                     }
                     _ => unreachable!(),
