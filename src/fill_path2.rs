@@ -38,20 +38,20 @@ fn path_edges_to_elms(path: &Path) -> Vec<ElmContainer> {
             PathItem::Line(Line(p1, p2)) => {
                 elms.push(ElmContainer {
                     bound: (p1.1.min(p2.1), p1.1.max(p2.1)),
-                    elm: Elm::Line(Line(*p1, *p2)), signum: (p1.1 - p2.1).signum()
+                    elm: Elm::Line(Line(*p1, *p2)), signum: (p2.1 - p1.1).signum()
                 });
             }
             PathItem::Arc(arc) => {
                 fn left_arc(arc: &Arc, upper: f64, lower: f64) -> ElmContainer {
                     ElmContainer {
                         bound: (arc.center.1 + upper * arc.radius, arc.center.1 + lower * arc.radius),
-                        elm: Elm::LeftArc(arc.clone()), signum: (arc.angle1 - arc.angle2).signum()
+                        elm: Elm::LeftArc(arc.clone()), signum: (arc.angle2 - arc.angle1).signum()
                     }
                 }
                 fn right_arc(arc: &Arc, upper: f64, lower: f64) -> ElmContainer {
                     ElmContainer {
                         bound: (arc.center.1 + upper * arc.radius, arc.center.1 + lower * arc.radius),
-                        elm: Elm::RightArc(arc.clone()), signum: (arc.angle2 - arc.angle1).signum()
+                        elm: Elm::RightArc(arc.clone()), signum: (arc.angle1 - arc.angle2).signum()
                     }
                 }
                 let (a1, a2) = angle_norm(arc.angle1, arc.angle2);
@@ -88,14 +88,14 @@ fn path_edges_to_elms(path: &Path) -> Vec<ElmContainer> {
                     ElmContainer {
                         bound: (upper, lower),
                         elm: Elm::LeftEllipse(ellipse.clone().into()),
-                        signum: (ellipse.angle1 - ellipse.angle2).signum()
+                        signum: (ellipse.angle2 - ellipse.angle1).signum()
                     }
                 }
                 fn right_ellipse(ellipse: &Ellipse, upper: f64, lower: f64) -> ElmContainer {
                     ElmContainer {
                         bound: (upper, lower),
                         elm: Elm::RightEllipse(ellipse.clone().into()),
-                        signum: (ellipse.angle2 - ellipse.angle1).signum()
+                        signum: (ellipse.angle1 - ellipse.angle2).signum()
                     }
                 }
                 let bound = ellipse.bound();
@@ -140,7 +140,7 @@ fn path_edges_to_elms(path: &Path) -> Vec<ElmContainer> {
                     ElmContainer {
                         bound: (bound.2, bound.3),
                         elm: Elm::Quad(crate::bezier_area::QuadPart::from_quad(&q), bound.0, bound.1),
-                        signum: (q.start.1 - q.end.1).signum(),
+                        signum: (q.end.1 - q.start.1).signum(),
                     }
                 }));
             }
