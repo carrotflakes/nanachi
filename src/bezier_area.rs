@@ -180,7 +180,7 @@ pub fn separate_quad(quad: &Quad) -> Vec<Quad> {//dbg!(quad);
         //dbg!(qex.top_x());
         let (q1, q2) = quad.separate(qex.top_x());
         let mut v = separate_quad(&clip_x(q1));
-        v.extend(separate_quad(&clip_y(q2)));
+        v.extend(separate_quad(&clip_x(q2)));
         v
     } else {
         vec![quad.clone()]
