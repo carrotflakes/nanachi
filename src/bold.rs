@@ -19,26 +19,29 @@ pub fn path_item_bold(path_item: &PathItem, width: f64) -> Vec<PathItem> {
             ]
         }
         PathItem::Arc(arc) => {
+            let (a1, a2) = arc.angle_norm();
             let outer_radius = arc.radius + width;
             let inner_radius = (arc.radius - width).max(0.0);
             vec![
                 PathItem::Arc(Arc{
                     radius: outer_radius,
+                    angle1: a1,
+                    angle2: a2,
                     ..arc.clone()
                 }),
                 PathItem::Line(Line(
-                    arc.center + Point(arc.angle2.cos(), arc.angle2.sin()) * outer_radius,
-                    arc.center + Point(arc.angle2.cos(), arc.angle2.sin()) * inner_radius,
+                    arc.center + Point(a2.cos(), a2.sin()) * outer_radius,
+                    arc.center + Point(a2.cos(), a2.sin()) * inner_radius,
                 )),
                 PathItem::Arc(Arc{
                     radius: inner_radius,
-                    angle1: arc.angle2,
-                    angle2: arc.angle1,
+                    angle1: a2,
+                    angle2: a1,
                     ..arc.clone()
                 }),
                 PathItem::Line(Line(
-                    arc.center + Point(arc.angle1.cos(), arc.angle1.sin()) * inner_radius,
-                    arc.center + Point(arc.angle1.cos(), arc.angle1.sin()) * outer_radius,
+                    arc.center + Point(a1.cos(), a1.sin()) * inner_radius,
+                    arc.center + Point(a1.cos(), a1.sin()) * outer_radius,
                 )),
             ]
         }
