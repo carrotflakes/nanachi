@@ -19,3 +19,4 @@ pub mod writer;
 pub mod models;
 pub mod bezier_area;
 //pub mod path_outline;
+pub mod bold;

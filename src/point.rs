@@ -25,6 +25,10 @@ impl Point {
             self.0 * sin + self.1 * cos,
         )
     }
+
+    pub fn unit(self) -> Point {
+        self / self.0.hypot(self.1)
+    }
 }
 
 impl std::ops::Add for Point {
