@@ -56,10 +56,12 @@ pub fn path_item_bold(path_item: &PathItem, width: f64) -> Vec<PathItem> {
                 Point(n.1, -n.0) * width
             };
             let control1_d = {
-                let n = quad.end - quad.start;
-                let n = (quad.control1 + Point(n.1, -n.0)).unit();
-                n * width // TODO
-            };dbg!(control1_d);
+                let c = (quad.end + quad.start) / 2.0;
+                let n = (quad.control1 - c).unit();
+                let m = quad.end - quad.start;
+                let m = (quad.control1 + Point(m.1, -m.0)).unit();
+                (n + m) * width
+            };
             let outer_quad = PathItem::Quad(Quad {
                 start: quad.start + start_d,
                 end: quad.end + end_d,
