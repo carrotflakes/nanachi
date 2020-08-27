@@ -64,6 +64,12 @@ impl Ellipse {
     pub fn angle_offset(&self) -> f64 {
         -((self.rotation - FRAC_PI_2).tan() * self.radius_y / self.radius_x).atan()
     }
+
+    pub fn angle_norm(&self) -> (f64, f64) {
+        let (a1, a2) = if self.angle1 < self.angle2 { (self.angle1, self.angle2) } else { (self.angle2, self.angle1) };
+        let a = a1.rem_euclid(PI * 2.0);
+        (a, if a2 - a < 0.0 { a2 + PI * 2.0 } else { a2 })
+    }
 }
 
 #[derive(Debug, Clone)]
