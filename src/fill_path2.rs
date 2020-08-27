@@ -305,11 +305,11 @@ fn right_skewed_half_unit_circle_area(upper: f64, lower: f64, upper_right: f64, 
     match (upper_right < upper_x, lower_right < lower_x) {
         (true, true) => {
             //(upper_right + lower_right).max(0.0) * (lower - upper) / 2.0
-            (upper_right + lower_right) * (lower - upper) / 2.0 + match (0. <= upper_right, 0. <= lower_right) {
-                (true, true) => 0.0,
-                (false, false) => unreachable!(),
-                (true, false) => (lower_right).powi(2) / (upper_right - lower_right) / 2.0 * (lower - upper),
-                (false, true) => (upper_right).powi(2) / (lower_right - upper_right) / 2.0 * (lower - upper),
+            (lower - upper) / 2.0 * match (0. <= upper_right, 0. <= lower_right) {
+                (true, true) => (upper_right + lower_right),
+                (false, false) => 0.0, // 大丈夫？
+                (true, false) => (upper_right + lower_right) + (lower_right).powi(2) / (upper_right - lower_right),
+                (false, true) => (upper_right + lower_right) + (upper_right).powi(2) / (lower_right - upper_right),
             }
         }
         (false, false) => {
