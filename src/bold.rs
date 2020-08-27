@@ -16,10 +16,17 @@ pub fn path_bold1(path: &Path, width: f64) -> Vec<PathItem> {
         pis.push(pi1);
         pis.push(pi2);
     }
-    let p1 = pis[pis.len() - 2].right_point();
-    let p2 = pis[pis.len() - 1].left_point();
-    pis.push(PathItem::Line(Line(p1, pis[0].left_point())));
-    pis.push(PathItem::Line(Line(pis[1].right_point(), p2)));
+    if path.is_closed() {
+        let p1 = pis[pis.len() - 2].right_point();
+        let p2 = pis[pis.len() - 1].left_point();
+        pis.push(PathItem::Line(Line(p1, pis[0].left_point())));
+        pis.push(PathItem::Line(Line(pis[1].right_point(), p2)));
+    } else {
+        let p1 = pis[pis.len() - 2].right_point();
+        let p2 = pis[pis.len() - 1].left_point();
+        pis.push(PathItem::Line(Line(p1, p2)));
+        pis.push(PathItem::Line(Line(pis[1].right_point(), pis[0].left_point())));
+    }
     pis
 }
 
