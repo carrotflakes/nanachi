@@ -45,7 +45,32 @@ pub fn path_item_bold(path_item: &PathItem, width: f64) -> Vec<PathItem> {
                 )),
             ]
         }
-        PathItem::Ellipse(ellipse) => {vec![]}
+        PathItem::Ellipse(ellipse) => {
+            let (a1, a2) = ellipse.angle_norm();
+            let outer_ellipse = PathItem::Ellipse(Ellipse{
+                radius_x: ellipse.radius_x + width,
+                radius_y: ellipse.radius_y + width,
+                angle1: a1,
+                angle2: a2,
+                ..ellipse.clone()
+            });
+            let inner_ellipse = PathItem::Ellipse(Ellipse{
+                radius_x: (ellipse.radius_x - width).max(0.0),
+                radius_y: (ellipse.radius_y - width).max(0.0),
+                angle1: a2,
+                angle2: a1,
+                ..ellipse.clone()
+            });
+            let line1 = PathItem::Line(Line(
+                outer_ellipse.right_point(),
+                inner_ellipse.left_point(),
+            ));
+            let line2 = PathItem::Line(Line(
+                inner_ellipse.right_point(),
+                outer_ellipse.left_point(),
+            ));
+            vec![outer_ellipse, line1,inner_ellipse, line2]
+        }
         PathItem::Quad(quad) => {
             let start_d = {
                 let n = (quad.control1 - quad.start).unit();
