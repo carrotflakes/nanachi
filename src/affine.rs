@@ -1,6 +1,6 @@
 use crate::point::Point;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct AugmentedMatrix(pub [f64; 6]);
 
 impl AugmentedMatrix {
@@ -10,12 +10,12 @@ impl AugmentedMatrix {
 
     pub fn translate(&self, x: f64, y: f64) -> AugmentedMatrix {
         let s = &self.0;
-        AugmentedMatrix([s[0], s[1], x, s[3], s[4], y])
+        AugmentedMatrix([s[0], s[1], s[2] + x, s[3], s[4], s[5] + y])
     }
 
     pub fn scale(&self, x: f64, y: f64) -> AugmentedMatrix {
         let s = &self.0;
-        AugmentedMatrix([s[0] * x, s[1] * x, s[2], s[3] * y, s[4] * y, s[5]])
+        AugmentedMatrix([s[0] * x, s[1] * x, s[2] * x, s[3] * y, s[4] * y, s[5] * y])
     }
 
     pub fn rotate(&self, rad: f64) -> AugmentedMatrix {
@@ -55,8 +55,28 @@ impl AugmentedMatrix {
     }
 }
 
+impl std::ops::Mul<AugmentedMatrix> for AugmentedMatrix {
+    type Output = AugmentedMatrix;
+    fn mul(self, rhs: AugmentedMatrix) -> Self {
+        let s = &self.0;
+        let t = &rhs.0;
+        AugmentedMatrix([
+            s[0] * t[0] + s[3] * t[1],
+            s[1] * t[0] + s[4] * t[1],
+            s[2] * t[0] + s[5] * t[1] + t[2],
+            s[0] * t[3] + s[3] * t[4],
+            s[1] * t[3] + s[4] * t[4],
+            s[2] * t[3] + s[5] * t[4] + t[5],
+        ])
+    }
+}
+
 #[test]
 fn test() {
     let am = AugmentedMatrix::new().rotate(1.0).translate(1.0, 2.0).scale(0.5, 0.6);
     assert!((Point(3.0, 4.0) - am.inverse().apply(am.apply(Point(3.0, 4.0)))).norm() < 0.00001);
+
+    assert_eq!(
+        am.rotate(0.1) * AugmentedMatrix::new().scale(0.5, 0.6).translate(-0.5, -0.6),
+        am.rotate(0.1).scale(0.5, 0.6).translate(-0.5, -0.6))
 }
