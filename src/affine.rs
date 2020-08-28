@@ -1,7 +1,7 @@
 use crate::point::Point;
 
 #[derive(Debug, Copy, Clone)]
-pub struct AugmentedMatrix([f64; 6]);
+pub struct AugmentedMatrix(pub [f64; 6]);
 
 impl AugmentedMatrix {
     pub fn new() -> AugmentedMatrix {
@@ -40,4 +40,23 @@ impl AugmentedMatrix {
         )
         .into()
     }
+
+    pub fn inverse(&self) -> AugmentedMatrix {
+        let s = &self.0;
+        let a = 1.0 / (s[0] * s[4] - s[1] * s[3]);
+        AugmentedMatrix([
+            a * s[4],
+            -a * s[1],
+            a * (s[1] * s[5] - s[2] * s[4]),
+            -a * s[3],
+            a * s[0],
+            -a * (s[0] * s[5] - s[2] * s[3]),
+        ])
+    }
+}
+
+#[test]
+fn test() {
+    let am = AugmentedMatrix::new().rotate(1.0).translate(1.0, 2.0).scale(0.5, 0.6);
+    assert!((Point(3.0, 4.0) - am.inverse().apply(am.apply(Point(3.0, 4.0)))).norm() < 0.00001);
 }
