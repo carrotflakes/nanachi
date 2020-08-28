@@ -22,12 +22,12 @@ impl AugmentedMatrix {
         let s = &self.0;
         let (sin, cos) = rad.sin_cos();
         AugmentedMatrix([
-            s[0] * cos + s[1] * sin,
-            s[0] * -sin + s[1] * cos,
-            s[2],
-            s[3] * cos + s[4] * sin,
-            s[3] * -sin + s[4] * cos,
-            s[5],
+            s[0] * cos - s[3] * sin,
+            s[1] * cos - s[4] * sin,
+            s[2] * cos - s[5] * sin,
+            s[0] * sin + s[3] * cos,
+            s[1] * sin + s[4] * cos,
+            s[2] * sin + s[5] * cos,
         ])
     }
 
@@ -53,11 +53,8 @@ impl AugmentedMatrix {
             -a * (s[0] * s[5] - s[2] * s[3]),
         ])
     }
-}
 
-impl std::ops::Mul<AugmentedMatrix> for AugmentedMatrix {
-    type Output = AugmentedMatrix;
-    fn mul(self, rhs: AugmentedMatrix) -> Self {
+    pub fn then(&self, rhs: &AugmentedMatrix) -> AugmentedMatrix {
         let s = &self.0;
         let t = &rhs.0;
         AugmentedMatrix([
@@ -77,6 +74,15 @@ fn test() {
     assert!((Point(3.0, 4.0) - am.inverse().apply(am.apply(Point(3.0, 4.0)))).norm() < 0.00001);
 
     assert_eq!(
-        am.rotate(0.1) * AugmentedMatrix::new().scale(0.5, 0.6).translate(-0.5, -0.6),
-        am.rotate(0.1).scale(0.5, 0.6).translate(-0.5, -0.6))
+        am.rotate(0.1).then(&AugmentedMatrix::new().translate(-0.5, -0.6)),
+        am.rotate(0.1).translate(-0.5, -0.6));
+    assert_eq!(
+        am.rotate(0.1).then(&AugmentedMatrix::new().scale(-0.5, -0.6)),
+        am.rotate(0.1).scale(-0.5, -0.6));
+    assert_eq!(
+        am.rotate(0.1).then(&AugmentedMatrix::new().rotate(0.3)),
+        am.rotate(0.1).rotate(0.3));
+    // assert_eq!(
+    //     am.rotate(0.1).then(&AugmentedMatrix::new().scale(0.5, 0.6).translate(-0.5, -0.6).rotate(0.3)),
+    //     am.rotate(0.1).scale(0.5, 0.6).translate(-0.5, -0.6).rotate(0.3));
 }
