@@ -31,6 +31,30 @@ impl AugmentedMatrix {
         ])
     }
 
+    pub fn skew_y(&self, dy: f64) -> AugmentedMatrix {
+        let s = &self.0;
+        AugmentedMatrix([
+            s[0],
+            s[1],
+            s[2],
+            s[3] + s[0] * dy,
+            s[4] + s[1] * dy,
+            s[5],
+        ])
+    }
+
+    pub fn skew_x(&self, dx: f64) -> AugmentedMatrix {
+        let s = &self.0;
+        AugmentedMatrix([
+            s[0] + s[3] * dx,
+            s[1] + s[4] * dx,
+            s[2],
+            s[3],
+            s[4],
+            s[5],
+        ])
+    }
+
     pub fn apply<P: From<Point> + Into<Point>>(&self, p: P) -> P {
         let p: Point = p.into();
         let s = &self.0;
