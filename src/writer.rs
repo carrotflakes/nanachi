@@ -1,30 +1,30 @@
-use crate::position_color::PositionColor;
+use crate::fill_color::FillColor;
 use image::{ImageBuffer, Pixel};
 
-pub fn alpha_blend<'a, X, C: PositionColor<X>>(
+pub fn alpha_blend<'a, X, C: FillColor<X>>(
     buf: &'a mut ImageBuffer<X, Vec<u8>>,
-    position_color: &'a C,
+    fill_color: &'a C,
 ) -> impl FnMut(u32, u32, f64) + 'a
 where
     X: Pixel<Subpixel = u8> + 'static {
     move |x: u32, y: u32, v: f64|
-    img_blend_pixel(buf, position_color, x, y, v)
+    img_blend_pixel(buf, fill_color, x, y, v)
 }
 
-pub fn alpha_blend2<'a, X, C: PositionColor<X>>(
+pub fn alpha_blend2<'a, X, C: FillColor<X>>(
     buf: &'a mut ImageBuffer<X, Vec<u8>>,
-    position_color: &'a C,
+    fill_color: &'a C,
     alpha: f64,
 ) -> impl FnMut(u32, u32, f64) + 'a
 where
     X: Pixel<Subpixel = u8> + 'static {
     move |x: u32, y: u32, v: f64|
-    img_blend_pixel(buf, position_color, x, y, v * alpha)
+    img_blend_pixel(buf, fill_color, x, y, v * alpha)
 }
 
-pub fn img_blend_pixel<X, C: PositionColor<X>>(
+pub fn img_blend_pixel<X, C: FillColor<X>>(
     buf: &mut ImageBuffer<X, Vec<u8>>,
-    position_color: &C,
+    fill_color: &C,
     x: u32,
     y: u32,
     r: f64,
@@ -32,7 +32,7 @@ pub fn img_blend_pixel<X, C: PositionColor<X>>(
     X: Pixel<Subpixel = u8> + 'static,
 {
     if x < buf.width() && y < buf.height() {
-        let pixel = position_color.position_color((x, y).into());
+        let pixel = fill_color.fill_color(x as f64, y as f64);
         let pixel = blend_pixel(*buf.get_pixel(x, y), pixel, r);
         buf.put_pixel(x, y, pixel);
     }

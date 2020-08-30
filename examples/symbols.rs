@@ -6,7 +6,8 @@ use nanachi::{
     k_curve,
     path::Path,
     point::Point,
-    position_color, primitives,
+    position_color,
+    fill_color, primitives,
     models::{Arc, Ellipse, Quad},
 };
 use std::f64::consts::PI;
@@ -131,7 +132,7 @@ fn main() {
         draw_fill(
             &mut img,
             &paths.iter().flat_map(|p| p.edges()).collect(),
-            &position_color::Constant::new(Rgb([200, 100, 250])),
+            &fill_color::Constant::new(Rgb([200, 100, 250])),
         );
         // for path in paths {
         //     nanachi::draw_path::draw_path2(&mut img, &path, Rgb([100, 0, 200]));
@@ -163,7 +164,7 @@ fn main() {
         draw_fill(
             &mut img,
             &path.edges(),
-            &position_color::Constant::new(Rgb([200, 100, 20])),
+            &fill_color::Constant::new(Rgb([200, 100, 20])),
         );
 
         // わずかに傾いた正方形
@@ -183,7 +184,7 @@ fn main() {
         draw_fill(
             &mut img,
             &path.edges(),
-            &position_color::Constant::new(Rgb([100, 200, 20])),
+            &fill_color::Constant::new(Rgb([100, 200, 20])),
         );
 
         //欠けた円
@@ -216,7 +217,7 @@ fn main() {
         draw_fill(
             &mut img,
             &e,
-            &position_color::Constant::new(Rgb([200, 100, 250])),
+            &fill_color::Constant::new(Rgb([200, 100, 250])),
         );
         println!("fill_path elapsed: {:?}", t.elapsed());
     }
@@ -248,7 +249,7 @@ fn main() {
         draw_fill(
             &mut img,
             &path.edges(),
-            &position_color::Constant::new(Rgb([200, 200, 50])),
+            &fill_color::Constant::new(Rgb([200, 200, 50])),
         );
     }
 
@@ -305,7 +306,7 @@ fn main() {
             //&path.edge_path(5.0)[0..1].iter().flat_map(|p| p.edges()).collect(),
             //&path.edges(),
             &paths.iter().flat_map(|p| p.edges()).collect(),
-            &position_color::Constant::new(Rgb([50, 250, 10])),
+            &fill_color::Constant::new(Rgb([50, 250, 10])),
         );
     }
 
@@ -313,10 +314,10 @@ fn main() {
     println!("save: {:?}", res);
 }
 
-fn draw_fill<X, C: nanachi::position_color::PositionColor<X>>(
+fn draw_fill<X, C: nanachi::fill_color::FillColor<X>>(
     img: &mut ImageBuffer<X, Vec<u8>>,
     edges: &Vec<nanachi::path2::PathEdge>,
-    position_color: &C,
+    fill_color: &C,
 ) where
     X: image::Pixel<Subpixel = u8> + 'static,
 {
@@ -324,6 +325,6 @@ fn draw_fill<X, C: nanachi::position_color::PositionColor<X>>(
         img.width() as u32,
         img.height() as u32,
         edges,
-        &mut nanachi::writer::alpha_blend(img, position_color),
+        &mut nanachi::writer::alpha_blend(img, fill_color),
     );
 }

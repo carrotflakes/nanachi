@@ -2,7 +2,7 @@ use nanachi::{
     image::{ImageBuffer, Rgb},
     path2::{Path, PathAnchor},
     point::Point,
-    position_color,
+    fill_color,
 };
 
 fn main() {
@@ -26,7 +26,7 @@ fn main() {
         );
         let paths = path.edge_path(0.5);
 
-        let pc = position_color::Constant::new(Rgb([40, 40, 250]));
+        let pc = fill_color::Constant::new(Rgb([40, 40, 250]));
         nanachi::fill_path::draw_fill(
             img.width() as u32,
             img.height() as u32,
@@ -50,7 +50,7 @@ fn main() {
         );
         let paths = path.edge_path(1.0);
 
-        let pc = position_color::Constant::new(Rgb([40, 40, 250]));
+        let pc = fill_color::Constant::new(Rgb([40, 40, 250]));
         nanachi::fill_path::draw_fill(
             img.width() as u32,
             img.height() as u32,
@@ -74,7 +74,7 @@ fn main() {
         );
         let paths = path.edge_path(1.5);
 
-        let pc = position_color::Constant::new(Rgb([40, 40, 250]));
+        let pc = fill_color::Constant::new(Rgb([40, 40, 250]));
         nanachi::fill_path::draw_fill(
             img.width() as u32,
             img.height() as u32,
@@ -98,7 +98,7 @@ fn main() {
         );
         let paths = path.edge_path(0.5);
 
-        let pc = position_color::Constant::new(Rgb([40, 40, 250]));
+        let pc = fill_color::Constant::new(Rgb([40, 40, 250]));
         nanachi::fill_path::draw_fill(
             img.width() as u32,
             img.height() as u32,
@@ -122,7 +122,7 @@ fn main() {
         );
         let paths = path.edge_path(1.0);
 
-        let pc = position_color::Constant::new(Rgb([40, 40, 250]));
+        let pc = fill_color::Constant::new(Rgb([40, 40, 250]));
         nanachi::fill_path::draw_fill(
             img.width() as u32,
             img.height() as u32,
@@ -146,7 +146,7 @@ fn main() {
         );
         let paths = path.edge_path(6.5);
 
-        let pc = position_color::Constant::new(Rgb([40, 40, 250]));
+        let pc = fill_color::Constant::new(Rgb([40, 40, 250]));
         nanachi::fill_path::draw_fill(
             img.width() as u32,
             img.height() as u32,

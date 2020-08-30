@@ -2,8 +2,7 @@ use nanachi::{
     image::{ImageBuffer, Rgb},
     path3::Path,
     path_builder::PathBuilder,
-    point::Point,
-    position_color,
+    fill_color,
     path_transform::path_transform,
     matrix::Matrix2d,
 };
@@ -40,12 +39,12 @@ fn main() {
     ;
     let path = path_transform(&path, &am);
     {
-        let pc = position_color::Constant::new(Rgb([250, 100, 100]));
+        let pc = fill_color::Constant::new(Rgb([250, 100, 100]));
         draw_fill(&mut img, &path, &pc, 1.0);
     }
     {
         let path = Path::new(nanachi::bold::path_bold1(&path, 1.0));
-        let pc = position_color::Constant::new(Rgb([100, 100, 250]));
+        let pc = fill_color::Constant::new(Rgb([100, 100, 250]));
         draw_fill(&mut img, &path, &pc, 0.9);
     }
 
@@ -53,10 +52,10 @@ fn main() {
     println!("save: {:?}", res);
 }
 
-fn draw_fill<X, C: nanachi::position_color::PositionColor<X>>(
+fn draw_fill<X, C: fill_color::FillColor<X>>(
     img: &mut ImageBuffer<X, Vec<u8>>,
     path: &Path,
-    position_color: &C,
+    fill_color: &C,
     alpha: f64,
 ) where
     X: image::Pixel<Subpixel = u8> + 'static,
@@ -66,6 +65,6 @@ fn draw_fill<X, C: nanachi::position_color::PositionColor<X>>(
         img.height() as u32,
         path,
         nanachi::fill_rule::NonZero,
-        &mut nanachi::writer::alpha_blend2(img, position_color, alpha),
+        &mut nanachi::writer::alpha_blend2(img, fill_color, alpha),
     );
 }
