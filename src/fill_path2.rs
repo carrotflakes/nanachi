@@ -103,8 +103,6 @@ fn path_edges_to_elms(path: &Path) -> Vec<ElmContainer> {
                 let (a1, a2) = angle_norm(ellipse.angle1, ellipse.angle2);
                 // let aa = (ellipse.rotation.tan() * ellipse.radius_x / ellipse.radius_y).atan();
                 let aa = ellipse.angle_offset() - FRAC_PI_2;
-                dbg!(&aa);
-                dbg!((((a1 - aa) / FRAC_PI_2), ((a2 - aa) / FRAC_PI_2)));
                 match ((((a1 - aa) / FRAC_PI_2) as usize + 1) / 2, (((a2 - aa) / FRAC_PI_2) as usize + 1) / 2) {
                     (0, 0) | (2, 2) => {
                         elms.push(right_ellipse(&ellipse, ellipse.pos(a1).1, ellipse.pos(a2).1));
@@ -396,7 +394,7 @@ impl Into<SkewEllipse> for Ellipse {
         // let radius_y = self.radius_y * rr.sin() * self.rotation.cos() + self.radius_x * rr.cos() * self.rotation.sin();
         let radius_y = (self.radius_x * self.rotation.sin()).hypot(self.radius_y * (self.rotation + FRAC_PI_2).sin());
         let rr = (self.radius_x / self.radius_y * (-self.rotation).tan()).atan();
-        let radius_x = self.radius_x * rr.cos() * self.rotation.cos() - self.radius_y * rr.sin() * self.rotation.sin();
+        let radius_x = (self.radius_x * rr.cos() * self.rotation.cos() - self.radius_y * rr.sin() * self.rotation.sin()).abs();
         let half_width = (self.radius_x * self.rotation.cos()).hypot(self.radius_y * (self.rotation + FRAC_PI_2).cos());
         
 let aa = -(self.radius_y / self.radius_x * (self.rotation + FRAC_PI_2).tan()).atan();
