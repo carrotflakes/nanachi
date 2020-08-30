@@ -39,7 +39,7 @@ impl AugmentedMatrix {
             s[2],
             s[3] + s[0] * dy,
             s[4] + s[1] * dy,
-            s[5],
+            s[5] + s[2] * dy,
         ])
     }
 
@@ -48,7 +48,7 @@ impl AugmentedMatrix {
         AugmentedMatrix([
             s[0] + s[3] * dx,
             s[1] + s[4] * dx,
-            s[2],
+            s[2] + s[5] * dx,
             s[3],
             s[4],
             s[5],
@@ -94,7 +94,7 @@ impl AugmentedMatrix {
 
 #[test]
 fn test() {
-    let am = AugmentedMatrix::new().rotate(1.0).translate(1.0, 2.0).scale(0.5, 0.6);
+    let am = AugmentedMatrix::new().translate(1.0, 2.0).rotate(1.0).scale(0.5, 0.6);
     assert!((Point(3.0, 4.0) - am.inverse().apply(am.apply(Point(3.0, 4.0)))).norm() < 0.00001);
 
     assert_eq!(
@@ -106,7 +106,7 @@ fn test() {
     assert_eq!(
         am.rotate(0.1).then(&AugmentedMatrix::new().rotate(0.3)),
         am.rotate(0.1).rotate(0.3));
-    // assert_eq!(
-    //     am.rotate(0.1).then(&AugmentedMatrix::new().scale(0.5, 0.6).translate(-0.5, -0.6).rotate(0.3)),
-    //     am.rotate(0.1).scale(0.5, 0.6).translate(-0.5, -0.6).rotate(0.3));
+    assert_eq!(
+        am.rotate(0.1).then(&AugmentedMatrix::new().scale(0.5, 0.6).translate(-0.5, -0.6).rotate(0.3)),
+        am.rotate(0.1).scale(0.5, 0.6).translate(-0.5, -0.6).rotate(0.3));
 }
