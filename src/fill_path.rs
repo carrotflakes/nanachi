@@ -171,7 +171,7 @@ pub fn draw_fill<F: FnMut(u32, u32, f64)>(
             ).sum();
             let v = a - acc;
             acc = a;
-            writer(x as u32, y as u32, v);
+            writer(x as u32, y as u32, v.abs().min(1.0));
         }
     }
 }

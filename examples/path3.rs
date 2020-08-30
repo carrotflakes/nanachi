@@ -65,6 +65,7 @@ fn draw_fill<X, C: nanachi::position_color::PositionColor<X>>(
         img.width() as u32,
         img.height() as u32,
         path,
-        &mut nanachi::writer::alpha_blend2(img, position_color, nanachi::writer::FillRule::NonZero, alpha),
+        nanachi::fill_rule::NonZero,
+        &mut nanachi::writer::alpha_blend2(img, position_color, alpha),
     );
 }

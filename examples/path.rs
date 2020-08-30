@@ -31,7 +31,7 @@ fn main() {
             img.width() as u32,
             img.height() as u32,
             &paths.iter().flat_map(|p| p.edges()).collect(),
-            &mut nanachi::writer::alpha_blend(&mut img, &pc, nanachi::writer::FillRule::NonZero),
+            &mut nanachi::writer::alpha_blend(&mut img, &pc),
         );
 
         let x = -100.5;
@@ -55,7 +55,7 @@ fn main() {
             img.width() as u32,
             img.height() as u32,
             &paths.iter().flat_map(|p| p.edges()).collect(),
-            &mut nanachi::writer::alpha_blend(&mut img, &pc, nanachi::writer::FillRule::NonZero),
+            &mut nanachi::writer::alpha_blend(&mut img, &pc),
         );
 
         let x = -100.5;
@@ -79,7 +79,7 @@ fn main() {
             img.width() as u32,
             img.height() as u32,
             &paths.iter().flat_map(|p| p.edges()).collect(),
-            &mut nanachi::writer::alpha_blend(&mut img, &pc, nanachi::writer::FillRule::NonZero),
+            &mut nanachi::writer::alpha_blend(&mut img, &pc),
         );
 
         let x = 100.0;
@@ -103,7 +103,7 @@ fn main() {
             img.width() as u32,
             img.height() as u32,
             &paths.iter().flat_map(|p| p.edges()).collect(),
-            &mut nanachi::writer::alpha_blend(&mut img, &pc, nanachi::writer::FillRule::NonZero),
+            &mut nanachi::writer::alpha_blend(&mut img, &pc),
         );
 
         let x = 100.0;
@@ -127,7 +127,7 @@ fn main() {
             img.width() as u32,
             img.height() as u32,
             &paths.iter().flat_map(|p| p.edges()).collect(),
-            &mut nanachi::writer::alpha_blend(&mut img, &pc, nanachi::writer::FillRule::NonZero),
+            &mut nanachi::writer::alpha_blend(&mut img, &pc),
         );
 
         let x = 100.0;
@@ -151,7 +151,7 @@ fn main() {
             img.width() as u32,
             img.height() as u32,
             &paths.iter().flat_map(|p| p.edges()).collect(),
-            &mut nanachi::writer::alpha_blend(&mut img, &pc, nanachi::writer::FillRule::NonZero),
+            &mut nanachi::writer::alpha_blend(&mut img, &pc),
         );
     }
 

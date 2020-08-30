@@ -14,6 +14,7 @@ fn main() {
 
     let ps = vec![
         Point(0.2, 0.2),
+        Point(0.5, 0.4),
         Point(0.8, 0.2),
         Point(0.8, 0.8),
         Point(0.2, 0.8),
@@ -39,6 +40,7 @@ fn draw_fill<X, C: nanachi::position_color::PositionColor<X>>(
         img.width() as u32,
         img.height() as u32,
         path,
-        &mut nanachi::writer::alpha_blend2(img, position_color, nanachi::writer::FillRule::NonZero, alpha),
+        nanachi::fill_rule::NonZero,
+        &mut nanachi::writer::alpha_blend2(img, position_color, alpha),
     );
 }

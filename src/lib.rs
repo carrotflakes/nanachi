@@ -6,6 +6,7 @@ pub mod compositor;
 pub mod legacy_draw;
 pub mod fill_path;
 pub mod fill_path2;
+pub mod fill_rule;
 pub mod geometry;
 pub mod k_curve;
 pub mod path;

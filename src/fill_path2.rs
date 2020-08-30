@@ -3,6 +3,7 @@ use crate::models::{Line, Arc, Ellipse};
 use crate::path3::{Path, PathItem};
 use crate::point::Point;
 use crate::bezier_area::QuadPart;
+use crate::fill_rule::FillRule;
 use std::f64::consts::{FRAC_PI_2, PI};
 
 #[derive(Debug, Clone)]
@@ -148,10 +149,11 @@ fn path_edges_to_elms(path: &Path) -> Vec<ElmContainer> {
     elms.into_iter().filter(|e| e.bound.0 < e.bound.1).collect()
 }
 
-pub fn draw_fill<F: FnMut(u32, u32, f64)>(
+pub fn draw_fill<F: FnMut(u32, u32, f64), FR: FillRule>(
     width: u32,
     height: u32,
     path: &Path,
+    fill_rule: FR,
     writer: &mut F,
 ) {
     let ecs = path_edges_to_elms(path);
@@ -165,7 +167,7 @@ pub fn draw_fill<F: FnMut(u32, u32, f64)>(
             ).sum();
             let v = a - acc;
             acc = a;
-            writer(x as u32, y as u32, v);
+            writer(x as u32, y as u32, fill_rule.apply(v));
         }
     }
 }

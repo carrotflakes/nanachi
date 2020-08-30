@@ -1,46 +1,25 @@
 use crate::position_color::PositionColor;
 use image::{ImageBuffer, Pixel};
 
-#[derive(Clone, Copy)]
-pub enum FillRule {
-    NonZero,
-    EvenOdd,
-    NoClip,
-}
-
 pub fn alpha_blend<'a, X, C: PositionColor<X>>(
     buf: &'a mut ImageBuffer<X, Vec<u8>>,
     position_color: &'a C,
-    fill_rule: FillRule,
 ) -> impl FnMut(u32, u32, f64) + 'a
 where
     X: Pixel<Subpixel = u8> + 'static {
-    move |x: u32, y: u32, v: f64| {
-        let v = match fill_rule {
-            FillRule::NonZero => v.abs().min(1.0),
-            FillRule::EvenOdd => 1.0 - (v.rem_euclid(2.0) - 1.0).abs(),
-            FillRule::NoClip => v,
-        };
-        img_blend_pixel(buf, position_color, x, y, v)
-    }
+    move |x: u32, y: u32, v: f64|
+    img_blend_pixel(buf, position_color, x, y, v)
 }
 
 pub fn alpha_blend2<'a, X, C: PositionColor<X>>(
     buf: &'a mut ImageBuffer<X, Vec<u8>>,
     position_color: &'a C,
-    fill_rule: FillRule,
     alpha: f64,
 ) -> impl FnMut(u32, u32, f64) + 'a
 where
     X: Pixel<Subpixel = u8> + 'static {
-    move |x: u32, y: u32, v: f64| {
-        let v = match fill_rule {
-            FillRule::NonZero => v.abs().min(1.0),
-            FillRule::EvenOdd => 1.0 - (v.rem_euclid(2.0) - 1.0).abs(),
-            FillRule::NoClip => v,
-        } * alpha;
-        img_blend_pixel(buf, position_color, x, y, v)
-    }
+    move |x: u32, y: u32, v: f64|
+    img_blend_pixel(buf, position_color, x, y, v * alpha)
 }
 
 pub fn img_blend_pixel<X, C: PositionColor<X>>(
