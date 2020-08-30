@@ -1,5 +1,5 @@
 use nanachi::{
-    draw, geometry,
+    legacy_draw as draw, geometry,
     image::{ImageBuffer, Rgb},
     position_color,
 };

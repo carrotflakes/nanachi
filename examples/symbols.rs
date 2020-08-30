@@ -1,7 +1,7 @@
 use nanachi::{
     affine::AugmentedMatrix,
     bezier::{Bezier2, Bezier3},
-    draw, geometry,
+    legacy_draw as draw, geometry,
     image::{ImageBuffer, Luma, Rgb},
     k_curve,
     path::Path,

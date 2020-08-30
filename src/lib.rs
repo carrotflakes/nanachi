@@ -3,7 +3,7 @@ pub extern crate image;
 pub mod affine;
 pub mod bezier;
 pub mod compositor;
-pub mod draw;
+pub mod legacy_draw;
 pub mod fill_path;
 pub mod fill_path2;
 pub mod geometry;
