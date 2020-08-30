@@ -14,7 +14,7 @@ fn main() {
     let mut img = ImageBuffer::from_pixel(width, height, Rgb([250u8, 250, 250]));
 
     let path = PathBuilder::new()
-    .move_to(10.0, 10.0)
+    .start(10.0, 10.0)
     .line_to(300.0, 10.0)
     // .quad(500.0, 300.0, 300.0, 300.0)
     // .quad(300.0, 200.0, 300.0, 300.0)
