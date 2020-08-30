@@ -88,7 +88,37 @@ where
 X: Pixel<Subpixel = u8> + 'static {
     fn fill_color(&self, x: f64, y: f64) -> X {
         let p = ((x - self.start.0) * self.cos + (y - self.start.1) * self.sin) / self.d;
-        let p = p.min(1.0).max(0.0);
+        gradient(&self.points, p)
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct RadialGradient<X>
+where
+X: Pixel<Subpixel = u8> + 'static {
+    start: (f64, f64),
+    radius: f64,
+    points: Vec<GradientPoint<X>>,
+}
+
+impl<X> RadialGradient<X>
+where
+X: Pixel<Subpixel = u8> + 'static {
+    pub fn new(start: (f64, f64), radius: f64, points: Vec<GradientPoint<X>>) -> RadialGradient<X> {
+        assert!(!points.is_empty());
+        RadialGradient {
+            start,
+            radius,
+            points,
+        }
+    }
+}
+
+impl<X> FillColor<X> for RadialGradient<X>
+where
+X: Pixel<Subpixel = u8> + 'static {
+    fn fill_color(&self, x: f64, y: f64) -> X {
+        let p = (x - self.start.0).hypot(y - self.start.1) / self.radius;
         gradient(&self.points, p)
     }
 }

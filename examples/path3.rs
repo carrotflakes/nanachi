@@ -47,7 +47,11 @@ fn main() {
     }
     {
         let path = Path::new(nanachi::bold::path_bold1(&path, 1.0));
-        let pc = fill_color::Constant::new(Rgb([100, 100, 250]));
+        let pc = fill_color::RadialGradient::new((250.0, 200.0), 200.0, vec![
+            (0.0, Rgb([255, 255, 255])),
+            (0.9, Rgb([200, 10, 10])),
+            (1.0, Rgb([10, 10, 255])),
+        ]);
         draw_fill(&mut img, &path, &pc, 0.9);
     }
 
