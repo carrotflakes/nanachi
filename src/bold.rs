@@ -30,6 +30,18 @@ pub fn path_bold1(path: &Path, width: f64) -> Vec<PathItem> {
     pis
 }
 
+pub fn path_bold2(path: &Path, width: f64) -> Vec<PathItem> {
+    let mut pis = Vec::with_capacity(path.0.len() * 4);
+    for pi in path.0.iter() {
+        let (pi1, pi2) = path_item_bold(pi, width);
+        pis.push(PathItem::Line(Line(pi1.right_point(), pi2.left_point())));
+        pis.push(PathItem::Line(Line(pi2.right_point(), pi1.left_point())));
+        pis.push(pi1);
+        pis.push(pi2);
+    }
+    pis
+}
+
 pub fn path_item_bold(path_item: &PathItem, width: f64) -> (PathItem, PathItem) {
     match path_item {
         PathItem::Line(Line(p1, p2)) => {
