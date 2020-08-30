@@ -12,11 +12,11 @@ fn main() {
             Rgb([255, 255, 255]),
         );
 
-        let color = Rgb([10, 10, 10]);
-        let color2 = Rgb([200, 10, 10]);
+        let color = nanachi::fill_color::Constant::new(Rgb([10, 10, 10]));
+        let color2 = nanachi::fill_color::Constant::new(Rgb([200, 10, 10]));
 
         let mut path: Vec<(f64, f64)> = vec![];
-        nanachi::draw::draw_path(&mut buffer, &path, color, 3.0);
+        // nanachi::draw::draw_path(&mut buffer, &path, color, 3.0);
 
         'running: loop {
             render(&buffer);
@@ -30,10 +30,17 @@ fn main() {
                             Rgb([255, 255, 255]),
                         );
                         path.push((x as f64, y as f64));
-                        nanachi::draw::draw_path(&mut buffer, &path, color, 3.0);
-                        let path2 = path.iter().map(|x| (*x).into()).collect();
-                        let path2 = nanachi::k_curve::k_curve(path2, false, 4).as_lines_points(10);
-                        nanachi::draw::draw_path(&mut buffer, &path2, color2, 1.0);
+                        if 2 <= path.len() {
+                            let path2 = nanachi::path3::Path::from_points(&path.iter().map(|x| (*x).into()).collect());
+                            let path2 = nanachi::bold::path_bold1(&path2, 1.0);
+                            draw_fill(&mut buffer, &nanachi::path3::Path(path2), &color, 1.0);
+                        }
+                        if 2 <= path.len() {
+                            let path2 = path.iter().map(|x| (*x).into()).collect();
+                            let path2 = nanachi::path3::Path::from_bezier2_points(&nanachi::k_curve::k_curve(path2, false, 4));
+                            let path2 = nanachi::bold::path_bold1(&path2, 1.0);
+                            draw_fill(&mut buffer, &nanachi::path3::Path(path2), &color2, 1.0);
+                        }
                     }
                     gui::Event::Quit { .. }
                     | gui::Event::KeyDown {
@@ -46,4 +53,21 @@ fn main() {
             thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
         }
     });
+}
+
+fn draw_fill<X, C: nanachi::fill_color::FillColor<X>>(
+    img: &mut nanachi::image::ImageBuffer<X, Vec<u8>>,
+    path: &nanachi::path3::Path,
+    fill_color: &C,
+    alpha: f64,
+) where
+    X: nanachi::image::Pixel<Subpixel = u8> + 'static,
+{
+    nanachi::fill_path2::draw_fill(
+        img.width() as u32,
+        img.height() as u32,
+        path,
+        nanachi::fill_rule::NonZero,
+        &mut nanachi::writer::alpha_blend2(img, fill_color, alpha),
+    );
 }
