@@ -2,6 +2,10 @@
 pub struct Point(pub f64, pub f64);
 
 impl Point {
+    pub fn from_angle(angle: f64) -> Point {
+        Point(angle.cos(), angle.sin())
+    }
+
     pub fn dot(&self, rhs: &Self) -> f64 {
         self.0 * rhs.0 + self.1 * rhs.1
     }
