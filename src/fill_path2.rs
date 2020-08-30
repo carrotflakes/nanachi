@@ -156,7 +156,9 @@ pub fn draw_fill<F: FnMut(u32, u32, f64)>(
 ) {
     let ecs = path_edges_to_elms(path);
     for y in 0..height as i32 {
-        let mut acc = 0.0;
+        let mut acc: f64 = ecs.iter().map(|e|
+            e.area(y as f64, (y + 1) as f64, 0.0)
+        ).sum();
         for x in 0..width as i32 {
             let a = ecs.iter().map(|e|
                 e.area(y as f64, (y + 1) as f64, (x + 1) as f64)
