@@ -1,5 +1,5 @@
 use nanachi::{
-    affine::AugmentedMatrix,
+    matrix::Matrix2d,
     bezier::{Bezier2, Bezier3},
     legacy_draw as draw, geometry,
     image::{ImageBuffer, Luma, Rgb},
@@ -52,7 +52,7 @@ fn main() {
     .map(|x| x.into())
     .collect::<Vec<Point>>()
     .into();
-    path.transform_mut(&AugmentedMatrix::new().rotate(-0.1));
+    path.transform_mut(&Matrix2d::new().rotate(-0.1));
     draw::draw_path(
         &mut img,
         &path.into() as &Vec<Point>,
@@ -61,10 +61,10 @@ fn main() {
     );
 
     let mut path = primitives::triangle(100.);
-    path.transform_mut(&AugmentedMatrix::new().rotate(0.0).translate(100., 100.));
+    path.transform_mut(&Matrix2d::new().rotate(0.0).translate(100., 100.));
     let mut path2 = primitives::triangle(100.);
     path2.transform_mut(
-        &AugmentedMatrix::new()
+        &Matrix2d::new()
             .scale(0.5, 0.5)
             .rotate(0.0)
             .translate(100., 100.),
@@ -86,7 +86,7 @@ fn main() {
     );
 
     let mut path = primitives::triangle(100.);
-    path.transform_mut(&AugmentedMatrix::new().rotate(0.2).translate(100., 100.));
+    path.transform_mut(&Matrix2d::new().rotate(0.2).translate(100., 100.));
     draw::draw_path(
         &mut img,
         &path.into() as &Vec<Point>,
@@ -95,7 +95,7 @@ fn main() {
     );
 
     let mut path = primitives::triangle(100.);
-    path.transform_mut(&AugmentedMatrix::new().rotate(0.4).translate(100., 100.));
+    path.transform_mut(&Matrix2d::new().rotate(0.4).translate(100., 100.));
     draw::draw_path(
         &mut img,
         &path.into() as &Vec<Point>,

@@ -1,4 +1,4 @@
-use crate::affine::AugmentedMatrix;
+use crate::matrix::Matrix2d;
 use crate::point::Point;
 
 #[derive(Debug, Clone)]
@@ -15,7 +15,7 @@ impl Path {
         }
     }
 
-    pub fn transform_mut(&mut self, am: &AugmentedMatrix) {
+    pub fn transform_mut(&mut self, am: &Matrix2d) {
         for p in self.points.as_mut_slice() {
             *p = am.apply(*p);
         }

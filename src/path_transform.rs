@@ -1,10 +1,10 @@
 use crate::point::Point;
 use crate::models::{Line, Arc, Ellipse, Quad};
-use crate::affine::AugmentedMatrix;
+use crate::matrix::Matrix2d;
 use crate::path3::{Path, PathItem};
 use std::f64::consts::PI;
 
-pub fn path_transform(path: &Path, am: &AugmentedMatrix) -> Path {
+pub fn path_transform(path: &Path, am: &Matrix2d) -> Path {
     let mut pis = Vec::with_capacity(path.0.len());
     for pi in path.0.iter() {
         pis.push(match pi {
@@ -30,8 +30,8 @@ pub fn path_transform(path: &Path, am: &AugmentedMatrix) -> Path {
     Path::new(pis)
 }
 
-pub fn transform_ellipse(ellipse: &Ellipse, am: &AugmentedMatrix) -> Ellipse {
-    let eam = AugmentedMatrix::new()
+pub fn transform_ellipse(ellipse: &Ellipse, am: &Matrix2d) -> Ellipse {
+    let eam = Matrix2d::new()
         .scale(ellipse.radius_x, ellipse.radius_y)
         .rotate(ellipse.rotation)
         .translate(ellipse.center.0, ellipse.center.1);
@@ -57,7 +57,7 @@ pub fn transform_ellipse(ellipse: &Ellipse, am: &AugmentedMatrix) -> Ellipse {
     let radius_y = w * (1.0 + k * rotation.tan()).sqrt();
     // dbg!(rotation, radius_x, radius_y);
     let rotation = rotation + am.0[4].atan2(am.0[1]);
-    let am2 = AugmentedMatrix::new()
+    let am2 = Matrix2d::new()
         .scale(radius_x, radius_y)
         .rotate(rotation)
         .translate(center.0, center.1)
@@ -82,7 +82,7 @@ pub fn transform_ellipse(ellipse: &Ellipse, am: &AugmentedMatrix) -> Ellipse {
 
 #[test]
 fn test() {
-    let am = AugmentedMatrix::new().scale(3.0, 2.0).skew_y(0.5).rotate(0.1);
+    let am = Matrix2d::new().scale(3.0, 2.0).skew_y(0.5).rotate(0.1);
     // let k = (am.0[1] + am.0[2]) / (am.0[4] + am.0[5]) + (am.0[3] + am.0[5]) / (am.0[0] + am.0[2]);
     let k = (PI / 2.0 - am.0[4].atan2(am.0[1]) + am.0[3].atan2(am.0[0])).tan();
     let p = am.apply(Point(1.0, 0.0)).rotate(am.0[1].atan2(am.0[4])).0;

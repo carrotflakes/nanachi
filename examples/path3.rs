@@ -5,7 +5,7 @@ use nanachi::{
     point::Point,
     position_color,
     path_transform::path_transform,
-    affine::AugmentedMatrix,
+    matrix::Matrix2d,
 };
 use std::f64::consts::PI;
 
@@ -31,7 +31,7 @@ fn main() {
     //     .line_to(Point(200.0, 200.0))
     //     .line_to(Point(100.0, 200.0))
     //     .close().end();
-    let am = AugmentedMatrix::new()
+    let am = Matrix2d::new()
         .translate(-250.0, -250.0)
         .rotate(0.9)
         .scale(1.0, 0.6)

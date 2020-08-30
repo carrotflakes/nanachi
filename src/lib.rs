@@ -1,6 +1,6 @@
 pub extern crate image;
 
-pub mod affine;
+pub mod matrix;
 pub mod bezier;
 pub mod compositor;
 pub mod legacy_draw;
