@@ -2,7 +2,6 @@ use crate::point::Point;
 
 pub struct Bezier3 {
     pub points: Vec<Point>,
-    pub close: bool,
 }
 
 impl Bezier3 {
@@ -38,7 +37,6 @@ impl Bezier3 {
 #[derive(Debug)]
 pub struct Bezier2 {
     pub points: Vec<Point>,
-    pub close: bool,
 }
 
 impl Bezier2 {

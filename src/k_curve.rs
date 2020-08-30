@@ -132,7 +132,7 @@ impl K {
         solve_tridiagonal_equation(a, &mut self.b, &self.points);
     }
 
-    pub fn get_bezier(&self) -> Bezier2 {
+    pub fn get_bezier_points(&self) -> Vec<Point> {
         let mut points = self.b.clone();
         if self.close {
             points.push(points[0]);
@@ -144,10 +144,7 @@ impl K {
                 points = Vec::from(&points[2..self.n * 2 - 1])
             };
         }
-        Bezier2 {
-            points,
-            close: self.close,
-        }
+        points
     }
 }
 
@@ -155,12 +152,13 @@ pub fn k_curve(points: Vec<Point>, close: bool, iteration: usize) -> Bezier2 {
     if points.len() <= 1 {
         return Bezier2 {
             points: Vec::new(),
-            close,
         };
     }
     let mut k = K::new(points, close);
     k.optimize(iteration);
-    k.get_bezier()
+    Bezier2 {
+        points: k.get_bezier_points(),
+    }
 }
 
 fn tri_area(p1: Point, p2: Point, p3: Point) -> f64 {

@@ -13,12 +13,10 @@ fn main() {
                 Point(0.0, 1.0),
                 Point(1.0, 0.0),
             ],
-            close: false,
         };
         println!("{:?}", b.as_lines_points(8));
         let b3 = Bezier2 {
             points: vec![Point(0.0, 0.0), Point(0.5, 1.0), Point(1.0, 0.0)],
-            close: false,
         };
         println!("{:?}", b3.as_lines_points(8));
 
