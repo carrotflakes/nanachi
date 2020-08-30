@@ -39,7 +39,10 @@ fn main() {
     ;
     let path = path_transform(&path, &am);
     {
-        let pc = fill_color::Constant::new(Rgb([250, 100, 100]));
+        let pc = fill_color::LinearGradient::new((200.0, 200.0), (300.0, 400.0), vec![
+            (0.0, Rgb([255, 100, 100])),
+            (1.0, Rgb([200, 255, 10])),
+        ]);
         draw_fill(&mut img, &path, &pc, 1.0);
     }
     {
