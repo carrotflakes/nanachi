@@ -129,6 +129,18 @@ impl Path {
     pub fn is_closed(&self) -> bool {
         self.0[0].left_point() == self.0[self.0.len() - 1].right_point()
     }
+
+    pub fn from_bezier2_points(points: &Vec<Point>) -> Path {
+        let mut pis = Vec::new();
+        for i in 0..points.len() / 2 {
+            pis.push(PathItem::Quad(Quad {
+                start: points[i * 2],
+                end: points[i * 2 + 2],
+                control1: points[i * 2 + 1],
+            }));
+        }
+        Path(pis)
+    }
 }
 
 pub fn intersect_segment_and_arc(line: &Line, arc: &Arc) -> Option<Point> {

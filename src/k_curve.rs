@@ -148,17 +148,13 @@ impl K {
     }
 }
 
-pub fn k_curve(points: Vec<Point>, close: bool, iteration: usize) -> Bezier2 {
+pub fn k_curve(points: Vec<Point>, close: bool, iteration: usize) -> Vec<Point> {
     if points.len() <= 1 {
-        return Bezier2 {
-            points: Vec::new(),
-        };
+        return Vec::new();
     }
     let mut k = K::new(points, close);
     k.optimize(iteration);
-    Bezier2 {
-        points: k.get_bezier_points(),
-    }
+    k.get_bezier_points()
 }
 
 fn tri_area(p1: Point, p2: Point, p3: Point) -> f64 {
