@@ -8,8 +8,8 @@ use std::f64::consts::{FRAC_PI_2, PI};
 #[derive(Debug, Clone)]
 pub struct SkewEllipse {
     center: Point,
-    radius_x: f64,
-    radius_y: f64,
+    pre_half_width: f64,
+    half_height: f64,
     dx_dy: f64,
     half_width: f64,
 }
@@ -212,7 +212,7 @@ impl Elm {
                     let upper_right = x - (upper - se.center.1) * se.dx_dy;
                     let lower_right = x - (lower - se.center.1) * se.dx_dy;
                     //(lower_right + upper_right) / 2.0
-                    x * h - skewed_half_circle_area(se.center, se.radius_x, se.radius_y, upper, lower, upper_right, lower_right)
+                    x * h - skewed_half_circle_area(se.center, se.pre_half_width, se.half_height, upper, lower, upper_right, lower_right)
                 }
             }
             Elm::RightEllipse(se) => {
@@ -226,9 +226,9 @@ impl Elm {
                     let lower_x = se.center.0 + (lower - se.center.1) * se.dx_dy;
                     match (x < upper_x, x < lower_x) {
                         (true, true) => x * h,
-                        (false, false) => (upper_x + lower_x) / 2.0 * h + right_skewed_half_circle_area(se.center, se.radius_x, se.radius_y, upper, lower, upper_right, lower_right),
-                        (true, false) => (x - (x - lower_x).powi(2) / (upper_x - lower_x) / 2.0) * h + right_skewed_half_circle_area(se.center, se.radius_x, se.radius_y, upper, lower, upper_right, lower_right),
-                        (false, true) => (x - (x - upper_x).powi(2) / (lower_x - upper_x) / 2.0) * h + right_skewed_half_circle_area(se.center, se.radius_x, se.radius_y, upper, lower, upper_right, lower_right),
+                        (false, false) => (upper_x + lower_x) / 2.0 * h + right_skewed_half_circle_area(se.center, se.pre_half_width, se.half_height, upper, lower, upper_right, lower_right),
+                        (true, false) => (x - (x - lower_x).powi(2) / (upper_x - lower_x) / 2.0) * h + right_skewed_half_circle_area(se.center, se.pre_half_width, se.half_height, upper, lower, upper_right, lower_right),
+                        (false, true) => (x - (x - upper_x).powi(2) / (lower_x - upper_x) / 2.0) * h + right_skewed_half_circle_area(se.center, se.pre_half_width, se.half_height, upper, lower, upper_right, lower_right),
                         //(_, _) => (upper_x + lower_x) / 2.0 * h + right_skewed_half_circle_area(se.center, se.radius_x, se.radius_y, upper, lower, upper_right, lower_right),
                     }
                     //((x.min(upper_x) + x.min(lower_x)) / 2.0) * h // FIXME
@@ -389,23 +389,21 @@ fn angle_norm(a1: f64, a2: f64) -> (f64, f64) {
 
 impl Into<SkewEllipse> for Ellipse {
     fn into(self) -> SkewEllipse {
-        // let radius_x = (self.radius_x * self.rotation.cos()).hypot(self.radius_y * (self.rotation + FRAC_PI_2).cos());
-        // let rr = (self.radius_y / self.radius_x * (-self.rotation).tan()).atan() + FRAC_PI_2;
-        // let radius_y = self.radius_y * rr.sin() * self.rotation.cos() + self.radius_x * rr.cos() * self.rotation.sin();
-        let radius_y = (self.radius_x * self.rotation.sin()).hypot(self.radius_y * (self.rotation + FRAC_PI_2).sin());
+        let half_height = (self.radius_x * self.rotation.sin()).hypot(self.radius_y * self.rotation.cos());
+        let half_width = (self.radius_x * self.rotation.cos()).hypot(self.radius_y * self.rotation.sin());
         let rr = (self.radius_x / self.radius_y * (-self.rotation).tan()).atan();
-        let radius_x = (self.radius_x * rr.cos() * self.rotation.cos() - self.radius_y * rr.sin() * self.rotation.sin()).abs();
-        let half_width = (self.radius_x * self.rotation.cos()).hypot(self.radius_y * (self.rotation + FRAC_PI_2).cos());
-        
-let aa = -(self.radius_y / self.radius_x * (self.rotation + FRAC_PI_2).tan()).atan();
-let x = aa.cos() * self.radius_x;
-let y = aa.sin() * self.radius_y;
-let (sin, cos) = self.rotation.sin_cos();
-        let dx_dy = (x * cos - y * sin) / (x * sin + y * cos);
+        let pre_half_width = (self.radius_x * self.rotation.cos() * rr.cos() - self.radius_y * self.rotation.sin() * rr.sin()).abs();
+
+        // skew_x by
+        let dx_dy = {
+            let angle = -(self.radius_y / self.radius_x * (self.rotation + FRAC_PI_2).tan()).atan();
+            let p = Point(angle.cos() * self.radius_x, angle.sin() * self.radius_y).rotate(self.rotation);
+            p.0 / p.1
+        };
         SkewEllipse{
             center: self.center,
-            radius_x,
-            radius_y,
+            pre_half_width,
+            half_height,
             dx_dy,
             half_width,
         }
