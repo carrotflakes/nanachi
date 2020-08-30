@@ -84,6 +84,7 @@ fn path_edges_to_elms(path: &Path) -> Vec<ElmContainer> {
                 }
             }
             PathItem::Ellipse(ellipse) => {
+                let ellipse = ellipse.normalize();
                 fn left_ellipse(ellipse: &Ellipse, upper: f64, lower: f64) -> ElmContainer {
                     ElmContainer {
                         bound: (upper, lower),
@@ -106,30 +107,30 @@ fn path_edges_to_elms(path: &Path) -> Vec<ElmContainer> {
                 dbg!((((a1 - aa) / FRAC_PI_2), ((a2 - aa) / FRAC_PI_2)));
                 match ((((a1 - aa) / FRAC_PI_2) as usize + 1) / 2, (((a2 - aa) / FRAC_PI_2) as usize + 1) / 2) {
                     (0, 0) | (2, 2) => {
-                        elms.push(right_ellipse(ellipse, ellipse.pos(a1).1, ellipse.pos(a2).1));
+                        elms.push(right_ellipse(&ellipse, ellipse.pos(a1).1, ellipse.pos(a2).1));
                     }
                     (0, 1) | (2, 3) => {
-                        elms.push(left_ellipse(ellipse, ellipse.pos(a2).1, bound.3,));
-                        elms.push(right_ellipse(ellipse, ellipse.pos(a1).1, bound.3));
+                        elms.push(left_ellipse(&ellipse, ellipse.pos(a2).1, bound.3,));
+                        elms.push(right_ellipse(&ellipse, ellipse.pos(a1).1, bound.3));
                     }
                     (0, 2) | (2, 4) => {
-                        elms.push(left_ellipse(ellipse, bound.2, bound.3));
-                        elms.push(right_ellipse(ellipse, ellipse.pos(a1).1, bound.3));
-                        elms.push(right_ellipse(ellipse, bound.2, ellipse.pos(a2).1));
+                        elms.push(left_ellipse(&ellipse, bound.2, bound.3));
+                        elms.push(right_ellipse(&ellipse, ellipse.pos(a1).1, bound.3));
+                        elms.push(right_ellipse(&ellipse, bound.2, ellipse.pos(a2).1));
                     }
                     (1, 1) => {
-                        elms.push(left_ellipse(ellipse, ellipse.pos(a2).1, ellipse.pos(a1).1));
+                        elms.push(left_ellipse(&ellipse, ellipse.pos(a2).1, ellipse.pos(a1).1));
                     }
                     (1, 2) => {
-                        elms.push(left_ellipse(ellipse, bound.2, ellipse.pos(a1).1));
-                        elms.push(right_ellipse(ellipse, bound.2, ellipse.pos(a2).1));
+                        elms.push(left_ellipse(&ellipse, bound.2, ellipse.pos(a1).1));
+                        elms.push(right_ellipse(&ellipse, bound.2, ellipse.pos(a2).1));
                     }
                     (1, 3) => {
-                        elms.push(left_ellipse(ellipse, ellipse.pos(a2).1, bound.3));
-                        elms.push(left_ellipse(ellipse, bound.2, ellipse.pos(a1).1));
-                        elms.push(right_ellipse(ellipse, bound.2, bound.3));
+                        elms.push(left_ellipse(&ellipse, ellipse.pos(a2).1, bound.3));
+                        elms.push(left_ellipse(&ellipse, bound.2, ellipse.pos(a1).1));
+                        elms.push(right_ellipse(&ellipse, bound.2, bound.3));
                     }
-                    _ => unreachable!(),
+                    (a1, a2) => {dbg!(a1, a2);unreachable!()},
                 }
             }
             PathItem::Quad(quad) => {
