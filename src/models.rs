@@ -176,6 +176,23 @@ impl Quad {
             },
         )
     }
+
+    pub fn closest_t_to_control(&self) -> f64 {
+        let v0 = self.control1 - self.start;
+        let v1 = self.end - self.control1;
+
+        let a = (v1 - v0).dot(&(v1 - v0));
+        let b = 3.0 * (v1.dot(&v0) - v0.dot(&v0));
+        let c = 3.0 * v0.dot(&v0) - v1.dot(&v0);
+        let d = -1.0 * v0.dot(&v0);
+
+        let p = -b / (3.0 * a);
+        let q = p.powi(3) + (b * c - 3.0 * a * d) / (6.0 * a.powi(2));
+        let r = c / (3.0 * a);
+
+        let s = (q.powi(2) + (r - p.powi(2)).powi(3)).sqrt();
+        (q + s).cbrt() + (q - s).cbrt() + p
+    }
 }
 
 #[derive(Debug, Clone)]
