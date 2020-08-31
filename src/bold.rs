@@ -1,6 +1,7 @@
 use crate::point::Point;
 use crate::path3::{Path, PathItem};
 use crate::models::{Line, Arc, Ellipse, Quad};
+use crate::geometry;
 
 pub fn path_bold1(path: &Path, width: f64) -> Vec<PathItem> {
     let mut pis = Vec::with_capacity(path.0.len() * 4);
@@ -97,23 +98,20 @@ pub fn path_item_bold(path_item: &PathItem, width: f64) -> (PathItem, PathItem) 
                 let n = (quad.end - quad.control1).unit();
                 Point(n.1, -n.0) * width
             };
-            let control1_d = {
-                let c = (quad.end + quad.start) / 2.0;
-                let n = (quad.control1 - c).unit();
-                let m = quad.end - quad.start;
-                let m = (quad.control1 + Point(m.1, -m.0)).unit();
-                (n + m) * width
-            };
             (
                 PathItem::Quad(Quad {
                     start: quad.start + start_d,
                     end: quad.end + end_d,
-                    control1: quad.control1 + control1_d,
+                    control1: geometry::intersect_line_and_line(
+                        quad.start + start_d, quad.control1 + start_d,
+                        quad.end + end_d, quad.control1 + end_d),
                 }),
                 PathItem::Quad(Quad {
                     start: quad.end - end_d,
                     end: quad.start - start_d,
-                    control1: quad.control1 - control1_d,
+                    control1: geometry::intersect_line_and_line(
+                        quad.start - start_d, quad.control1 - start_d,
+                        quad.end - end_d, quad.control1 - end_d),
                 }),
             )
         }
