@@ -91,9 +91,11 @@ pub fn path_item_bold(pis: &mut Vec<PathItem>, path_item: &PathItem, width: f64)
                 let n = (quad.end - quad.control1).unit();
                 Point(n.1, -n.0) * width
             };
-            let v0 = quad.start - quad.control1;
-            let v1 = quad.end - quad.control1;
-            if 0.0 <= v1.0 * v0.0 + v1.1 * v0.1 {
+            if {
+                let v0 = quad.start - quad.control1;
+                let v1 = quad.end - quad.control1;
+                0.0 <= v1.0 * v0.0 + v1.1 * v0.1 // whether acute angle
+             } {
                 let t= quad.closest_t_to_control();
                 let (q1, q2) = quad.separate(t);
                 let middle_d = {
