@@ -23,3 +23,4 @@ pub mod bezier_area;
 pub mod bold;
 pub mod path_transform;
 pub mod fill_color;
+pub mod draw_stroke;
