@@ -91,20 +91,60 @@ pub fn path_item_bold(pis: &mut Vec<PathItem>, path_item: &PathItem, width: f64)
                 let n = (quad.end - quad.control1).unit();
                 Point(n.1, -n.0) * width
             };
-            pis.push(PathItem::Quad(Quad {
-                start: quad.start + start_d,
-                end: quad.end + end_d,
-                control1: geometry::intersect_line_and_line(
-                    quad.start + start_d, quad.control1 + start_d,
-                    quad.end + end_d, quad.control1 + end_d),
-            }));
-            pis.push(PathItem::Quad(Quad {
-                start: quad.end - end_d,
-                end: quad.start - start_d,
-                control1: geometry::intersect_line_and_line(
-                    quad.start - start_d, quad.control1 - start_d,
-                    quad.end - end_d, quad.control1 - end_d),
-            }));
+            let v0 = quad.start - quad.control1;
+            let v1 = quad.end - quad.control1;
+            if 0.0 <= v1.0 * v0.0 + v1.1 * v0.1 {
+                let t= quad.closest_t_to_control();
+                let (q1, q2) = quad.separate(t);
+                let middle_d = {
+                    let n = (q2.control1 - q2.start).unit();
+                    Point(n.1, -n.0) * width
+                };
+
+                pis.push(PathItem::Quad(Quad {
+                    start: q1.start + start_d,
+                    end: q1.end + middle_d,
+                    control1: geometry::intersect_line_and_line(
+                        q1.start + start_d, q1.control1 + start_d,
+                        q1.end + middle_d, q1.control1 + middle_d),
+                }));
+                pis.push(PathItem::Quad(Quad {
+                    start: q1.end - middle_d,
+                    end: q1.start - start_d,
+                    control1: geometry::intersect_line_and_line(
+                        q1.start - start_d, q1.control1 - start_d,
+                        q1.end - middle_d, q1.control1 - middle_d),
+                }));
+                pis.push(PathItem::Quad(Quad {
+                    start: q2.start + middle_d,
+                    end: q2.end + end_d,
+                    control1: geometry::intersect_line_and_line(
+                        q2.start + middle_d, q2.control1 + middle_d,
+                        q2.end + end_d, q2.control1 + end_d),
+                }));
+                pis.push(PathItem::Quad(Quad {
+                    start: q2.end - end_d,
+                    end: q2.start - middle_d,
+                    control1: geometry::intersect_line_and_line(
+                        q2.start - middle_d, q2.control1 - middle_d,
+                        q2.end - end_d, q2.control1 - end_d),
+                }));
+            } else {
+                pis.push(PathItem::Quad(Quad {
+                    start: quad.start + start_d,
+                    end: quad.end + end_d,
+                    control1: geometry::intersect_line_and_line(
+                        quad.start + start_d, quad.control1 + start_d,
+                        quad.end + end_d, quad.control1 + end_d),
+                }));
+                pis.push(PathItem::Quad(Quad {
+                    start: quad.end - end_d,
+                    end: quad.start - start_d,
+                    control1: geometry::intersect_line_and_line(
+                        quad.start - start_d, quad.control1 - start_d,
+                        quad.end - end_d, quad.control1 - end_d),
+                }));
+            }
         }
     }
 }
