@@ -1,4 +1,5 @@
 use crate::fill_color::FillColor;
+use crate::compositor::Compositor;
 use image::{ImageBuffer, Pixel};
 
 pub fn alpha_blend<'a, X, C: FillColor<X>>(
@@ -43,4 +44,20 @@ where
     X: Pixel<Subpixel = u8> + 'static,
 {
     p1.map2(&p2, |a, b| (a as f64 * (1.0 - r) + b as f64 * r).round() as u8)
+}
+
+pub fn img_writer<'a, X, F: FillColor<X>, C>(
+    buf: &'a mut ImageBuffer<X, Vec<u8>>,
+    fill_color: &'a F,
+    compositor: C,
+) -> impl FnMut(u32, u32, f64) + 'a
+where
+    X: Pixel<Subpixel = u8> + 'static,
+    C: Compositor<X> + 'static,
+{
+    move |x: u32, y: u32, v: f64| {
+        let pixel = fill_color.fill_color(x as f64, y as f64);
+        let pixel = compositor.composite(buf.get_pixel(x, y), &pixel, v as f32);
+        buf.put_pixel(x, y, pixel);
+    }
 }

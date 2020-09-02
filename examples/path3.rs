@@ -43,35 +43,33 @@ fn main() {
             (0.0, Rgb([255, 100, 100])),
             (1.0, Rgb([200, 255, 10])),
         ]);
-        draw_fill(&mut img, &path, &pc, 1.0);
+        draw_fill(&mut img, &path, &pc);
     }
     {
-        let path = Path::new(nanachi::bold::path_bold1(&path, 1.0));
+        let path = Path::new(nanachi::bold::path_bold1(&path, 5.0));
         let pc = fill_color::RadialGradient::new((250.0, 200.0), 200.0, vec![
             (0.0, Rgb([255, 255, 255])),
             (0.9, Rgb([200, 10, 10])),
             (1.0, Rgb([10, 10, 255])),
         ]);
-        draw_fill(&mut img, &path, &pc, 0.9);
+        draw_fill(&mut img, &path, &pc);
     }
 
     let res = img.save("./path3.png");
     println!("save: {:?}", res);
 }
 
-fn draw_fill<X, C: fill_color::FillColor<X>>(
-    img: &mut ImageBuffer<X, Vec<u8>>,
+fn draw_fill<C: fill_color::FillColor<Rgb<u8>>>(
+    img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>,
     path: &Path,
     fill_color: &C,
-    alpha: f64,
-) where
-    X: image::Pixel<Subpixel = u8> + 'static,
-{
+) {
+    let compositor = nanachi::compositor::normal::Normal;
     nanachi::fill_path2::draw_fill(
         img.width() as u32,
         img.height() as u32,
         path,
         nanachi::fill_rule::NonZero,
-        &mut nanachi::writer::alpha_blend2(img, fill_color, alpha),
+        &mut nanachi::writer::img_writer(img, fill_color, compositor),
     );
 }
