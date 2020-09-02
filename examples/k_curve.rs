@@ -22,25 +22,22 @@ fn main() {
     let path = Path::from_bezier2_points(&k_curve(ps, true, 3));
     let path = path_transform(&path, &Matrix2d::new().scale(512.0, 512.0));
     let pc = fill_color::Constant::new(Rgb([100, 100, 250]));
-    draw_fill(&mut img, &path, &pc, 1.0);
+    draw_fill(&mut img, &path, &pc);
 
     let res = img.save("./k_curve.png");
     println!("save: {:?}", res);
 }
 
-fn draw_fill<X, C: fill_color::FillColor<X>>(
-    img: &mut ImageBuffer<X, Vec<u8>>,
+fn draw_fill<C: fill_color::FillColor<Rgb<u8>>>(
+    img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>,
     path: &Path,
     fill_color: &C,
-    alpha: f64,
-) where
-    X: image::Pixel<Subpixel = u8> + 'static,
-{
+) {
     nanachi::fill_path2::draw_fill(
         img.width() as u32,
         img.height() as u32,
         path,
         nanachi::fill_rule::NonZero,
-        &mut nanachi::writer::alpha_blend2(img, fill_color, alpha),
+        &mut nanachi::writer::img_writer(img, fill_color, nanachi::compositor::normal::Normal),
     );
 }

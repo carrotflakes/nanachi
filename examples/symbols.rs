@@ -314,17 +314,15 @@ fn main() {
     println!("save: {:?}", res);
 }
 
-fn draw_fill<X, C: nanachi::fill_color::FillColor<X>>(
-    img: &mut ImageBuffer<X, Vec<u8>>,
+fn draw_fill<C: nanachi::fill_color::FillColor<Rgb<u8>>>(
+    img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>,
     edges: &Vec<nanachi::path2::PathEdge>,
     fill_color: &C,
-) where
-    X: image::Pixel<Subpixel = u8> + 'static,
-{
+) {
     nanachi::fill_path::draw_fill(
         img.width() as u32,
         img.height() as u32,
         edges,
-        &mut nanachi::writer::alpha_blend(img, fill_color),
+        &mut nanachi::writer::img_writer(img, fill_color, nanachi::compositor::normal::Normal),
     );
 }
