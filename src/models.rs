@@ -13,6 +13,20 @@ pub struct Arc {
 }
 
 impl Arc {
+    pub fn from_points(center: Point, start: Point, end: Point) -> Arc {
+        let angle1 = (start - center).atan2();
+        let mut angle2 = (end - center).atan2();
+        if angle1 > angle2 {
+            angle2 += PI * 2.0
+        }
+        Arc {
+            center,
+            radius: (start - center).norm(),
+            angle1,
+            angle2,
+        }
+    }
+
     pub fn angle_norm(&self) -> (f64, f64) {
         let (a1, a2) = if self.angle1 < self.angle2 { (self.angle1, self.angle2) } else { (self.angle2, self.angle1) };
         let a = a1.rem_euclid(PI * 2.0);

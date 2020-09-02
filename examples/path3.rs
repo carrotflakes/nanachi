@@ -30,14 +30,14 @@ fn main() {
     //     .line_to(Point(200.0, 200.0))
     //     .line_to(Point(100.0, 200.0))
     //     .close().end();
-    let am = Matrix2d::new()
-        .translate(-250.0, -250.0)
-        .rotate(0.9)
-        .scale(1.0, 0.6)
-        .skew_x(-0.1)
-        .translate(250.0, 250.0)
-    ;
-    let path = path_transform(&path, &am);
+    // let am = Matrix2d::new()
+    //     .translate(-250.0, -250.0)
+    //     .rotate(0.9)
+    //     .scale(1.0, 0.6)
+    //     .skew_x(-0.1)
+    //     .translate(250.0, 250.0)
+    // ;
+    // let path = path_transform(&path, &am);
     {
         let pc = fill_color::LinearGradient::new((200.0, 200.0), (300.0, 400.0), vec![
             (0.0, Rgb([255, 100, 100])),
@@ -46,7 +46,8 @@ fn main() {
         draw_fill(&mut img, &path, &pc);
     }
     {
-        let path = Path::new(nanachi::bold::path_bold1(&path, 5.0));
+        use nanachi::path_outline::{path_outline, Join, Cap};
+        let path = Path::new(path_outline(&path, 8.0, &Join::Round, &Cap::Round));
         let pc = fill_color::RadialGradient::new((250.0, 200.0), 200.0, vec![
             (0.0, Rgb([255, 255, 255])),
             (0.9, Rgb([200, 10, 10])),

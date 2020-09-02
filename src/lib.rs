@@ -24,3 +24,4 @@ pub mod bold;
 pub mod path_transform;
 pub mod fill_color;
 pub mod draw_stroke;
+pub mod path_outline;
