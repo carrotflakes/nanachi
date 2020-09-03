@@ -86,7 +86,11 @@ fn add_cap(pis: &mut Vec<PathItem>, cap: &Cap, start: Point, end: Point) {
             pis.push(PathItem::Line(Line(start, end)));
         }
         Cap::Square => {
-            todo!()
+            let v = end - start;
+            let v = Point(v.1, -v.0) * 0.5;
+            pis.push(PathItem::Line(Line(start, start + v)));
+            pis.push(PathItem::Line(Line(start + v, end + v)));
+            pis.push(PathItem::Line(Line(end + v, end)));
         }
     }
 }
