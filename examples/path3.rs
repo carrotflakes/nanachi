@@ -47,7 +47,7 @@ fn main() {
     }
     {
         use nanachi::path_outline::{path_outline, Join, Cap};
-        let path = Path::new(path_outline(&path, 8.0, &Join::Miter(16.0), &Cap::Round));
+        let path = Path::new(path_outline(&path, 8.0, &Join::Round, &Cap::Round));
         let pc = fill_color::RadialGradient::new((250.0, 200.0), 200.0, vec![
             (0.0, Rgb([255, 255, 255])),
             (0.9, Rgb([200, 10, 10])),
@@ -66,7 +66,7 @@ fn draw_fill<C: fill_color::FillColor<Rgb<u8>>>(
     fill_color: &C,
 ) {
     let compositor = nanachi::compositor::normal::Normal;
-    nanachi::fill_path2::draw_fill(
+    nanachi::fill_path::draw_fill(
         img.width() as u32,
         img.height() as u32,
         path,

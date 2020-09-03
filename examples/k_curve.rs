@@ -33,7 +33,7 @@ fn draw_fill<C: fill_color::FillColor<Rgb<u8>>>(
     path: &Path,
     fill_color: &C,
 ) {
-    nanachi::fill_path2::draw_fill(
+    nanachi::fill_path::draw_fill(
         img.width() as u32,
         img.height() as u32,
         path,
