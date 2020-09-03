@@ -358,8 +358,8 @@ fn circle_area(center: Point, radius: f64, upper: f64, lower: f64, right: f64) -
         }
     }
     let w = (center.0 - right) / radius;
-    let upper = (center.1 - upper) / radius;
-    let lower = (center.1 - lower) / radius;
+    let upper = ((center.1 - upper) / radius).min(1.0);
+    let lower = ((center.1 - lower) / radius).max(-1.0);
 
     radius.powi(2) * (g(w, lower) - g(w, upper))
 }

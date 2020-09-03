@@ -14,8 +14,8 @@ pub struct Arc {
 
 impl Arc {
     pub fn from_points(center: Point, start: Point, end: Point) -> Arc {
-        let angle1 = (start - center).atan2();
-        let mut angle2 = (end - center).atan2();
+        let angle1 = (start - center).atan2().rem_euclid(PI * 2.0);
+        let mut angle2 = (end - center).atan2().rem_euclid(PI * 2.0);
         if angle1 > angle2 {
             angle2 += PI * 2.0
         }
