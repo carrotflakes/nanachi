@@ -1,6 +1,5 @@
 use nanachi::{
     matrix::Matrix2d,
-    bezier::{Bezier2, Bezier3},
     legacy_draw as draw, geometry,
     image::{ImageBuffer, Luma, Rgb},
     k_curve,
