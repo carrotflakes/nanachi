@@ -13,7 +13,7 @@ where
 {
     move |x: u32, y: u32, v: f64| {
         let pixel = fill_color.fill_color(x as f64, y as f64);
-        let pixel = compositor.composite(buf.get_pixel(x, y), &pixel, v as f32);
+        let pixel = compositor.composite(buf.get_pixel(x, y), &pixel, v);
         buf.put_pixel(x, y, pixel);
     }
 }
