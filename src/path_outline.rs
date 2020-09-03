@@ -54,6 +54,10 @@ pub fn path_outline(path: &Path, width: f64, join: &Join, cap: &Cap) -> Vec<Path
 }
 
 fn add_join(pis: &mut Vec<PathItem>, join: &Join, center: Point, start1: Point, end1: Point, start2: Point, end2: Point) {
+    let mut bevel = || {
+        pis.push(PathItem::Line(Line(start1, end1)));
+        pis.push(PathItem::Line(Line(start2, end2)));
+    };
     match join {
         Join::Round => {
             if geometry::point_is_right_side_of_line(start1 - center, end1 - center) {
@@ -65,10 +69,9 @@ fn add_join(pis: &mut Vec<PathItem>, join: &Join, center: Point, start1: Point, 
             }
         }
         Join::Bevel => {
-            pis.push(PathItem::Line(Line(start1, end1)));
-            pis.push(PathItem::Line(Line(start2, end2)));
+            bevel();
         }
-        Join::Miter(_) => {
+        Join::Miter(limit) => {
             if geometry::point_is_right_side_of_line(start1 - center, end1 - center) {
                 let p = geometry::intersect_line_and_line(
                     start2,
@@ -76,9 +79,13 @@ fn add_join(pis: &mut Vec<PathItem>, join: &Join, center: Point, start1: Point, 
                     end2,
                     end2 + Point(center.1 - end2.1, end2.0 - center.0),
                 );
-                pis.push(PathItem::Line(Line(start1, end1)));
-                pis.push(PathItem::Line(Line(start2, p)));
-                pis.push(PathItem::Line(Line(p, end2)));
+                if ((p - center).norm() as f32) < *limit {
+                    pis.push(PathItem::Line(Line(start1, end1)));
+                    pis.push(PathItem::Line(Line(start2, p)));
+                    pis.push(PathItem::Line(Line(p, end2)));
+                } else {
+                    bevel();
+                }
             } else {
                 let p = geometry::intersect_line_and_line(
                     start1,
@@ -86,9 +93,13 @@ fn add_join(pis: &mut Vec<PathItem>, join: &Join, center: Point, start1: Point, 
                     end1,
                     end1 + Point(center.1 - end1.1, end1.0 - center.0),
                 );
-                pis.push(PathItem::Line(Line(start1, p)));
-                pis.push(PathItem::Line(Line(p, end1)));
-                pis.push(PathItem::Line(Line(start2, end2)));
+                if ((p - center).norm() as f32) < *limit {
+                    pis.push(PathItem::Line(Line(start1, p)));
+                    pis.push(PathItem::Line(Line(p, end1)));
+                    pis.push(PathItem::Line(Line(start2, end2)));
+                } else {
+                    bevel();
+                }
             }
         }
         Join::NoJoin => {
