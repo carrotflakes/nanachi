@@ -1,4 +1,4 @@
-use crate::{bold, path3::Path, fill_rule, fill_path2::draw_fill};
+use crate::{path_outline, path3::Path, fill_rule, fill_path2::draw_fill};
 
 pub fn draw_stroke<F: FnMut(u32, u32, f64)>(
     width: u32,
