@@ -6,7 +6,7 @@ impl super::Compositor<Rgba<u8>> for SrcOver {
     fn composite(&self, a: &Rgba<u8>, b: &Rgba<u8>, alpha: f64) -> Rgba<u8> {
         let aa = a.0[3] as f64 / std::u8::MAX as f64;
         let ba = b.0[3] as f64 / std::u8::MAX as f64 * alpha;
-        let alpha_a = aa * (1.0 - ba);
+        let alpha_a = 1.0 - ba;
         let alpha_b = ba;
         Rgba([
             (a.0[0] as f64 * alpha_a + b.0[0] as f64 * alpha_b).round() as u8,
@@ -81,9 +81,8 @@ pub struct SrcAtop;
 
 impl super::Compositor<Rgba<u8>> for SrcAtop {
     fn composite(&self, a: &Rgba<u8>, b: &Rgba<u8>, alpha: f64) -> Rgba<u8> {
-        let aa = a.0[3] as f64 / std::u8::MAX as f64;
         let ba = b.0[3] as f64 / std::u8::MAX as f64 * alpha;
-        let alpha_a = aa * (1.0 - ba);
+        let alpha_a = 1.0 - ba;
         let alpha_b = ba;
         Rgba([
             (a.0[0] as f64 * alpha_a + b.0[0] as f64 * alpha_b).round() as u8,
@@ -112,7 +111,7 @@ impl super::Compositor<Rgba<u8>> for DstOver {
     fn composite(&self, b: &Rgba<u8>, a: &Rgba<u8>, alpha: f64) -> Rgba<u8> {
         let aa = a.0[3] as f64 / std::u8::MAX as f64 * alpha;
         let ba = b.0[3] as f64 / std::u8::MAX as f64;
-        let alpha_a = aa * (1.0 - ba);
+        let alpha_a = 1.0 - ba;
         let alpha_b = ba;
         Rgba([
             (a.0[0] as f64 * alpha_a + b.0[0] as f64 * alpha_b).round() as u8,
@@ -187,9 +186,8 @@ pub struct DstAtop;
 
 impl super::Compositor<Rgba<u8>> for DstAtop {
     fn composite(&self, b: &Rgba<u8>, a: &Rgba<u8>, alpha: f64) -> Rgba<u8> {
-        let aa = a.0[3] as f64 / std::u8::MAX as f64 * alpha;
         let ba = b.0[3] as f64 / std::u8::MAX as f64;
-        let alpha_a = aa * (1.0 - ba);
+        let alpha_a = 1.0 - ba;
         let alpha_b = ba;
         Rgba([
             (a.0[0] as f64 * alpha_a + b.0[0] as f64 * alpha_b).round() as u8,
