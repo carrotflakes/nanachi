@@ -1,5 +1,5 @@
 use nanachi::{
-    image::{ImageBuffer, Rgb},
+    image::{ImageBuffer, Rgb, Rgba},
     path3::Path,
     path_builder::PathBuilder,
     fill_color,
@@ -10,7 +10,7 @@ use std::f64::consts::PI;
 
 fn main() {
     let (width, height) = (512, 512);
-    let mut img = ImageBuffer::from_pixel(width, height, Rgb([250u8, 250, 250]));
+    let mut img = ImageBuffer::from_pixel(width, height, Rgba([250u8, 250, 250, 0]));
 
     let path = PathBuilder::new()
     .start(10.0, 10.0)
@@ -40,32 +40,32 @@ fn main() {
     let path = path_transform(&path, &am);
     {
         let pc = fill_color::LinearGradient::new((200.0, 200.0), (300.0, 400.0), vec![
-            (0.0, Rgb([255, 100, 100])),
-            (1.0, Rgb([200, 255, 10])),
+            (0.0, Rgba([255, 100, 100, 100])),
+            (1.0, Rgba([200, 255, 10, 255])),
         ]);
-        draw_fill(&mut img, &path, &pc);
+        draw_fill(&mut img, &path, nanachi::compositor::basic::SrcOver, &pc);
     }
     {
         use nanachi::path_outline::{path_outline, Join, Cap};
         let path = Path::new(path_outline(&path, 8.0, &Join::Round, &Cap::Round));
         let pc = fill_color::RadialGradient::new((250.0, 200.0), 200.0, vec![
-            (0.0, Rgb([255, 255, 255])),
-            (0.9, Rgb([200, 10, 10])),
-            (1.0, Rgb([10, 10, 255])),
+            (0.0, Rgba([255, 255, 255, 255])),
+            (0.9, Rgba([200, 10, 10, 255])),
+            (1.0, Rgba([10, 10, 255, 10])),
         ]);
-        draw_fill(&mut img, &path, &pc);
+        draw_fill(&mut img, &path, nanachi::compositor::basic::SrcOver, &pc);
     }
 
     let res = img.save("./path3.png");
     println!("save: {:?}", res);
 }
 
-fn draw_fill<C: fill_color::FillColor<Rgb<u8>>>(
-    img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>,
+fn draw_fill<C: fill_color::FillColor<Rgba<u8>>, M: nanachi::compositor::Compositor<Rgba<u8>> + 'static>(
+    img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>,
     path: &Path,
+    compositor: M,
     fill_color: &C,
 ) {
-    let compositor = nanachi::compositor::normal::Normal;
     nanachi::fill_path::draw_fill(
         img.width() as u32,
         img.height() as u32,
