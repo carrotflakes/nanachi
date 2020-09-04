@@ -138,6 +138,7 @@ impl K {
         } else {
             if self.n <= 2 {
                 points[0] = self.points[0];
+                points[1] = (points[0] + points[2]) / 2.0; // workaround!
                 points.pop();
             } else {
                 points = Vec::from(&points[2..self.n * 2 - 1])
