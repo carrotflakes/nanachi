@@ -138,6 +138,14 @@ impl QuadPart {
             }
         }
     }
+
+    pub fn y2x(&self, y: f64) -> f64 {
+        self.qex.x2y(if self.rising {
+            self.qey.y2x2(y)
+        } else {
+            self.qey.y2x(y)
+        })
+    }
 }
 
 fn integral(x: &QuadEq, y: &QuadEq, t: f64) -> f64 {

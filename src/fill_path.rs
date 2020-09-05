@@ -383,6 +383,67 @@ fn segment_area(p1: Point, p2: Point, upper: f64, lower: f64, right: f64) -> f64
     }
 }
 
+pub fn draw_fill_no_aa<F: FnMut(u32, u32, f64), FR: FillRule>(
+    width: u32,
+    height: u32,
+    path: &Path,
+    fill_rule: FR,
+    writer: &mut F,
+) {
+    let ecs = path_edges_to_elms(path);
+    for y in 0..height as i32 {
+        let mut vec: Vec<_> = Vec::new();
+        for e in ecs.iter() {
+            let x = e.intersect(y as f64 + 0.5);
+            if !x.is_nan() {
+                vec.push((x, e.signum));
+            }
+        }
+        vec.sort_unstable_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+        let mut vi = 0;
+        let mut value = 0.0;
+        for x in 0..width as i32 {
+            let xf = x as f64;
+            while vi < vec.len() && vec[vi].0 < xf {
+                value += vec[vi].1;
+                vi += 1;
+            }
+            writer(x as u32, y as u32, fill_rule.apply(value));
+        }
+    }
+}
+
+impl ElmContainer {
+    fn intersect(&self, y: f64) -> f64 {
+        if self.bound.0 < y && y < self.bound.1 {
+            match &self.elm {
+                Elm::Line(line) => {
+                    geometry::intersect_line_and_horizon(line.0, line.1, y)
+                }
+                Elm::LeftArc(arc) => {
+                    arc.center.0 - (1.0 - ((y - arc.center.1) / arc.radius).powi(2)).sqrt() * arc.radius
+                }
+                Elm::RightArc(arc) => {
+                    arc.center.0 + (1.0 - ((y - arc.center.1) / arc.radius).powi(2)).sqrt() * arc.radius
+                }
+                Elm::LeftEllipse(skew_ellipse) => {
+                    let dy = y - skew_ellipse.center.1;
+                    skew_ellipse.center.0 - (1.0 - (dy / skew_ellipse.half_height).powi(2)).sqrt() * skew_ellipse.pre_half_width + dy * skew_ellipse.dx_dy
+                }
+                Elm::RightEllipse(skew_ellipse) => {
+                    let dy = y - skew_ellipse.center.1;
+                    skew_ellipse.center.0 + (1.0 - (dy / skew_ellipse.half_height).powi(2)).sqrt() * skew_ellipse.pre_half_width + dy * skew_ellipse.dx_dy
+                }
+                Elm::Quad(quad, _, _) => {
+                    quad.y2x(y)
+                }
+            }
+        } else {
+            std::f64::NAN
+        }
+    }
+}
+
 fn angle_norm(a1: f64, a2: f64) -> (f64, f64) {
     let (a1, a2) = if a1 < a2 { (a1, a2) } else { (a2, a1) };
     let a = a1.rem_euclid(PI * 2.0);
