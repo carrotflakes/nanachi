@@ -1,4 +1,4 @@
-use crate::models::{Quad, Cubic};
+use crate::models::Quad;
 
 #[derive(Debug, Clone)]
 pub struct QuadEq(f64, f64, f64);
