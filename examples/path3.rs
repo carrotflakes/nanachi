@@ -12,18 +12,18 @@ fn main() {
     let (width, height) = (512, 512);
     let mut img = ImageBuffer::from_pixel(width, height, Rgba([250u8, 250, 250, 0]));
 
-    let path = PathBuilder::new()
-    .start(10.0, 10.0)
-    .line_to(300.0, 10.0)
-    // .quad(500.0, 300.0, 300.0, 300.0)
-    // .quad(300.0, 200.0, 300.0, 300.0)
-    .quad(700.0, 500.0, 300.0, 300.0)
-    .arc(200.0, 340.0, 100.0, 0.0, 3.14)
-    .arc(200.0, 340.0, 50.0, PI * 3.0, PI * 1.2)
-    .line_to(50.0, 250.0)
-    .ellipse(100.0, 150.0, 80.0, 50.0, 1.0, PI * 2.7, PI * 1.0)
-    .close()
-    .end();
+    let mut pb = PathBuilder::new();
+    pb.start(10.0, 10.0);
+    pb.line_to(300.0, 10.0);
+    // .quad(500.0, 300.0, 300.0, 300.0);
+    // .quad(300.0, 200.0, 300.0, 300.0);
+    pb.quad(700.0, 500.0, 300.0, 300.0);
+    pb.arc(200.0, 340.0, 100.0, 0.0, 3.14);
+    pb.arc(200.0, 340.0, 50.0, PI * 3.0, PI * 1.2);
+    pb.line_to(50.0, 250.0);
+    pb.ellipse(100.0, 150.0, 80.0, 50.0, 1.0, PI * 2.7, PI * 1.0);
+    pb.close();
+    let path = pb.end();
     // let path = PathBuilder::new()
     //     .move_to(Point(100.0, 100.0))
     //     .line_to(Point(200.0, 100.0))

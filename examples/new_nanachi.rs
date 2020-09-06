@@ -34,14 +34,15 @@ fn main() {
 fn draw_stars(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
     let spoke = (2.0 * PI / 5.0).cos() / (1.0 * PI / 5.0).cos();
     let mut pb = PathBuilder::new();
-    pb = pb.start(0.0, 10.0);
+    pb.start(0.0, 10.0);
     for i in 1..10 {
         let p = i as f64 / 10.0 * PI * 2.0;
         let (s, c) = p.sin_cos();
         let r = (1.0 - (i % 2) as f64 * (1.0 - spoke)) * 10.0;
-        pb = pb.line_to(s * r, c * r);
+        pb.line_to(s * r, c * r);
     }
-    let path = pb.close().end();
+    pb.close();
+    let path = pb.end();
 
     let mut rnd = Pcg32::new(0xcafef00dd15ea5e5, 0xa02bdbf7bb3c0a7);
     let shapes = (0..100)
