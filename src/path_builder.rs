@@ -19,17 +19,16 @@ impl PathBuilder {
     }
 
     pub fn start(&mut self, x: f64, y: f64) {
+        assert!(self.items.is_empty());
         self.last_pos = Some(Point(x, y));
     }
 
     pub fn line_to(&mut self, x: f64, y: f64) {
+        let p = Point(x, y);
         if let Some(last_pos) = self.last_pos {
-            let p = Point(x, y);
             self.items.push(PathItem::Line(Line(last_pos, p)));
-            self.last_pos = Some(p);
-        } else {
-            panic!("PathBuilder::start() is required");
         }
+        self.last_pos = Some(p);
     }
 
     pub fn arc(&mut self, x: f64, y: f64, radius: f64, angle1: f64, angle2: f64) {
