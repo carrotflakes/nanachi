@@ -39,7 +39,7 @@ fn path_edges_to_elms(path: &Path) -> Vec<ElmContainer> {
             PathItem::Line(Line(p1, p2)) => {
                 elms.push(ElmContainer {
                     bound: (p1.1.min(p2.1), p1.1.max(p2.1)),
-                    elm: Elm::Line(Line(*p1, *p2)), signum: (p2.1 - p1.1).signum()
+                    elm: Elm::Line(if p1.1 < p2.1 {Line(*p1, *p2)} else {Line(*p2, *p1)}), signum: (p2.1 - p1.1).signum()
                 });
             }
             PathItem::Arc(arc) => {
@@ -365,21 +365,15 @@ fn circle_area(center: Point, radius: f64, upper: f64, lower: f64, right: f64) -
 }
 
 fn segment_area(p1: Point, p2: Point, upper: f64, lower: f64, right: f64) -> f64 {
-    let y1 = p1.1.min(p2.1).max(upper);
-    let y2 = p1.1.max(p2.1).min(lower);
-    if y1 < y2 {
-        let x1 = geometry::intersect_line_and_horizon(p1, p2, y1);
-        let x2 = geometry::intersect_line_and_horizon(p1, p2, y2);
-        let (x1, x2) = if x1 < x2 {(x1, x2)} else {(x2, x1)};
-        (y2 - y1) * if right < x1 {
-            right
-        } else if right < x2 {
-            right - (right - x1).powi(2) / (x2 - x1) / 2.0
-        } else {
-            (x1 + x2) / 2.0
-        }
+    let x1 = geometry::intersect_line_and_horizon(p1, p2, upper);
+    let x2 = geometry::intersect_line_and_horizon(p1, p2, lower);
+    let (x1, x2) = if x1 < x2 {(x1, x2)} else {(x2, x1)};
+    (lower - upper) * if right < x1 {
+        right
+    } else if right < x2 {
+        right - (right - x1).powi(2) / (x2 - x1) / 2.0
     } else {
-        0.0
+        (x1 + x2) / 2.0
     }
 }
 
