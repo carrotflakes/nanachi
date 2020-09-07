@@ -1,5 +1,5 @@
 use crate::geometry;
-use crate::{point::Point, position_color::PositionColor};
+use crate::{point::Point, fill_color::FillColor};
 use image::{ImageBuffer, Pixel, Rgb};
 
 pub fn draw_line<P: Into<Point>>(
@@ -92,10 +92,10 @@ pub fn draw_lines<P: Into<Point> + Copy>(
     }
 }
 
-pub fn draw_fill<X, P: Into<Point> + Copy, C: PositionColor<X>>(
+pub fn draw_fill<X, P: Into<Point> + Copy, C: FillColor<X>>(
     img: &mut ImageBuffer<X, Vec<u8>>,
     pss: &Vec<&Vec<P>>,
-    position_color: &C,
+    fill_color: &C,
 ) where
     X: Pixel<Subpixel = u8> + 'static,
 {
@@ -115,18 +115,18 @@ pub fn draw_fill<X, P: Into<Point> + Copy, C: PositionColor<X>>(
             let s = vec[i * 2].max(0.0) as u32;
             let e = vec[i * 2 + 1].max(0.0).min(img.width() as f64) as u32;
             for x in s..e {
-                let pixel = position_color.position_color((x, y).into());
+                let pixel = fill_color.fill_color(x as f64, y as f64);
                 img.put_pixel(x, y, pixel);
             }
         }
     }
 }
 
-pub fn draw_hori<P: Into<Point> + Copy, C: PositionColor<Rgb<u8>>>(
+pub fn draw_hori<P: Into<Point> + Copy, C: FillColor<Rgb<u8>>>(
     buf: &mut ImageBuffer<Rgb<u8>, Vec<u8>>,
     center: P,
     rotate: f64,
-    position_color: &C,
+    fill_color: &C,
 ) {
     use std::f64::consts::{FRAC_PI_2, FRAC_PI_4, PI};
     let r = rotate.rem_euclid(2.0 * PI) + FRAC_PI_4;
@@ -137,7 +137,7 @@ pub fn draw_hori<P: Into<Point> + Copy, C: PositionColor<Rgb<u8>>>(
             for x in 0..buf.width() {
                 let yy = center.1 + rotate.sin() * (x as f64 - center.0);
                 for y in yy.round().max(0.0) as u32..buf.height() {
-                    let pixel = position_color.position_color((x, y).into());
+                    let pixel = fill_color.fill_color(x as f64, y as f64);
                     buf.put_pixel(x, y, pixel);
                 }
             }
@@ -146,7 +146,7 @@ pub fn draw_hori<P: Into<Point> + Copy, C: PositionColor<Rgb<u8>>>(
             for y in 0..buf.height() {
                 let xx = center.0 + rotate.cos() * (y as f64 - center.1);
                 for x in 0..(xx.round().max(0.0) as u32).min(buf.width()) {
-                    let pixel = position_color.position_color((x, y).into());
+                    let pixel = fill_color.fill_color(x as f64, y as f64);
                     buf.put_pixel(x, y, pixel);
                 }
             }
@@ -157,7 +157,7 @@ pub fn draw_hori<P: Into<Point> + Copy, C: PositionColor<Rgb<u8>>>(
             for x in 0..buf.width() {
                 let yy = center.1 - rotate.sin() * (x as f64 - center.0);
                 for y in 0..(yy.round().max(0.0) as u32).min(buf.height()) {
-                    let pixel = position_color.position_color((x, y).into());
+                    let pixel = fill_color.fill_color(x as f64, y as f64);
                     buf.put_pixel(x, y, pixel);
                 }
             }
@@ -166,7 +166,7 @@ pub fn draw_hori<P: Into<Point> + Copy, C: PositionColor<Rgb<u8>>>(
             for y in 0..buf.height() {
                 let xx = center.0 - rotate.cos() * (y as f64 - center.1);
                 for x in xx.round().max(0.0) as u32..buf.width() {
-                    let pixel = position_color.position_color((x, y).into());
+                    let pixel = fill_color.fill_color(x as f64, y as f64);
                     buf.put_pixel(x, y, pixel);
                 }
             }
@@ -174,11 +174,11 @@ pub fn draw_hori<P: Into<Point> + Copy, C: PositionColor<Rgb<u8>>>(
     }
 }
 
-pub fn draw_hori_with_antialias<P: Into<Point> + Copy, C: PositionColor<Rgb<u8>>>(
+pub fn draw_hori_with_antialias<P: Into<Point> + Copy, C: FillColor<Rgb<u8>>>(
     buf: &mut ImageBuffer<Rgb<u8>, Vec<u8>>,
     center: P,
     rotate: f64,
-    position_color: &C,
+    fill_color: &C,
 ) {
     use std::f64::consts::FRAC_PI_4;
     let center: Point = center.into();
@@ -189,7 +189,7 @@ pub fn draw_hori_with_antialias<P: Into<Point> + Copy, C: PositionColor<Rgb<u8>>
         if x < 0 || y < 0 || buf.width() as i32 <= x || buf.height() as i32 <= y {
             return;
         }
-        let pixel = position_color.position_color((x, y).into());
+        let pixel = fill_color.fill_color(x as f64, y as f64);
         buf.put_pixel(
             x as u32,
             y as u32,
@@ -209,7 +209,7 @@ pub fn draw_hori_with_antialias<P: Into<Point> + Copy, C: PositionColor<Rgb<u8>>
                     mix(buf, x, b.0, 1.0 - b.1.powi(2) * (b.1 + 1.0 - a.1) / 2.0);
                 }
                 for y in (b.0 + 1).max(0)..buf.height() as i32 {
-                    let pixel = position_color.position_color((x, y).into());
+                    let pixel = fill_color.fill_color(x as f64, y as f64);
                     buf.put_pixel(x as u32, y as u32, pixel);
                 }
                 a = b;
@@ -231,7 +231,7 @@ pub fn draw_hori_with_antialias<P: Into<Point> + Copy, C: PositionColor<Rgb<u8>>
                     );
                 }
                 for x in 0..a.0.min(buf.width() as i32) {
-                    let pixel = position_color.position_color((x, y).into());
+                    let pixel = fill_color.fill_color(x as f64, y as f64);
                     buf.put_pixel(x as u32, y as u32, pixel);
                 }
                 a = b;
@@ -253,7 +253,7 @@ pub fn draw_hori_with_antialias<P: Into<Point> + Copy, C: PositionColor<Rgb<u8>>
                     );
                 }
                 for x in 0..a.0.min(buf.width() as i32) {
-                    let pixel = position_color.position_color((x, y).into());
+                    let pixel = fill_color.fill_color(x as f64, y as f64);
                     buf.put_pixel(x as u32, y as u32, pixel);
                 }
                 a = b;
@@ -270,7 +270,7 @@ pub fn draw_hori_with_antialias<P: Into<Point> + Copy, C: PositionColor<Rgb<u8>>
                     mix(buf, x, b.0, 1.0 - b.1.powi(2) * (a.1 + 1.0 - b.1) / 2.0);
                 }
                 for y in 0..a.0.min(buf.height() as i32) {
-                    let pixel = position_color.position_color((x, y).into());
+                    let pixel = fill_color.fill_color(x as f64, y as f64);
                     buf.put_pixel(x as u32, y as u32, pixel);
                 }
                 a = b;
@@ -287,7 +287,7 @@ pub fn draw_hori_with_antialias<P: Into<Point> + Copy, C: PositionColor<Rgb<u8>>
                     mix(buf, x, a.0, 1.0 - a.1.powi(2) * (b.1 + 1.0 - a.1) / 2.0);
                 }
                 for y in 0..a.0.min(buf.height() as i32) {
-                    let pixel = position_color.position_color((x, y).into());
+                    let pixel = fill_color.fill_color(x as f64, y as f64);
                     buf.put_pixel(x as u32, y as u32, pixel);
                 }
                 a = b;
@@ -304,7 +304,7 @@ pub fn draw_hori_with_antialias<P: Into<Point> + Copy, C: PositionColor<Rgb<u8>>
                     mix(buf, b.0, y, 1.0 - b.1.powi(2) * (b.1 + 1.0 - a.1) / 2.0);
                 }
                 for x in (b.0 + 1).max(0)..buf.width() as i32 {
-                    let pixel = position_color.position_color((x, y).into());
+                    let pixel = fill_color.fill_color(x as f64, y as f64);
                     buf.put_pixel(x as u32, y as u32, pixel);
                 }
                 a = b;
@@ -321,7 +321,7 @@ pub fn draw_hori_with_antialias<P: Into<Point> + Copy, C: PositionColor<Rgb<u8>>
                     mix(buf, a.0, y, 1.0 - a.1.powi(2) * (a.1 + 1.0 - b.1) / 2.0);
                 }
                 for x in (b.0 + 1).max(0)..buf.width() as i32 {
-                    let pixel = position_color.position_color((x, y).into());
+                    let pixel = fill_color.fill_color(x as f64, y as f64);
                     buf.put_pixel(x as u32, y as u32, pixel);
                 }
                 a = b;
@@ -338,7 +338,7 @@ pub fn draw_hori_with_antialias<P: Into<Point> + Copy, C: PositionColor<Rgb<u8>>
                     mix(buf, x, a.0, 1.0 - a.1.powi(2) / 2.0 * (a.1 + 1.0 - b.1));
                 }
                 for y in (a.0 + 1).max(0)..buf.height() as i32 {
-                    let pixel = position_color.position_color((x, y).into());
+                    let pixel = fill_color.fill_color(x as f64, y as f64);
                     buf.put_pixel(x as u32, y as u32, pixel);
                 }
                 a = b;
