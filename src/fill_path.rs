@@ -27,7 +27,7 @@ enum Elm {
 
 #[derive(Debug, Clone)]
 struct ElmContainer {
-    bound: (f64, f64),
+    bound: (f64, f64, f64, f64), // left, right, upper, lower
     elm: Elm,
     signum: f64,
 }
@@ -38,96 +38,112 @@ fn path_edges_to_elms(path: &Path) -> Vec<ElmContainer> {
         match e {
             PathItem::Line(Line(p1, p2)) => {
                 elms.push(ElmContainer {
-                    bound: (p1.1.min(p2.1), p1.1.max(p2.1)),
+                    bound: (p1.0.min(p2.0), p1.0.max(p2.0), p1.1.min(p2.1), p1.1.max(p2.1)),
                     elm: Elm::Line(if p1.1 < p2.1 {Line(*p1, *p2)} else {Line(*p2, *p1)}), signum: (p2.1 - p1.1).signum()
                 });
             }
             PathItem::Arc(arc) => {
-                fn left_arc(arc: &Arc, upper: f64, lower: f64) -> ElmContainer {
+                let (a1, a2) = angle_norm(arc.angle1, arc.angle2);
+                let mut left = a1.cos().min(a2.cos());
+                let mut right = a1.cos().max(a2.cos());
+                if (a1 < PI && PI < a2) || (a1 < PI * 3.0 && PI * 3.0 < a2) {
+                    left = -1.0;
+                }
+                if (a1 < PI * 2.0 && PI * 2.0 < a2) || (a1 < PI * 4.0 && PI * 4.0 < a2) {
+                    right = 1.0;
+                }
+                let left_arc = |upper: f64, lower: f64| -> ElmContainer {
                     ElmContainer {
-                        bound: (arc.center.1 + upper * arc.radius, arc.center.1 + lower * arc.radius),
+                        bound: (
+                            arc.center.0 + left * arc.radius, arc.center.0 + right * arc.radius,
+                            arc.center.1 + upper * arc.radius, arc.center.1 + lower * arc.radius
+                        ),
                         elm: Elm::LeftArc(arc.clone()), signum: (arc.angle1 - arc.angle2).signum()
                     }
-                }
-                fn right_arc(arc: &Arc, upper: f64, lower: f64) -> ElmContainer {
+                };
+                let right_arc = |upper: f64, lower: f64| -> ElmContainer {
                     ElmContainer {
-                        bound: (arc.center.1 + upper * arc.radius, arc.center.1 + lower * arc.radius),
+                        bound: (
+                            arc.center.0 + left * arc.radius, arc.center.0 + right * arc.radius,
+                            arc.center.1 + upper * arc.radius, arc.center.1 + lower * arc.radius
+                        ),
                         elm: Elm::RightArc(arc.clone()), signum: (arc.angle2 - arc.angle1).signum()
                     }
-                }
-                let (a1, a2) = angle_norm(arc.angle1, arc.angle2);
+                };
                 match (((a1 / FRAC_PI_2) as usize + 1) / 2, ((a2 / FRAC_PI_2) as usize + 1) / 2) {
                     (0, 0) | (2, 2) => {
-                        elms.push(right_arc(arc, a1.sin(), a2.sin()));
+                        elms.push(right_arc(a1.sin(), a2.sin()));
                     }
                     (0, 1) | (2, 3) => {
-                        elms.push(left_arc(arc, a2.sin(), 1.0));
-                        elms.push(right_arc(arc, a1.sin(), 1.0));
+                        elms.push(left_arc(a2.sin(), 1.0));
+                        elms.push(right_arc(a1.sin(), 1.0));
                     }
                     (0, 2) | (2, 4) => {
-                        elms.push(left_arc(arc, -1.0, 1.0));
-                        elms.push(right_arc(arc, a1.sin(), 1.0));
-                        elms.push(right_arc(arc, -1.0, a2.sin()));
+                        elms.push(left_arc(-1.0, 1.0));
+                        elms.push(right_arc(a1.sin(), 1.0));
+                        elms.push(right_arc(-1.0, a2.sin()));
                     }
                     (1, 1) => {
-                        elms.push(left_arc(arc, a2.sin(), a1.sin()));
+                        elms.push(left_arc(a2.sin(), a1.sin()));
                     }
                     (1, 2) => {
-                        elms.push(left_arc(arc, -1.0, a1.sin()));
-                        elms.push(right_arc(arc, -1.0, a2.sin()));
+                        elms.push(left_arc(-1.0, a1.sin()));
+                        elms.push(right_arc(-1.0, a2.sin()));
                     }
                     (1, 3) => {
-                        elms.push(left_arc(arc, a2.sin(), 1.0));
-                        elms.push(left_arc(arc, -1.0, a1.sin()));
-                        elms.push(right_arc(arc, -1.0, 1.0));
+                        elms.push(left_arc(a2.sin(), 1.0));
+                        elms.push(left_arc(-1.0, a1.sin()));
+                        elms.push(right_arc(-1.0, 1.0));
                     }
                     _ => unreachable!(),
                 }
             }
             PathItem::Ellipse(ellipse) => {
                 let ellipse = ellipse.normalize();
-                fn left_ellipse(ellipse: &Ellipse, upper: f64, lower: f64) -> ElmContainer {
+                let bound = ellipse.bound();
+                let left = bound.0;
+                let right = bound.1;
+                let left_ellipse = |upper: f64, lower: f64| -> ElmContainer {
                     ElmContainer {
-                        bound: (upper, lower),
+                        bound: (left, right, upper, lower),
                         elm: Elm::LeftEllipse(ellipse.clone().into()),
                         signum: (ellipse.angle1 - ellipse.angle2).signum()
                     }
-                }
-                fn right_ellipse(ellipse: &Ellipse, upper: f64, lower: f64) -> ElmContainer {
+                };
+                let right_ellipse = |upper: f64, lower: f64| -> ElmContainer {
                     ElmContainer {
-                        bound: (upper, lower),
+                        bound: (left, right, upper, lower),
                         elm: Elm::RightEllipse(ellipse.clone().into()),
                         signum: (ellipse.angle2 - ellipse.angle1).signum()
                     }
-                }
-                let bound = ellipse.bound();
+                };
                 let (a1, a2) = angle_norm(ellipse.angle1, ellipse.angle2);
                 // let aa = (ellipse.rotation.tan() * ellipse.radius_x / ellipse.radius_y).atan();
                 let aa = ellipse.angle_offset() - FRAC_PI_2;
                 match ((((a1 - aa) / FRAC_PI_2) as usize + 1) / 2, (((a2 - aa) / FRAC_PI_2) as usize + 1) / 2) {
                     (0, 0) | (2, 2) => {
-                        elms.push(right_ellipse(&ellipse, ellipse.pos(a1).1, ellipse.pos(a2).1));
+                        elms.push(right_ellipse(ellipse.pos(a1).1, ellipse.pos(a2).1));
                     }
                     (0, 1) | (2, 3) => {
-                        elms.push(left_ellipse(&ellipse, ellipse.pos(a2).1, bound.3,));
-                        elms.push(right_ellipse(&ellipse, ellipse.pos(a1).1, bound.3));
+                        elms.push(left_ellipse(ellipse.pos(a2).1, bound.3,));
+                        elms.push(right_ellipse(ellipse.pos(a1).1, bound.3));
                     }
                     (0, 2) | (2, 4) => {
-                        elms.push(left_ellipse(&ellipse, bound.2, bound.3));
-                        elms.push(right_ellipse(&ellipse, ellipse.pos(a1).1, bound.3));
-                        elms.push(right_ellipse(&ellipse, bound.2, ellipse.pos(a2).1));
+                        elms.push(left_ellipse(bound.2, bound.3));
+                        elms.push(right_ellipse(ellipse.pos(a1).1, bound.3));
+                        elms.push(right_ellipse(bound.2, ellipse.pos(a2).1));
                     }
                     (1, 1) => {
-                        elms.push(left_ellipse(&ellipse, ellipse.pos(a2).1, ellipse.pos(a1).1));
+                        elms.push(left_ellipse(ellipse.pos(a2).1, ellipse.pos(a1).1));
                     }
                     (1, 2) => {
-                        elms.push(left_ellipse(&ellipse, bound.2, ellipse.pos(a1).1));
-                        elms.push(right_ellipse(&ellipse, bound.2, ellipse.pos(a2).1));
+                        elms.push(left_ellipse(bound.2, ellipse.pos(a1).1));
+                        elms.push(right_ellipse(bound.2, ellipse.pos(a2).1));
                     }
                     (1, 3) => {
-                        elms.push(left_ellipse(&ellipse, ellipse.pos(a2).1, bound.3));
-                        elms.push(left_ellipse(&ellipse, bound.2, ellipse.pos(a1).1));
-                        elms.push(right_ellipse(&ellipse, bound.2, bound.3));
+                        elms.push(left_ellipse(ellipse.pos(a2).1, bound.3));
+                        elms.push(left_ellipse(bound.2, ellipse.pos(a1).1));
+                        elms.push(right_ellipse(bound.2, bound.3));
                     }
                     (a1, a2) => {dbg!(a1, a2);unreachable!()},
                 }
@@ -136,7 +152,7 @@ fn path_edges_to_elms(path: &Path) -> Vec<ElmContainer> {
                 elms.extend(crate::bezier_area::separate_quad(quad).into_iter().map(|q| {
                     let bound = q.bound();
                     ElmContainer {
-                        bound: (bound.2, bound.3),
+                        bound,
                         elm: Elm::Quad(crate::bezier_area::QuadPart::from_quad(&q), bound.0, bound.1),
                         signum: (q.end.1 - q.start.1).signum(),
                     }
@@ -144,7 +160,7 @@ fn path_edges_to_elms(path: &Path) -> Vec<ElmContainer> {
             }
         }
     }
-    elms.into_iter().filter(|e| e.bound.0 < e.bound.1).collect()
+    elms.into_iter().filter(|e| e.bound.2 < e.bound.3).collect()
 }
 
 pub fn draw_fill<F: FnMut(u32, u32, f64), FR: FillRule>(
@@ -155,8 +171,8 @@ pub fn draw_fill<F: FnMut(u32, u32, f64), FR: FillRule>(
     writer: &mut F,
 ) {
     let ecs = path_edges_to_elms(path);
-    let upper = ecs.iter().fold(std::f64::MAX, |a, ec| a.min(ec.bound.0)).max(0.0).floor() as i32;
-    let lower = ecs.iter().fold(0.0f64, |a, ec| a.max(ec.bound.1)).min(height as f64).ceil() as i32;
+    let upper = ecs.iter().fold(std::f64::MAX, |a, ec| a.min(ec.bound.2)).max(0.0).floor() as i32;
+    let lower = ecs.iter().fold(0.0f64, |a, ec| a.max(ec.bound.3)).min(height as f64).ceil() as i32;
     for y in 0..upper {
         for x in 0..width as i32 {
             writer(x as u32, y as u32, fill_rule.apply(0.0));
@@ -184,10 +200,13 @@ pub fn draw_fill<F: FnMut(u32, u32, f64), FR: FillRule>(
 
 impl ElmContainer {
     fn area(&self, upper: f64, lower: f64, x: f64) -> f64 {
-        let upper = upper.max(self.bound.0);
-        let lower = lower.min(self.bound.1);
+        let upper = upper.max(self.bound.2);
+        let lower = lower.min(self.bound.3);
         if lower <= upper {
             return 0.0;
+        }
+        if x <= self.bound.0 {
+            return (lower - upper) * x * self.signum;
         }
         self.elm.area(upper, lower, x) * self.signum
     }
@@ -249,12 +268,8 @@ impl Elm {
                     //+ right_skewed_half_circle_area(se.center, se.radius_x, se.radius_y, upper, lower, upper_right, lower_right)
                 }
             }
-            Elm::Quad(q, x1, x2) => {
-                if x <= *x1 {
-                    (lower - upper) * x
-                } else {
-                    q.area(upper, lower, x.min(*x2))
-                }
+            Elm::Quad(q, _x1, x2) => {
+                q.area(upper, lower, x.min(*x2))
             }
         }
     }
