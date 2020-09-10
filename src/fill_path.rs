@@ -155,7 +155,9 @@ pub fn draw_fill<F: FnMut(u32, u32, f64), FR: FillRule>(
     writer: &mut F,
 ) {
     let ecs = path_edges_to_elms(path);
-    for y in 0..height as i32 {
+    let upper = ecs.iter().fold(std::f64::MAX, |a, ec| a.min(ec.bound.0)).max(0.0).floor() as i32;
+    let lower = ecs.iter().fold(0.0f64, |a, ec| a.max(ec.bound.1)).min(height as f64).ceil() as i32;
+    for y in upper..lower {
         let mut acc: f64 = ecs.iter().map(|e|
             e.area(y as f64, (y + 1) as f64, 0.0)
         ).sum();
