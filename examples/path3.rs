@@ -23,13 +23,13 @@ fn main() {
     pb.line_to(50.0, 250.0);
     pb.ellipse(100.0, 150.0, 80.0, 50.0, 1.0, PI * 2.7, PI * 1.0);
     pb.close();
+    // pb.start(100.0, 100.0);
+    // pb.line_to(200.0, 100.0);
+    // pb.line_to(200.0, 200.0);
+    // pb.line_to(100.0, 200.0);
+    // pb.close();
     let path = pb.end();
-    // let path = PathBuilder::new()
-    //     .move_to(Point(100.0, 100.0))
-    //     .line_to(Point(200.0, 100.0))
-    //     .line_to(Point(200.0, 200.0))
-    //     .line_to(Point(100.0, 200.0))
-    //     .close().end();
+
     let am = Matrix2d::new()
         .translate(-250.0, -250.0)
         .rotate(0.9)
