@@ -70,8 +70,8 @@ fn draw_stars(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
         let compositor = compositor::basic::SrcOver;
         let outline = path_outline::path_outline(
             ps, 0.5,
-            &path_outline::Join::Bevel,
-            &path_outline::Cap::Butt,
+            &path_outline::Join::Round,
+            &path_outline::Cap::Round,
         );
         fill_path::draw_fill(
             img.width() as u32, img.height() as u32, &Path::new(outline), fill_rule::NonZero,
@@ -154,7 +154,7 @@ fn draw_nanachi(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
     .iter()
     .map(|v| {
         v.iter()
-            .map(|p| Point(p.0 * 512.0, p.1 * 512.0))
+            .map(|p| Point(p.0 * img.width() as f64, p.1 * img.height() as f64))
             .collect::<Vec<_>>()
     })
     .collect::<Vec<_>>();
@@ -197,7 +197,7 @@ fn draw_nanachi(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
         (0.30, 0.73),
     ]
     .iter()
-    .map(|p| Point(p.0 * 512.0, p.1 * 512.0))
+    .map(|p| Point(p.0 * img.width() as f64, p.1 * img.height() as f64))
     .collect::<Vec<_>>();
 
     let moji = vec![
@@ -231,7 +231,7 @@ fn draw_nanachi(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
     .iter()
     .map(|v| {
         v.iter()
-            .map(|p| Point(p.0 * 512.0, p.1 * 512.0))
+            .map(|p| Point(p.0 * img.width() as f64, p.1 * img.height() as f64))
             .collect::<Vec<_>>()
     })
     .collect::<Vec<_>>();
@@ -256,8 +256,8 @@ fn draw_nanachi(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
         // let path = Path::from_bezier2_points(&k_curve(ps.clone(), false, 3));
         let outline = Path::new(path_outline::path_outline(
             &path, 2.0,
-            &path_outline::Join::Bevel,
-            &path_outline::Cap::Butt,
+            &path_outline::Join::Round,
+            &path_outline::Cap::Round,
         ));
         fill_path::draw_fill(
             img.width() as u32, img.height() as u32,
@@ -272,8 +272,8 @@ fn draw_nanachi(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
         // let path = Path::from_bezier2_points(&k_curve(ps.clone(), false, 3));
         let outline = Path::new(path_outline::path_outline(
             &path, 2.0,
-            &path_outline::Join::Bevel,
-            &path_outline::Cap::Butt,
+            &path_outline::Join::Round,
+            &path_outline::Cap::Round,
         ));
         fill_path::draw_fill(
             img.width() as u32, img.height() as u32,
