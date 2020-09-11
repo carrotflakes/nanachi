@@ -80,6 +80,15 @@ impl PathItem {
         }
     }
 
+    pub fn is_zero(&self) -> bool {
+        match self {
+            PathItem::Line(line) => {line.0 == line.1}
+            PathItem::Arc(arc) => {arc.radius == 0.0 || arc.angle1 == arc.angle2}
+            PathItem::Ellipse(ellipse) => {(ellipse.radius_x == 0.0 && ellipse.radius_y == 0.0) || ellipse.angle1 == ellipse.angle2}
+            PathItem::Quad(quad) => {quad.start == quad.end && quad.start == quad.control1}
+        }
+    }
+
     pub fn intersect(&self, other: &PathItem) -> Option<Point> {
         match (self, other) {
             (PathItem::Line(Line(p1, p2)), PathItem::Line(Line(p3, p4))) =>

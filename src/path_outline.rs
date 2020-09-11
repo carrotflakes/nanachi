@@ -20,10 +20,11 @@ pub enum Cap {
 
 pub fn path_outline(path: &Path, width: f64, join: &Join, cap: &Cap) -> Vec<PathItem> {
     assert_ne!(width, 0.0);
+    let mut it = path.0.iter().filter(|p| !p.is_zero());
     let mut pis = Vec::with_capacity(path.0.len() * 4);
-    path_item_offset(&mut pis, &path.0[0], width);
+    path_item_offset(&mut pis, it.next().unwrap(), width);
     let mut m = pis.len();
-    for pi in path.0.iter().skip(1) {
+    for pi in it {
         let l = pis.len();
         path_item_offset(&mut pis, pi, width);
         let p11 = pis[m - 2].right_point();
