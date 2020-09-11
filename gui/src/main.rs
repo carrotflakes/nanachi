@@ -1,5 +1,5 @@
 mod gui;
-use nanachi::image::Rgb;
+use nanachi::{image::Rgb, path_outline};
 use std::thread;
 use std::time::Duration;
 
@@ -32,14 +32,14 @@ fn main() {
                         path.push((x as f64, y as f64));
                         if 2 <= path.len() {
                             let path2 = nanachi::path3::Path::from_points(&path.iter().map(|x| (*x).into()).collect());
-                            let path2 = nanachi::bold::path_bold1(&path2, 1.0);
-                            draw_fill(&mut buffer, &nanachi::path3::Path(path2), &color, 1.0);
+                            let path2 = path_outline::path_outline(&path2, 1.0, &path_outline::Join::Round, &path_outline::Cap::Round);
+                            draw_fill(&mut buffer, &nanachi::path3::Path(path2), &color);
                         }
                         if 2 <= path.len() {
                             let path2 = path.iter().map(|x| (*x).into()).collect();
                             let path2 = nanachi::path3::Path::from_bezier2_points(&nanachi::k_curve::k_curve(path2, false, 4));
-                            let path2 = nanachi::bold::path_bold1(&path2, 1.0);
-                            draw_fill(&mut buffer, &nanachi::path3::Path(path2), &color2, 1.0);
+                            let path2 = path_outline::path_outline(&path2, 1.0, &path_outline::Join::Round, &path_outline::Cap::Round);
+                            draw_fill(&mut buffer, &nanachi::path3::Path(path2), &color2);
                         }
                     }
                     gui::Event::Quit { .. }
@@ -55,19 +55,16 @@ fn main() {
     });
 }
 
-fn draw_fill<X, C: nanachi::fill_color::FillColor<X>>(
-    img: &mut nanachi::image::ImageBuffer<X, Vec<u8>>,
+fn draw_fill<C: nanachi::fill_color::FillColor<Rgb<u8>>>(
+    img: &mut nanachi::image::ImageBuffer<Rgb<u8>, Vec<u8>>,
     path: &nanachi::path3::Path,
     fill_color: &C,
-    alpha: f64,
-) where
-    X: nanachi::image::Pixel<Subpixel = u8> + 'static,
-{
-    nanachi::fill_path2::draw_fill(
+) {
+    nanachi::fill_path::draw_fill(
         img.width() as u32,
         img.height() as u32,
         path,
         nanachi::fill_rule::NonZero,
-        &mut nanachi::writer::alpha_blend2(img, fill_color, alpha),
+        &mut nanachi::writer::img_writer(img, fill_color, nanachi::compositor::basic::SrcOver),
     );
 }
