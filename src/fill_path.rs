@@ -95,7 +95,7 @@ fn path_edges_to_elms(path: &Path) -> Vec<ElmContainer> {
                         elms.push(left_arc(-1.0, a1.sin()));
                         elms.push(right_arc(-1.0, 1.0));
                     }
-                    _ => unreachable!(),
+                    (a1, a2) => {dbg!(a1, a2, arc);unreachable!()},
                 }
             }
             PathItem::Ellipse(ellipse) => {

@@ -38,6 +38,7 @@ fn main() {
         .translate(250.0, 250.0)
     ;
     let path = path_transform(&path, &am);
+    let path = nanachi::path_flatten::path_flatten(&path, 0.5);
     {
         let pc = fill_color::LinearGradient::new((200.0, 200.0), (300.0, 400.0), vec![
             (0.0, Rgba([255, 100, 100, 100])),
