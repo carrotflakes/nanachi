@@ -1,5 +1,5 @@
 use crate::point::Point;
-use crate::models::{Line, Arc, Ellipse, Quad};
+use crate::models::{Line, Ellipse, Quad, Cubic};
 use crate::matrix::Matrix2d;
 use crate::path3::{Path, PathItem};
 use std::f64::consts::PI;
@@ -24,6 +24,12 @@ pub fn path_transform(path: &Path, am: &Matrix2d) -> Path {
                 start: am.apply(quad.start),
                 end: am.apply(quad.end),
                 control1: am.apply(quad.control1),
+            }),
+            PathItem::Cubic(cubic) => PathItem::Cubic(Cubic {
+                start: am.apply(cubic.start),
+                end: am.apply(cubic.end),
+                control1: am.apply(cubic.control1),
+                control2: am.apply(cubic.control2),
             }),
         });
     }

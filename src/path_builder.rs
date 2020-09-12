@@ -1,5 +1,5 @@
 use crate::{
-    models::{Line, Arc, Ellipse, Quad},
+    models::{Line, Arc, Ellipse, Quad, Cubic},
     path3::{Path, PathItem},
     point::Point
 };
@@ -74,6 +74,25 @@ impl PathBuilder {
             }
             self.last_pos = Some(quad.right_point());
             self.items.push(quad);
+        } else {
+            panic!("PathBuilder::start() is required");
+        }
+    }
+
+    pub fn cubic(&mut self, control_x1: f64, control_y1: f64, control_x2: f64, control_y2: f64, x: f64, y: f64) {
+        if let Some(last_pos) = self.last_pos {
+            let cubic = PathItem::Cubic(Cubic{
+                start: last_pos,
+                end: Point(x, y),
+                control1: Point(control_x1, control_y1),
+                control2: Point(control_x2, control_y2),
+            });
+            let left_point = cubic.left_point();
+            if last_pos != left_point {
+                self.items.push(PathItem::Line(Line(last_pos, left_point)));
+            }
+            self.last_pos = Some(cubic.right_point());
+            self.items.push(cubic);
         } else {
             panic!("PathBuilder::start() is required");
         }

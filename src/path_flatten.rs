@@ -3,7 +3,7 @@ use crate::models::Line;
 use crate::path3::{Path, PathItem};
 use lyon_geom::{
     euclid::{Angle, default::Point2D},
-    Arc, QuadraticBezierSegment
+    Arc, QuadraticBezierSegment, CubicBezierSegment,
 };
 
 pub fn path_flatten(path: &Path, tolerance: f64) -> Path {
@@ -62,6 +62,19 @@ pub fn path_flatten(path: &Path, tolerance: f64) -> Path {
                     to: point_to_point2d(&quad.end),
                 }.flattened(tolerance).map(|x| x.to_tuple().into());
                 let mut p = quad.start;
+                for q in it {
+                    pis.push(PathItem::Line(Line(p, q)));
+                    p = q;
+                }
+            }
+            PathItem::Cubic(cubic) => {
+                let it = CubicBezierSegment {
+                    from: point_to_point2d(&cubic.start),
+                    ctrl1: point_to_point2d(&cubic.control1),
+                    ctrl2: point_to_point2d(&cubic.control2),
+                    to: point_to_point2d(&cubic.end),
+                }.flattened(tolerance).map(|x| x.to_tuple().into());
+                let mut p = cubic.start;
                 for q in it {
                     pis.push(PathItem::Line(Line(p, q)));
                     p = q;

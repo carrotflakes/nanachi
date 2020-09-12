@@ -13,8 +13,10 @@ fn main() {
     let mut img = ImageBuffer::from_pixel(width, height, Rgba([250u8, 250, 250, 0]));
 
     let mut pb = PathBuilder::new();
-    pb.start(10.0, 10.0);
-    pb.line_to(300.0, 10.0);
+    pb.start(10.0, 40.0);
+    pb.line_to(100.0, 40.0);
+    pb.cubic(170.0, 100.0, 200.0, 10.0, 300.0, 40.0);
+    pb.line_to(300.0, 40.0);
     // .quad(500.0, 300.0, 300.0, 300.0);
     // .quad(300.0, 200.0, 300.0, 300.0);
     pb.quad(700.0, 500.0, 300.0, 300.0);
@@ -35,12 +37,13 @@ fn main() {
         .rotate(0.9)
         .scale(1.0, 0.6)
         .skew_x(-0.1)
-        .translate(250.0, 250.0)
+        .translate(250.0, 280.0)
     ;
     let path = path_transform(&path, &am);
     let path = nanachi::path_flatten::path_flatten(&path, 0.5);
+    let t = std::time::Instant::now();
     {
-        let pc = fill_color::LinearGradient::new((200.0, 200.0), (300.0, 400.0), vec![
+        let pc = fill_color::LinearGradient::new((200.0, 200.0), (300.0, 430.0), vec![
             (0.0, Rgba([255, 100, 100, 100])),
             (1.0, Rgba([200, 255, 10, 255])),
         ]);
@@ -49,13 +52,14 @@ fn main() {
     {
         use nanachi::path_outline::{path_outline, Join, Cap};
         let path = Path::new(path_outline(&path, 8.0, &Join::Round, &Cap::Round));
-        let pc = fill_color::RadialGradient::new((250.0, 200.0), 200.0, vec![
+        let pc = fill_color::RadialGradient::new((250.0, 220.0), 220.0, vec![
             (0.0, Rgba([255, 255, 255, 255])),
             (0.9, Rgba([200, 10, 10, 255])),
             (1.0, Rgba([10, 10, 255, 10])),
         ]);
         draw_fill(&mut img, &path, nanachi::compositor::basic::SrcOver, &pc);
     }
+    dbg!(t.elapsed());
 
     let res = img.save("./path3.png");
     println!("save: {:?}", res);

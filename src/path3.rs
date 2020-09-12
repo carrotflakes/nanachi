@@ -1,5 +1,5 @@
 use crate::point::Point;
-use crate::models::{Line, Arc, Ellipse, Quad};
+use crate::models::{Line, Arc, Ellipse, Quad, Cubic};
 use crate::geometry;
 
 #[derive(Debug, Clone)]
@@ -8,6 +8,7 @@ pub enum PathItem {
     Arc(Arc),
     Ellipse(Ellipse),
     Quad(Quad),
+    Cubic(Cubic),
 }
 
 impl PathItem {
@@ -32,7 +33,13 @@ impl PathItem {
                 start: quad.end.clone(),
                 end: quad.start.clone(),
                 control1: quad.control1.clone(),
-            })
+            }),
+            PathItem::Cubic(cubic) => PathItem::Cubic(Cubic{
+                start: cubic.end.clone(),
+                end: cubic.start.clone(),
+                control1: cubic.control2.clone(),
+                control2: cubic.control1.clone(),
+            }),
         }
     }
 
@@ -54,6 +61,9 @@ impl PathItem {
             }
             PathItem::Quad(quad) => {
                 quad.end
+            }
+            PathItem::Cubic(cubic) => {
+                cubic.end
             }
         }
     }
@@ -77,6 +87,9 @@ impl PathItem {
             PathItem::Quad(quad) => {
                 quad.start
             }
+            PathItem::Cubic(cubic) => {
+                cubic.start
+            }
         }
     }
 
@@ -86,45 +99,46 @@ impl PathItem {
             PathItem::Arc(arc) => {arc.radius == 0.0 || arc.angle1 == arc.angle2}
             PathItem::Ellipse(ellipse) => {(ellipse.radius_x == 0.0 && ellipse.radius_y == 0.0) || ellipse.angle1 == ellipse.angle2}
             PathItem::Quad(quad) => {quad.start == quad.end && quad.start == quad.control1}
+            PathItem::Cubic(cubic) => {cubic.start == cubic.end && cubic.start == cubic.control1 && cubic.start == cubic.control2}
         }
     }
 
-    pub fn intersect(&self, other: &PathItem) -> Option<Point> {
-        match (self, other) {
-            (PathItem::Line(Line(p1, p2)), PathItem::Line(Line(p3, p4))) =>
-                crate::geometry::intersect_segment_and_segment(*p1, *p2, *p3, *p4),
-            (PathItem::Line(line), PathItem::Arc(arc)) =>
-                intersect_segment_and_arc(line, arc),
-            (PathItem::Line(line), PathItem::Ellipse(ellipse)) =>
-                intersect_segment_and_ellipse(line, ellipse),
-            (PathItem::Line(line), PathItem::Quad(quad)) =>
-                intersect_segment_and_quad(line, quad),
-            (PathItem::Arc(arc), PathItem::Line(line)) =>
-                intersect_segment_and_arc(line, arc),
-            (PathItem::Arc(arc1), PathItem::Arc(arc2)) =>
-                todo!(),
-            (PathItem::Arc(arc), PathItem::Ellipse(ellipse)) =>
-                todo!(),
-            (PathItem::Arc(arc), PathItem::Quad(quad)) =>
-                todo!(),
-            (PathItem::Ellipse(ellipse), PathItem::Line(line)) =>
-                intersect_segment_and_ellipse(line, ellipse),
-            (PathItem::Ellipse(ellipse), PathItem::Arc(arc)) =>
-                todo!(),
-            (PathItem::Ellipse(ellipse1), PathItem::Ellipse(ellipse2)) =>
-                intersect_ellipse_and_ellipse(ellipse1, ellipse2),
-            (PathItem::Ellipse(ellipse), PathItem::Quad(quad)) =>
-                intersect_ellipse_and_quad(ellipse, quad),
-            (PathItem::Quad(quad), PathItem::Line(line)) =>
-                intersect_segment_and_quad(line, quad),
-            (PathItem::Quad(quad), PathItem::Arc(arc)) =>
-                todo!(),
-            (PathItem::Quad(quad), PathItem::Ellipse(ellipse)) =>
-                intersect_ellipse_and_quad(ellipse, quad),
-            (PathItem::Quad(quad1), PathItem::Quad(quad2)) =>
-                intersect_quad_and_quad(quad1, quad2),
-        }
-    }
+    // pub fn intersect(&self, other: &PathItem) -> Option<Point> {
+    //     match (self, other) {
+    //         (PathItem::Line(Line(p1, p2)), PathItem::Line(Line(p3, p4))) =>
+    //             crate::geometry::intersect_segment_and_segment(*p1, *p2, *p3, *p4),
+    //         (PathItem::Line(line), PathItem::Arc(arc)) =>
+    //             intersect_segment_and_arc(line, arc),
+    //         (PathItem::Line(line), PathItem::Ellipse(ellipse)) =>
+    //             intersect_segment_and_ellipse(line, ellipse),
+    //         (PathItem::Line(line), PathItem::Quad(quad)) =>
+    //             intersect_segment_and_quad(line, quad),
+    //         (PathItem::Arc(arc), PathItem::Line(line)) =>
+    //             intersect_segment_and_arc(line, arc),
+    //         (PathItem::Arc(arc1), PathItem::Arc(arc2)) =>
+    //             todo!(),
+    //         (PathItem::Arc(arc), PathItem::Ellipse(ellipse)) =>
+    //             todo!(),
+    //         (PathItem::Arc(arc), PathItem::Quad(quad)) =>
+    //             todo!(),
+    //         (PathItem::Ellipse(ellipse), PathItem::Line(line)) =>
+    //             intersect_segment_and_ellipse(line, ellipse),
+    //         (PathItem::Ellipse(ellipse), PathItem::Arc(arc)) =>
+    //             todo!(),
+    //         (PathItem::Ellipse(ellipse1), PathItem::Ellipse(ellipse2)) =>
+    //             intersect_ellipse_and_ellipse(ellipse1, ellipse2),
+    //         (PathItem::Ellipse(ellipse), PathItem::Quad(quad)) =>
+    //             intersect_ellipse_and_quad(ellipse, quad),
+    //         (PathItem::Quad(quad), PathItem::Line(line)) =>
+    //             intersect_segment_and_quad(line, quad),
+    //         (PathItem::Quad(quad), PathItem::Arc(arc)) =>
+    //             todo!(),
+    //         (PathItem::Quad(quad), PathItem::Ellipse(ellipse)) =>
+    //             intersect_ellipse_and_quad(ellipse, quad),
+    //         (PathItem::Quad(quad1), PathItem::Quad(quad2)) =>
+    //             intersect_quad_and_quad(quad1, quad2),
+    //     }
+    // }
 }
 
 #[derive(Debug, Clone)]

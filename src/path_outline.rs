@@ -232,5 +232,6 @@ pub fn path_item_offset(pis: &mut Vec<PathItem>, path_item: &PathItem, width: f6
                 }));
             }
         }
+        PathItem::Cubic(_) => {panic!("path_outline not support cubic curve.")}
     }
 }
