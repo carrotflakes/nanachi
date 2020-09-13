@@ -1,8 +1,9 @@
 use image::{Rgb, Rgba};
+use super::Compositor;
 
 pub struct SrcOver;
 
-impl super::Compositor<Rgba<u8>> for SrcOver {
+impl Compositor<Rgba<u8>> for SrcOver {
     fn composite(&self, a: &Rgba<u8>, b: &Rgba<u8>, alpha: f64) -> Rgba<u8> {
         let aa = a.0[3] as f64 / std::u8::MAX as f64;
         let ba = b.0[3] as f64 / std::u8::MAX as f64 * alpha;
@@ -17,7 +18,7 @@ impl super::Compositor<Rgba<u8>> for SrcOver {
     }
 }
 
-impl super::Compositor<Rgb<u8>> for SrcOver {
+impl Compositor<Rgb<u8>> for SrcOver {
     fn composite(&self, a: &Rgb<u8>, b: &Rgb<u8>, alpha: f64) -> Rgb<u8> {
         let alpha_a = 1.0 - alpha;
         let alpha_b = alpha;
@@ -31,7 +32,7 @@ impl super::Compositor<Rgb<u8>> for SrcOver {
 
 pub struct SrcIn;
 
-impl super::Compositor<Rgba<u8>> for SrcIn {
+impl Compositor<Rgba<u8>> for SrcIn {
     fn composite(&self, a: &Rgba<u8>, b: &Rgba<u8>, alpha: f64) -> Rgba<u8> {
         let aa = a.0[3] as f64 / std::u8::MAX as f64;
         Rgba([
@@ -43,7 +44,7 @@ impl super::Compositor<Rgba<u8>> for SrcIn {
     }
 }
 
-impl super::Compositor<Rgb<u8>> for SrcIn {
+impl Compositor<Rgb<u8>> for SrcIn {
     fn composite(&self, _: &Rgb<u8>, b: &Rgb<u8>, _: f64) -> Rgb<u8> {
         Rgb([
             b.0[0],
@@ -55,7 +56,7 @@ impl super::Compositor<Rgb<u8>> for SrcIn {
 
 pub struct SrcOut;
 
-impl super::Compositor<Rgba<u8>> for SrcOut {
+impl Compositor<Rgba<u8>> for SrcOut {
     fn composite(&self, a: &Rgba<u8>, b: &Rgba<u8>, alpha: f64) -> Rgba<u8> {
         let aa = a.0[3] as f64 / std::u8::MAX as f64;
         Rgba([
@@ -67,7 +68,7 @@ impl super::Compositor<Rgba<u8>> for SrcOut {
     }
 }
 
-impl super::Compositor<Rgb<u8>> for SrcOut {
+impl Compositor<Rgb<u8>> for SrcOut {
     fn composite(&self, _: &Rgb<u8>, b: &Rgb<u8>, _: f64) -> Rgb<u8> {
         Rgb([
             b.0[0],
@@ -79,7 +80,7 @@ impl super::Compositor<Rgb<u8>> for SrcOut {
 
 pub struct SrcAtop;
 
-impl super::Compositor<Rgba<u8>> for SrcAtop {
+impl Compositor<Rgba<u8>> for SrcAtop {
     fn composite(&self, a: &Rgba<u8>, b: &Rgba<u8>, alpha: f64) -> Rgba<u8> {
         let ba = b.0[3] as f64 / std::u8::MAX as f64 * alpha;
         let alpha_a = 1.0 - ba;
@@ -93,7 +94,7 @@ impl super::Compositor<Rgba<u8>> for SrcAtop {
     }
 }
 
-impl super::Compositor<Rgb<u8>> for SrcAtop {
+impl Compositor<Rgb<u8>> for SrcAtop {
     fn composite(&self, a: &Rgb<u8>, b: &Rgb<u8>, alpha: f64) -> Rgb<u8> {
         let alpha_a = 1.0 - alpha;
         let alpha_b = alpha;
@@ -104,10 +105,10 @@ impl super::Compositor<Rgb<u8>> for SrcAtop {
         ])
     }
 }
-////////////////////////////////////////////
+
 pub struct DstOver;
 
-impl super::Compositor<Rgba<u8>> for DstOver {
+impl Compositor<Rgba<u8>> for DstOver {
     fn composite(&self, b: &Rgba<u8>, a: &Rgba<u8>, alpha: f64) -> Rgba<u8> {
         let aa = a.0[3] as f64 / std::u8::MAX as f64 * alpha;
         let ba = b.0[3] as f64 / std::u8::MAX as f64;
@@ -122,7 +123,7 @@ impl super::Compositor<Rgba<u8>> for DstOver {
     }
 }
 
-impl super::Compositor<Rgb<u8>> for DstOver {
+impl Compositor<Rgb<u8>> for DstOver {
     fn composite(&self, b: &Rgb<u8>, a: &Rgb<u8>, alpha: f64) -> Rgb<u8> {
         let alpha_a = 1.0 - alpha;
         let alpha_b = alpha;
@@ -136,7 +137,7 @@ impl super::Compositor<Rgb<u8>> for DstOver {
 
 pub struct DstIn;
 
-impl super::Compositor<Rgba<u8>> for DstIn {
+impl Compositor<Rgba<u8>> for DstIn {
     fn composite(&self, b: &Rgba<u8>, a: &Rgba<u8>, alpha: f64) -> Rgba<u8> {
         let aa = a.0[3] as f64 / std::u8::MAX as f64;
         Rgba([
@@ -148,7 +149,7 @@ impl super::Compositor<Rgba<u8>> for DstIn {
     }
 }
 
-impl super::Compositor<Rgb<u8>> for DstIn {
+impl Compositor<Rgb<u8>> for DstIn {
     fn composite(&self, b: &Rgb<u8>, _: &Rgb<u8>, _: f64) -> Rgb<u8> {
         Rgb([
             b.0[0],
@@ -160,7 +161,7 @@ impl super::Compositor<Rgb<u8>> for DstIn {
 
 pub struct DstOut;
 
-impl super::Compositor<Rgba<u8>> for DstOut {
+impl Compositor<Rgba<u8>> for DstOut {
     fn composite(&self, b: &Rgba<u8>, a: &Rgba<u8>, alpha: f64) -> Rgba<u8> {
         let aa = a.0[3] as f64 / std::u8::MAX as f64 * alpha;
         Rgba([
@@ -172,7 +173,7 @@ impl super::Compositor<Rgba<u8>> for DstOut {
     }
 }
 
-impl super::Compositor<Rgb<u8>> for DstOut {
+impl Compositor<Rgb<u8>> for DstOut {
     fn composite(&self, b: &Rgb<u8>, _: &Rgb<u8>, _: f64) -> Rgb<u8> {
         Rgb([
             b.0[0],
@@ -184,7 +185,7 @@ impl super::Compositor<Rgb<u8>> for DstOut {
 
 pub struct DstAtop;
 
-impl super::Compositor<Rgba<u8>> for DstAtop {
+impl Compositor<Rgba<u8>> for DstAtop {
     fn composite(&self, b: &Rgba<u8>, a: &Rgba<u8>, alpha: f64) -> Rgba<u8> {
         let ba = b.0[3] as f64 / std::u8::MAX as f64;
         let alpha_a = 1.0 - ba;
@@ -198,7 +199,7 @@ impl super::Compositor<Rgba<u8>> for DstAtop {
     }
 }
 
-impl super::Compositor<Rgb<u8>> for DstAtop {
+impl Compositor<Rgb<u8>> for DstAtop {
     fn composite(&self, b: &Rgb<u8>, a: &Rgb<u8>, alpha: f64) -> Rgb<u8> {
         let alpha_a = 1.0 - alpha;
         let alpha_b = alpha;
@@ -212,7 +213,7 @@ impl super::Compositor<Rgb<u8>> for DstAtop {
 
 pub struct Xor;
 
-impl super::Compositor<Rgba<u8>> for Xor {
+impl Compositor<Rgba<u8>> for Xor {
     fn composite(&self, a: &Rgba<u8>, b: &Rgba<u8>, alpha: f64) -> Rgba<u8> {
         let aa = a.0[3] as f64 / std::u8::MAX as f64;
         let ba = b.0[3] as f64 / std::u8::MAX as f64 * alpha;
@@ -227,7 +228,7 @@ impl super::Compositor<Rgba<u8>> for Xor {
     }
 }
 
-impl super::Compositor<Rgb<u8>> for Xor {
+impl Compositor<Rgb<u8>> for Xor {
     fn composite(&self, a: &Rgb<u8>, b: &Rgb<u8>, alpha: f64) -> Rgb<u8> {
         let alpha_a = 1.0 - alpha;
         let alpha_b = alpha;
