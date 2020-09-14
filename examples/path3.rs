@@ -76,6 +76,6 @@ fn draw_fill<C: fill_color::FillColor<Rgba<u8>>, M: nanachi::compositor::Composi
         img.height() as u32,
         path,
         nanachi::fill_rule::NonZero,
-        &mut nanachi::writer::img_writer(img, fill_color, compositor),
+        &mut nanachi::writer::img_writer(img, fill_color, &compositor),
     );
 }

@@ -64,7 +64,7 @@ fn draw_stars(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
         let compositor = compositor::basic::SrcOver;
         fill_path::draw_fill(
             img.width() as u32, img.height() as u32, ps, fill_rule::NonZero,
-            &mut img_writer(img, &fc, compositor)
+            &mut img_writer(img, &fc, &compositor)
         );
         let fc = fill_color::Constant::new(Rgba([[128, 64, 0, 255], [0, 128, 64, 255], [64, 0, 128, 255]][si % 3]));
         let compositor = compositor::basic::SrcOver;
@@ -75,7 +75,7 @@ fn draw_stars(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
         );
         fill_path::draw_fill(
             img.width() as u32, img.height() as u32, &Path::new(outline), fill_rule::NonZero,
-            &mut img_writer(img, &fc, compositor)
+            &mut img_writer(img, &fc, &compositor)
         );
     }
 }
@@ -242,13 +242,13 @@ fn draw_nanachi(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
         img.width() as u32, img.height() as u32,
         &Path::from_points(&shape),
         fill_rule::NonZero,
-        &mut img_writer(img, &pc, compositor::basic::SrcOver));
+        &mut img_writer(img, &pc, &compositor::basic::SrcOver));
 
     fill_path::draw_fill(
         img.width() as u32, img.height() as u32,
         &Path::from_points(&moji_shape),
         fill_rule::NonZero,
-        &mut img_writer(img, &pc, compositor::basic::SrcOver));
+        &mut img_writer(img, &pc, &compositor::basic::SrcOver));
 
     let pc = fill_color::Constant::new(Rgba([64, 8, 8, 255]));
     for ps in nanachi.iter() {
@@ -263,7 +263,7 @@ fn draw_nanachi(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
             img.width() as u32, img.height() as u32,
             &outline,
             fill_rule::NonZero,
-            &mut img_writer(img, &pc, compositor::basic::SrcOver));
+            &mut img_writer(img, &pc, &compositor::basic::SrcOver));
         //draw::draw_path(img, ps, Rgb([64, 8, 8]));
     }
 
@@ -279,6 +279,6 @@ fn draw_nanachi(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
             img.width() as u32, img.height() as u32,
             &outline,
             fill_rule::NonZero,
-            &mut img_writer(img, &pc, compositor::basic::SrcOver));
+            &mut img_writer(img, &pc, &compositor::basic::SrcOver));
     }
 }
