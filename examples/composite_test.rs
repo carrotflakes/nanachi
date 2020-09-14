@@ -38,7 +38,7 @@ fn main() {
         draw_fill(
             &mut img2, &path_transform(&path, &Matrix2d::new().translate(10.0, 10.0)),
             c,
-            &fill_color::Constant::new(Rgba([0, 0, 255, 200])));
+            &fill_color::Constant::new(Rgba([0, 0, 255, 150])));
         let x = (60 * (i % 4) + 10) as u32;
         let y = (60 * (i / 4) + 10) as u32;
         for dy in 0..60 {
