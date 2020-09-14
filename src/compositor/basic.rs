@@ -1,241 +1,139 @@
 use image::{Rgb, Rgba};
 use super::Compositor;
 
-pub struct SrcOver;
+macro_rules! def_compositor {
+    (
+        $name:ident ($aa:ident, $ba:ident => $ca:ident, $ax:ident, $bx:ident)
+        {$($rest1:tt)+} {$($rest2:tt)+}
+    ) => {
+        pub struct $name;
 
-impl Compositor<Rgba<u8>> for SrcOver {
-    fn composite(&self, a: &Rgba<u8>, b: &Rgba<u8>, alpha: f64) -> Rgba<u8> {
-        let aa = a.0[3] as f64 / std::u8::MAX as f64;
-        let ba = b.0[3] as f64 / std::u8::MAX as f64 * alpha;
-        let alpha_a = 1.0 - ba;
-        let alpha_b = ba;
-        Rgba([
-            (a.0[0] as f64 * alpha_a + b.0[0] as f64 * alpha_b).round() as u8,
-            (a.0[1] as f64 * alpha_a + b.0[1] as f64 * alpha_b).round() as u8,
-            (a.0[2] as f64 * alpha_a + b.0[2] as f64 * alpha_b).round() as u8,
-            ((aa + ba - aa * ba) * std::u8::MAX as f64).round() as u8,
-        ])
-    }
+        impl Compositor<Rgba<u8>> for $name {
+            #[allow(unused_variables)]
+            fn composite(&self, a: &Rgba<u8>, b: &Rgba<u8>, alpha: f64) -> Rgba<u8> {
+                let $aa = a.0[3] as f64 / std::u8::MAX as f64;
+                let $ba = b.0[3] as f64 / std::u8::MAX as f64 * alpha;
+                $($rest1)+
+                Rgba([
+                    (a.0[0] as f64 * $ax + b.0[0] as f64 * $bx).round() as u8,
+                    (a.0[1] as f64 * $ax + b.0[1] as f64 * $bx).round() as u8,
+                    (a.0[2] as f64 * $ax + b.0[2] as f64 * $bx).round() as u8,
+                    ($ca * std::u8::MAX as f64).round() as u8,
+                ])
+            }
+        }
+
+        impl Compositor<Rgb<u8>> for $name {
+            #[allow(unused_variables)]
+            fn composite(&self, a: &Rgb<u8>, b: &Rgb<u8>, alpha: f64) -> Rgb<u8> {
+                let $aa = 1.0;
+                let $ba = alpha;
+                $($rest2)+
+                Rgb([
+                    (a.0[0] as f64 * $ax + b.0[0] as f64 * $bx).round() as u8,
+                    (a.0[1] as f64 * $ax + b.0[1] as f64 * $bx).round() as u8,
+                    (a.0[2] as f64 * $ax + b.0[2] as f64 * $bx).round() as u8,
+                ])
+            }
+        }
+    };
 }
 
-impl Compositor<Rgb<u8>> for SrcOver {
-    fn composite(&self, a: &Rgb<u8>, b: &Rgb<u8>, alpha: f64) -> Rgb<u8> {
-        let alpha_a = 1.0 - alpha;
-        let alpha_b = alpha;
-        Rgb([
-            (a.0[0] as f64 * alpha_a + b.0[0] as f64 * alpha_b).round() as u8,
-            (a.0[1] as f64 * alpha_a + b.0[1] as f64 * alpha_b).round() as u8,
-            (a.0[2] as f64 * alpha_a + b.0[2] as f64 * alpha_b).round() as u8,
-        ])
+def_compositor!(
+    SrcOver(a, b => c, ax, bx) {
+        let c = a + b - a * b;
+        let ax = (a * (1.0 - b)) / c;
+        let bx = b / c;
+    } {
+        let ax = a * (1.0 - b);
+        let bx = b;
     }
-}
+);
 
-pub struct SrcIn;
-
-impl Compositor<Rgba<u8>> for SrcIn {
-    fn composite(&self, a: &Rgba<u8>, b: &Rgba<u8>, alpha: f64) -> Rgba<u8> {
-        let aa = a.0[3] as f64 / std::u8::MAX as f64;
-        Rgba([
-            b.0[0],
-            b.0[1],
-            b.0[2],
-            (b.0[3] as f64 * alpha * aa).round() as u8,
-        ])
+def_compositor!(
+    SrcIn(a, b => c, ax, bx) {
+        let c = a * b;
+        let ax = 0.0;
+        let bx = 1.0;
+    } {
+        let ax = 0.0;
+        let bx = 1.0;
     }
-}
+);
 
-impl Compositor<Rgb<u8>> for SrcIn {
-    fn composite(&self, _: &Rgb<u8>, b: &Rgb<u8>, _: f64) -> Rgb<u8> {
-        Rgb([
-            b.0[0],
-            b.0[1],
-            b.0[2],
-        ])
+def_compositor!(
+    SrcOut(a, b => c, ax, bx) {
+        let c = (1.0 - a) * b;
+        let ax = 0.0;
+        let bx = 1.0;
+    } {
+        let ax = 0.0;
+        let bx = 1.0;
     }
-}
+);
 
-pub struct SrcOut;
-
-impl Compositor<Rgba<u8>> for SrcOut {
-    fn composite(&self, a: &Rgba<u8>, b: &Rgba<u8>, alpha: f64) -> Rgba<u8> {
-        let aa = a.0[3] as f64 / std::u8::MAX as f64;
-        Rgba([
-            b.0[0],
-            b.0[1],
-            b.0[2],
-            (b.0[3] as f64 * alpha * (1.0 - aa)).round() as u8,
-        ])
+def_compositor!(
+    SrcAtop(a, b => c, ax, bx) {
+        let c = b;
+        let ax = 1.0 - b;
+        let bx = b;
+    } {
+        let ax = 1.0 - b;
+        let bx = b;
     }
-}
+);
 
-impl Compositor<Rgb<u8>> for SrcOut {
-    fn composite(&self, _: &Rgb<u8>, b: &Rgb<u8>, _: f64) -> Rgb<u8> {
-        Rgb([
-            b.0[0],
-            b.0[1],
-            b.0[2],
-        ])
+def_compositor!(
+    DstOver(a, b => c, ax, bx) {
+        let c = a + b - a * b;
+        let ax = a / c;
+        let bx = ((1.0 - a) * b) / c;
+    } {
+        let ax = a;
+        let bx = (1.0 - a) * b;
     }
-}
+);
 
-pub struct SrcAtop;
-
-impl Compositor<Rgba<u8>> for SrcAtop {
-    fn composite(&self, a: &Rgba<u8>, b: &Rgba<u8>, alpha: f64) -> Rgba<u8> {
-        let ba = b.0[3] as f64 / std::u8::MAX as f64 * alpha;
-        let alpha_a = 1.0 - ba;
-        let alpha_b = ba;
-        Rgba([
-            (a.0[0] as f64 * alpha_a + b.0[0] as f64 * alpha_b).round() as u8,
-            (a.0[1] as f64 * alpha_a + b.0[1] as f64 * alpha_b).round() as u8,
-            (a.0[2] as f64 * alpha_a + b.0[2] as f64 * alpha_b).round() as u8,
-            a.0[3],
-        ])
+def_compositor!(
+    DstIn(a, b => c, ax, bx) {
+        let c = a * b;
+        let ax = 1.0;
+        let bx = 0.0;
+    } {
+        let ax = 1.0;
+        let bx = 0.0;
     }
-}
+);
 
-impl Compositor<Rgb<u8>> for SrcAtop {
-    fn composite(&self, a: &Rgb<u8>, b: &Rgb<u8>, alpha: f64) -> Rgb<u8> {
-        let alpha_a = 1.0 - alpha;
-        let alpha_b = alpha;
-        Rgb([
-            (a.0[0] as f64 * alpha_a + b.0[0] as f64 * alpha_b).round() as u8,
-            (a.0[1] as f64 * alpha_a + b.0[1] as f64 * alpha_b).round() as u8,
-            (a.0[2] as f64 * alpha_a + b.0[2] as f64 * alpha_b).round() as u8,
-        ])
+def_compositor!(
+    DstOut(a, b => c, ax, bx) {
+        let c = a * (1.0 - b);
+        let ax = 1.0;
+        let bx = 0.0;
+    } {
+        let ax = 1.0;
+        let bx = 0.0;
     }
-}
+);
 
-pub struct DstOver;
-
-impl Compositor<Rgba<u8>> for DstOver {
-    fn composite(&self, b: &Rgba<u8>, a: &Rgba<u8>, alpha: f64) -> Rgba<u8> {
-        let aa = a.0[3] as f64 / std::u8::MAX as f64 * alpha;
-        let ba = b.0[3] as f64 / std::u8::MAX as f64;
-        let alpha_a = 1.0 - ba;
-        let alpha_b = ba;
-        Rgba([
-            (a.0[0] as f64 * alpha_a + b.0[0] as f64 * alpha_b).round() as u8,
-            (a.0[1] as f64 * alpha_a + b.0[1] as f64 * alpha_b).round() as u8,
-            (a.0[2] as f64 * alpha_a + b.0[2] as f64 * alpha_b).round() as u8,
-            ((aa + ba - aa * ba) * std::u8::MAX as f64).round() as u8,
-        ])
+def_compositor!(
+    DstAtop(a, b => c, ax, bx) {
+        let c = a;
+        let ax = a;
+        let bx = 1.0 - a;
+    } {
+        let ax = a;
+        let bx = 1.0 - a;
     }
-}
+);
 
-impl Compositor<Rgb<u8>> for DstOver {
-    fn composite(&self, b: &Rgb<u8>, a: &Rgb<u8>, alpha: f64) -> Rgb<u8> {
-        let alpha_a = 1.0 - alpha;
-        let alpha_b = alpha;
-        Rgb([
-            (a.0[0] as f64 * alpha_a + b.0[0] as f64 * alpha_b).round() as u8,
-            (a.0[1] as f64 * alpha_a + b.0[1] as f64 * alpha_b).round() as u8,
-            (a.0[2] as f64 * alpha_a + b.0[2] as f64 * alpha_b).round() as u8,
-        ])
+def_compositor!(
+    Xor(a, b => c, ax, bx) {
+        let ax = a * (1.0 - b);
+        let bx = (1.0 - a) * b;
+        let c = a + b - 2.0 * a * b;
+    } {
+        let ax = a * (1.0 - b);
+        let bx = (1.0 - a) * b;
     }
-}
-
-pub struct DstIn;
-
-impl Compositor<Rgba<u8>> for DstIn {
-    fn composite(&self, b: &Rgba<u8>, a: &Rgba<u8>, alpha: f64) -> Rgba<u8> {
-        let aa = a.0[3] as f64 / std::u8::MAX as f64;
-        Rgba([
-            b.0[0],
-            b.0[1],
-            b.0[2],
-            (b.0[3] as f64 * alpha * aa).round() as u8,
-        ])
-    }
-}
-
-impl Compositor<Rgb<u8>> for DstIn {
-    fn composite(&self, b: &Rgb<u8>, _: &Rgb<u8>, _: f64) -> Rgb<u8> {
-        Rgb([
-            b.0[0],
-            b.0[1],
-            b.0[2],
-        ])
-    }
-}
-
-pub struct DstOut;
-
-impl Compositor<Rgba<u8>> for DstOut {
-    fn composite(&self, b: &Rgba<u8>, a: &Rgba<u8>, alpha: f64) -> Rgba<u8> {
-        let aa = a.0[3] as f64 / std::u8::MAX as f64 * alpha;
-        Rgba([
-            b.0[0],
-            b.0[1],
-            b.0[2],
-            (b.0[3] as f64 * (1.0 - aa)).round() as u8,
-        ])
-    }
-}
-
-impl Compositor<Rgb<u8>> for DstOut {
-    fn composite(&self, b: &Rgb<u8>, _: &Rgb<u8>, _: f64) -> Rgb<u8> {
-        Rgb([
-            b.0[0],
-            b.0[1],
-            b.0[2],
-        ])
-    }
-}
-
-pub struct DstAtop;
-
-impl Compositor<Rgba<u8>> for DstAtop {
-    fn composite(&self, b: &Rgba<u8>, a: &Rgba<u8>, alpha: f64) -> Rgba<u8> {
-        let ba = b.0[3] as f64 / std::u8::MAX as f64;
-        let alpha_a = 1.0 - ba;
-        let alpha_b = ba;
-        Rgba([
-            (a.0[0] as f64 * alpha_a + b.0[0] as f64 * alpha_b).round() as u8,
-            (a.0[1] as f64 * alpha_a + b.0[1] as f64 * alpha_b).round() as u8,
-            (a.0[2] as f64 * alpha_a + b.0[2] as f64 * alpha_b).round() as u8,
-            (a.0[3] as f64 * alpha).round() as u8,
-        ])
-    }
-}
-
-impl Compositor<Rgb<u8>> for DstAtop {
-    fn composite(&self, b: &Rgb<u8>, a: &Rgb<u8>, alpha: f64) -> Rgb<u8> {
-        let alpha_a = 1.0 - alpha;
-        let alpha_b = alpha;
-        Rgb([
-            (a.0[0] as f64 * alpha_a + b.0[0] as f64 * alpha_b).round() as u8,
-            (a.0[1] as f64 * alpha_a + b.0[1] as f64 * alpha_b).round() as u8,
-            (a.0[2] as f64 * alpha_a + b.0[2] as f64 * alpha_b).round() as u8,
-        ])
-    }
-}
-
-pub struct Xor;
-
-impl Compositor<Rgba<u8>> for Xor {
-    fn composite(&self, a: &Rgba<u8>, b: &Rgba<u8>, alpha: f64) -> Rgba<u8> {
-        let aa = a.0[3] as f64 / std::u8::MAX as f64;
-        let ba = b.0[3] as f64 / std::u8::MAX as f64 * alpha;
-        let alpha_a = aa * (1.0 - ba);
-        let alpha_b = ba;
-        Rgba([
-            (a.0[0] as f64 * alpha_a + b.0[0] as f64 * alpha_b).round() as u8,
-            (a.0[1] as f64 * alpha_a + b.0[1] as f64 * alpha_b).round() as u8,
-            (a.0[2] as f64 * alpha_a + b.0[2] as f64 * alpha_b).round() as u8,
-            ((aa + ba - aa * ba * 2.0) * std::u8::MAX as f64).round() as u8,
-        ])
-    }
-}
-
-impl Compositor<Rgb<u8>> for Xor {
-    fn composite(&self, a: &Rgb<u8>, b: &Rgb<u8>, alpha: f64) -> Rgb<u8> {
-        let alpha_a = 1.0 - alpha;
-        let alpha_b = alpha;
-        Rgb([
-            (a.0[0] as f64 * alpha_a + b.0[0] as f64 * alpha_b).round() as u8,
-            (a.0[1] as f64 * alpha_a + b.0[1] as f64 * alpha_b).round() as u8,
-            (a.0[2] as f64 * alpha_a + b.0[2] as f64 * alpha_b).round() as u8,
-        ])
-    }
-}
+);
