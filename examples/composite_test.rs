@@ -11,25 +11,15 @@ fn main() {
     let (width, height) = (512, 512);
     let mut img = ImageBuffer::from_pixel(width, height, Rgba([250u8, 250, 250, 0]));
 
-    let mut pb = PathBuilder::new();
-    pb.start(0.0, 0.0);
-    pb.line_to(40.0, 0.0);
-    pb.line_to(40.0, 40.0);
-    pb.line_to(0.0, 40.0);
-    pb.close();
-    let path = pb.end();
+    fn f<C: nanachi::compositor::Compositor<Rgba<u8>> + 'static>(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>, i: usize, c: C) {
+        let mut pb = PathBuilder::new();
+        pb.start(0.0, 0.0);
+        pb.line_to(40.0, 0.0);
+        pb.line_to(40.0, 40.0);
+        pb.line_to(0.0, 40.0);
+        pb.close();
+        let path = pb.end();
 
-    for (i, c) in vec![
-        &nanachi::compositor::basic::SrcOver as &dyn nanachi::compositor::Compositor<Rgba<u8>>,
-        &nanachi::compositor::basic::SrcIn,
-        &nanachi::compositor::basic::SrcOut,
-        &nanachi::compositor::basic::SrcAtop,
-        &nanachi::compositor::basic::DstOver,
-        &nanachi::compositor::basic::DstIn,
-        &nanachi::compositor::basic::DstOut,
-        &nanachi::compositor::basic::DstAtop,
-        &nanachi::compositor::basic::Xor,
-    ].into_iter().enumerate() {
         let mut img2 = ImageBuffer::from_pixel(60, 60, Rgba([250u8, 250, 250, 0]));
         draw_fill(
             &mut img2, &path_transform(&path, &Matrix2d::new()),
@@ -37,7 +27,7 @@ fn main() {
             &fill_color::Constant::new(Rgba([255, 0, 0, 200])));
         draw_fill(
             &mut img2, &path_transform(&path, &Matrix2d::new().translate(10.0, 10.0)),
-            c,
+            &c,
             &fill_color::Constant::new(Rgba([0, 0, 255, 150])));
         let x = (60 * (i % 4) + 10) as u32;
         let y = (60 * (i / 4) + 10) as u32;
@@ -47,15 +37,24 @@ fn main() {
             }
         }
     }
+    f(&mut img, 0, nanachi::compositor::basic::SrcOver);
+    f(&mut img, 1, nanachi::compositor::basic::SrcIn);
+    f(&mut img, 2, nanachi::compositor::basic::SrcOut);
+    f(&mut img, 3, nanachi::compositor::basic::SrcAtop);
+    f(&mut img, 4, nanachi::compositor::basic::DstOver);
+    f(&mut img, 5, nanachi::compositor::basic::DstIn);
+    f(&mut img, 6, nanachi::compositor::basic::DstOut);
+    f(&mut img, 7, nanachi::compositor::basic::DstAtop);
+    f(&mut img, 8, nanachi::compositor::basic::Xor);
 
     let res = img.save("./composite_test.png");
     println!("save: {:?}", res);
 }
 
-fn draw_fill<C: fill_color::FillColor<Rgba<u8>>>(
+fn draw_fill<C: fill_color::FillColor<Rgba<u8>>, M: nanachi::compositor::Compositor<Rgba<u8>> + 'static>(
     img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>,
     path: &Path,
-    compositor: &dyn nanachi::compositor::Compositor<Rgba<u8>>,
+    compositor: &M,
     fill_color: &C,
 ) {
     nanachi::fill_path::draw_fill(
