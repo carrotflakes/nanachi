@@ -19,3 +19,4 @@ pub mod path_transform;
 pub mod fill_color;
 pub mod path_outline;
 pub mod path_flatten;
+pub mod draw_image;
