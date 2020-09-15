@@ -18,6 +18,12 @@ impl PathBuilder {
         }
     }
 
+    fn push(&mut self, pi: PathItem) {
+        if !pi.is_zero() {
+            self.items.push(pi);
+        }
+    }
+
     pub fn start(&mut self, x: f64, y: f64) {
         assert!(self.items.is_empty());
         self.last_pos = Some(Point(x, y));
@@ -26,7 +32,7 @@ impl PathBuilder {
     pub fn line_to(&mut self, x: f64, y: f64) {
         let p = Point(x, y);
         if let Some(last_pos) = self.last_pos {
-            self.items.push(PathItem::Line(Line(last_pos, p)));
+            self.push(PathItem::Line(Line(last_pos, p)));
         }
         self.last_pos = Some(p);
     }
@@ -39,11 +45,11 @@ impl PathBuilder {
         if let Some(last_pos) = self.last_pos {
             let left_point = arc.left_point();
             if last_pos != left_point {
-                self.items.push(PathItem::Line(Line(last_pos, left_point)));
+                self.push(PathItem::Line(Line(last_pos, left_point)));
             }
         }
         self.last_pos = Some(arc.right_point());
-        self.items.push(arc);
+        self.push(arc);
     }
 
     pub fn ellipse(&mut self, x: f64, y: f64, radius_x: f64, radius_y: f64, rotation: f64, angle1: f64, angle2: f64) {
@@ -54,11 +60,11 @@ impl PathBuilder {
         if let Some(last_pos) = self.last_pos {
             let left_point = ellipse.left_point();
             if last_pos != left_point {
-                self.items.push(PathItem::Line(Line(last_pos, left_point)));
+                self.push(PathItem::Line(Line(last_pos, left_point)));
             }
         }
         self.last_pos = Some(ellipse.right_point());
-        self.items.push(ellipse);
+        self.push(ellipse);
     }
 
     pub fn quad(&mut self, control_x: f64, control_y: f64, x: f64, y: f64) {
@@ -70,10 +76,10 @@ impl PathBuilder {
             });
             let left_point = quad.left_point();
             if last_pos != left_point {
-                self.items.push(PathItem::Line(Line(last_pos, left_point)));
+                self.push(PathItem::Line(Line(last_pos, left_point)));
             }
             self.last_pos = Some(quad.right_point());
-            self.items.push(quad);
+            self.push(quad);
         } else {
             panic!("PathBuilder::start() is required");
         }
@@ -89,10 +95,10 @@ impl PathBuilder {
             });
             let left_point = cubic.left_point();
             if last_pos != left_point {
-                self.items.push(PathItem::Line(Line(last_pos, left_point)));
+                self.push(PathItem::Line(Line(last_pos, left_point)));
             }
             self.last_pos = Some(cubic.right_point());
-            self.items.push(cubic);
+            self.push(cubic);
         } else {
             panic!("PathBuilder::start() is required");
         }
