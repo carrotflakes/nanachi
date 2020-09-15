@@ -138,6 +138,17 @@ def_linear_compositor!(
     }
 );
 
+def_linear_compositor!(
+    Add(a, b => c, ax, bx) {
+        let c = (a + b).min(1.0);
+        let ax = a / c;
+        let bx = b / c;
+    } {
+        let ax = a;
+        let bx = b;
+    }
+);
+
 macro_rules! def_compositor {
     (
         $name:ident ($a:ident, $b:ident, $alpha:ident)
@@ -168,11 +179,12 @@ def_compositor!{
         let ca = aa + ba - aa * ba;
         let ax = (aa * (1.0 - ba)) / ca;
         let bx = (ba * (1.0 - aa)) / ca;
-        let cx = aa * ba;
+        let cx = aa * ba / ca;
+        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f64, a.0[1] as f64, a.0[2] as f64, b.0[0] as f64, b.0[1] as f64, b.0[2] as f64);
         Rgba([
-            (a.0[0] as f64 * ax + b.0[0] as f64 * bx + a.0[0].min(b.0[0]) as f64 * cx).round() as u8,
-            (a.0[1] as f64 * ax + b.0[1] as f64 * bx + a.0[1].min(b.0[1]) as f64 * cx).round() as u8,
-            (a.0[2] as f64 * ax + b.0[2] as f64 * bx + a.0[2].min(b.0[2]) as f64 * cx).round() as u8,
+            (a0 * ax + b0 * bx + a.0[0].min(b.0[0]) as f64 * cx).round() as u8,
+            (a1 * ax + b1 * bx + a.0[1].min(b.0[1]) as f64 * cx).round() as u8,
+            (a2 * ax + b2 * bx + a.0[2].min(b.0[2]) as f64 * cx).round() as u8,
             (ca * std::u8::MAX as f64).round() as u8,
         ])
     } {
@@ -181,11 +193,12 @@ def_compositor!{
         let ca = aa + ba - aa * ba;
         let ax = (aa * (1.0 - ba)) / ca;
         let bx = (ba * (1.0 - aa)) / ca;
-        let cx = aa * ba;
+        let cx = aa * ba / ca;
+        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f64, a.0[1] as f64, a.0[2] as f64, b.0[0] as f64, b.0[1] as f64, b.0[2] as f64);
         Rgb([
-            (a.0[0] as f64 * ax + b.0[0] as f64 * bx + a.0[0].min(b.0[0]) as f64 * cx).round() as u8,
-            (a.0[1] as f64 * ax + b.0[1] as f64 * bx + a.0[1].min(b.0[1]) as f64 * cx).round() as u8,
-            (a.0[2] as f64 * ax + b.0[2] as f64 * bx + a.0[2].min(b.0[2]) as f64 * cx).round() as u8,
+            (a0 * ax + b0 * bx + a.0[0].min(b.0[0]) as f64 * cx).round() as u8,
+            (a1 * ax + b1 * bx + a.0[1].min(b.0[1]) as f64 * cx).round() as u8,
+            (a2 * ax + b2 * bx + a.0[2].min(b.0[2]) as f64 * cx).round() as u8,
         ])
     }
 }
@@ -197,11 +210,12 @@ def_compositor!{
         let ca = aa + ba - aa * ba;
         let ax = (aa * (1.0 - ba)) / ca;
         let bx = (ba * (1.0 - aa)) / ca;
-        let cx = aa * ba;
+        let cx = aa * ba / ca;
+        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f64, a.0[1] as f64, a.0[2] as f64, b.0[0] as f64, b.0[1] as f64, b.0[2] as f64);
         Rgba([
-            (a.0[0] as f64 * ax + b.0[0] as f64 * bx + a.0[0].max(b.0[0]) as f64 * cx).round() as u8,
-            (a.0[1] as f64 * ax + b.0[1] as f64 * bx + a.0[1].max(b.0[1]) as f64 * cx).round() as u8,
-            (a.0[2] as f64 * ax + b.0[2] as f64 * bx + a.0[2].max(b.0[2]) as f64 * cx).round() as u8,
+            (a0 * ax + b0 * bx + a.0[0].max(b.0[0]) as f64 * cx).round() as u8,
+            (a1 * ax + b1 * bx + a.0[1].max(b.0[1]) as f64 * cx).round() as u8,
+            (a2 * ax + b2 * bx + a.0[2].max(b.0[2]) as f64 * cx).round() as u8,
             (ca * std::u8::MAX as f64).round() as u8,
         ])
     } {
@@ -210,11 +224,75 @@ def_compositor!{
         let ca = aa + ba - aa * ba;
         let ax = (aa * (1.0 - ba)) / ca;
         let bx = (ba * (1.0 - aa)) / ca;
-        let cx = aa * ba;
+        let cx = aa * ba / ca;
+        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f64, a.0[1] as f64, a.0[2] as f64, b.0[0] as f64, b.0[1] as f64, b.0[2] as f64);
         Rgb([
-            (a.0[0] as f64 * ax + b.0[0] as f64 * bx + a.0[0].max(b.0[0]) as f64 * cx).round() as u8,
-            (a.0[1] as f64 * ax + b.0[1] as f64 * bx + a.0[1].max(b.0[1]) as f64 * cx).round() as u8,
-            (a.0[2] as f64 * ax + b.0[2] as f64 * bx + a.0[2].max(b.0[2]) as f64 * cx).round() as u8,
+            (a0 * ax + b0 * bx + a.0[0].max(b.0[0]) as f64 * cx).round() as u8,
+            (a1 * ax + b1 * bx + a.0[1].max(b.0[1]) as f64 * cx).round() as u8,
+            (a2 * ax + b2 * bx + a.0[2].max(b.0[2]) as f64 * cx).round() as u8,
+        ])
+    }
+}
+
+def_compositor!{
+    Multiply(a, b, alpha) {
+        let aa = a.0[3] as f64 / std::u8::MAX as f64;
+        let ba = b.0[3] as f64 / std::u8::MAX as f64 * alpha;
+        let ca = aa + ba - aa * ba;
+        let ax = (aa * (1.0 - ba)) / ca;
+        let bx = (ba * (1.0 - aa)) / ca;
+        let cx = aa * ba / ca;
+        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f64, a.0[1] as f64, a.0[2] as f64, b.0[0] as f64, b.0[1] as f64, b.0[2] as f64);
+        Rgba([
+            (a0 * ax + b0 * bx + a0 * b0 * cx).round() as u8,
+            (a1 * ax + b1 * bx + a1 * b1 * cx).round() as u8,
+            (a2 * ax + b2 * bx + a2 * b2 * cx).round() as u8,
+            (ca * std::u8::MAX as f64).round() as u8,
+        ])
+    } {
+        let aa = 1.0;
+        let ba = alpha;
+        let ca = aa + ba - aa * ba;
+        let ax = (aa * (1.0 - ba)) / ca;
+        let bx = (ba * (1.0 - aa)) / ca;
+        let cx = aa * ba / ca;
+        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f64, a.0[1] as f64, a.0[2] as f64, b.0[0] as f64, b.0[1] as f64, b.0[2] as f64);
+        Rgb([
+            (a0 * ax + b0 * bx + a0 * b0 * cx).round() as u8,
+            (a1 * ax + b1 * bx + a1 * b1 * cx).round() as u8,
+            (a2 * ax + b2 * bx + a2 * b2 * cx).round() as u8,
+        ])
+    }
+}
+
+
+def_compositor!{
+    Screen(a, b, alpha) {
+        let aa = a.0[3] as f64 / std::u8::MAX as f64;
+        let ba = b.0[3] as f64 / std::u8::MAX as f64 * alpha;
+        let ca = aa + ba - aa * ba;
+        let ax = (aa * (1.0 - ba)) / ca;
+        let bx = (ba * (1.0 - aa)) / ca;
+        let cx = aa * ba / ca;
+        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f64, a.0[1] as f64, a.0[2] as f64, b.0[0] as f64, b.0[1] as f64, b.0[2] as f64);
+        Rgba([
+            (a0 * ax + b0 * bx + (a0 + b0 - a0 * b0) * cx).round() as u8,
+            (a1 * ax + b1 * bx + (a1 + b1 - a1 * b1) * cx).round() as u8,
+            (a2 * ax + b2 * bx + (a2 + b2 - a2 * b2) * cx).round() as u8,
+            (ca * std::u8::MAX as f64).round() as u8,
+        ])
+    } {
+        let aa = 1.0;
+        let ba = alpha;
+        let ca = aa + ba - aa * ba;
+        let ax = (aa * (1.0 - ba)) / ca;
+        let bx = (ba * (1.0 - aa)) / ca;
+        let cx = aa * ba / ca;
+        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f64, a.0[1] as f64, a.0[2] as f64, b.0[0] as f64, b.0[1] as f64, b.0[2] as f64);
+        Rgb([
+            (a0 * ax + b0 * bx + (a0 + b0 - a0 * b0) * cx).round() as u8,
+            (a1 * ax + b1 * bx + (a1 + b1 - a1 * b1) * cx).round() as u8,
+            (a2 * ax + b2 * bx + (a2 + b2 - a2 * b2) * cx).round() as u8,
         ])
     }
 }
