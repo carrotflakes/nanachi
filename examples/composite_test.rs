@@ -46,6 +46,8 @@ fn main() {
     f(&mut img, 6, nanachi::compositor::basic::DstOut);
     f(&mut img, 7, nanachi::compositor::basic::DstAtop);
     f(&mut img, 8, nanachi::compositor::basic::Xor);
+    f(&mut img, 9, nanachi::compositor::basic::Darken);
+    f(&mut img, 10, nanachi::compositor::basic::Lighten);
 
     let res = img.save("./composite_test.png");
     println!("save: {:?}", res);
