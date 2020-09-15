@@ -8,7 +8,7 @@ use nanachi::{
 };
 
 fn main() {
-    let (width, height) = (512, 512);
+    let (width, height) = (250, 250);
     let mut img = ImageBuffer::from_pixel(width, height, Rgba([250u8, 250, 250, 0]));
 
     fn f<C: nanachi::compositor::Compositor<Rgba<u8>> + 'static>(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>, i: usize, c: C) {
