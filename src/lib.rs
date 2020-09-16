@@ -18,6 +18,7 @@ pub mod bezier_area;
 pub mod path_transform;
 pub mod fill_color;
 pub mod fill_color_transform;
+pub mod fill_color_pattern;
 pub mod path_outline;
 pub mod path_flatten;
 pub mod draw_image;
