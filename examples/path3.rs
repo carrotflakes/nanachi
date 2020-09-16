@@ -10,7 +10,21 @@ use std::f64::consts::PI;
 
 fn main() {
     let (width, height) = (512, 512);
-    let mut img = ImageBuffer::from_pixel(width, height, Rgba([250u8, 250, 250, 0]));
+
+    let bg_image = {
+        let mut img = ImageBuffer::from_pixel(10, 10, Rgba([0u8, 0, 0, 255]));
+        let mut pb = PathBuilder::new();
+        pb.arc(5.0, 5.0, 4.0, 0.0, PI * 2.0);
+        let path = pb.end();
+        let pc = fill_color::Constant::new(Rgba([80, 200, 255, 50]));
+        draw_fill(&mut img, &path, nanachi::compositor::basic::SrcOver, &pc);
+        img
+    };
+    let bg_fill_color = nanachi::fill_color_pattern::Pattern::new(&bg_image);
+    let mut img = ImageBuffer::from_fn(width, height, |x, y| {
+        use nanachi::fill_color::FillColor;
+        bg_fill_color.fill_color(x as f64, y as f64)
+    });
 
     let mut pb = PathBuilder::new();
     pb.start(10.0, 40.0);
