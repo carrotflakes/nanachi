@@ -45,31 +45,28 @@ fn draw_stars(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
     let path = pb.end();
 
     let mut rnd = Pcg32::new(0xcafef00dd15ea5e5, 0xa02bdbf7bb3c0a7);
-    let shapes = (0..100)
-        .map(|_| {
-            let t = (
-                rnd.next_u32() as f64 / std::u32::MAX as f64 * img.width() as f64,
-                rnd.next_u32() as f64 / std::u32::MAX as f64 * img.height() as f64,
-            );
-            let r = rnd.next_u32() as f64 / std::u32::MAX as f64 * PI * 2.0;
-            let s = rnd.next_u32() as f64 / std::u32::MAX as f64 * 4.0 + 5.0;
-            path_transform(&path, &Matrix2d::new().rotate(r).scale(s, s).translate(t.0, t.1))
-        })
-        .collect::<Vec<_>>();
 
-    for (si, ps) in shapes.iter().enumerate() {
+    for i in 0..100 {
+        let t = (
+            rnd.next_u32() as f64 / std::u32::MAX as f64 * img.width() as f64,
+            rnd.next_u32() as f64 / std::u32::MAX as f64 * img.height() as f64,
+        );
+        let r = rnd.next_u32() as f64 / std::u32::MAX as f64 * PI * 2.0;
+        let s = rnd.next_u32() as f64 / std::u32::MAX as f64 * 4.0 + 5.0;
+        let path = path_transform(&path, &Matrix2d::new().rotate(r).scale(s, s).translate(t.0, t.1));
+
         let fc = fill_color::Constant::new(Rgba(
-            [[255, 128, 0, 230], [0, 255, 128, 230], [128, 0, 255, 230]][si % 3]
+            [[255, 128, 0, 230], [0, 255, 128, 230], [128, 0, 255, 230]][i % 3]
         ));
         let compositor = compositor::basic::SrcOver;
         fill_path::draw_fill(
-            img.width() as u32, img.height() as u32, ps, fill_rule::NonZero,
+            img.width() as u32, img.height() as u32, &path, fill_rule::NonZero,
             &mut img_writer(img, &fc, &compositor)
         );
-        let fc = fill_color::Constant::new(Rgba([[128, 64, 0, 255], [0, 128, 64, 255], [64, 0, 128, 255]][si % 3]));
+        let fc = fill_color::Constant::new(Rgba([[128, 64, 0, 255], [0, 128, 64, 255], [64, 0, 128, 255]][i % 3]));
         let compositor = compositor::basic::SrcOver;
         let outline = path_outline::path_outline(
-            ps, 0.5,
+            &path, 0.5,
             &path_outline::Join::Round,
             &path_outline::Cap::Round,
         );
