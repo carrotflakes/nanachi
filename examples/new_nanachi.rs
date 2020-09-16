@@ -23,9 +23,10 @@ fn main() {
         Rgba([0, 0, 0, 0])
     });
 
+    let t = std::time::Instant::now();
     draw_stars(&mut img);
-
     draw_nanachi(&mut img);
+    println!("elapsed: {:?}", t.elapsed());
 
     let res = img.save("./nanachi.png");
     println!("{:?}", res);
