@@ -15,9 +15,10 @@ exclude = [
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-image = "0.23"
+image = { version = "0.23", default-features = false }
 lyon_geom = "0.16"
 
 [dev-dependencies]
 rand_pcg = "0.2"
 rand_core = "0.5"
+image = { version = "0.23", features = ["png"] }
