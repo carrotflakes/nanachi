@@ -27,7 +27,7 @@ fn main() {
     });
 
     let mut pb = PathBuilder::new();
-    pb.start(10.0, 40.0);
+    pb.move_to(10.0, 40.0);
     pb.line_to(100.0, 40.0);
     pb.cubic(170.0, 100.0, 200.0, 10.0, 300.0, 40.0);
     pb.line_to(300.0, 40.0);
@@ -39,7 +39,9 @@ fn main() {
     pb.line_to(50.0, 250.0);
     pb.ellipse(100.0, 150.0, 80.0, 50.0, 1.0, PI * 2.7, PI * 1.0);
     pb.close();
-    // pb.start(100.0, 100.0);
+    pb.arc(280.0, 220.0, 40.0, PI * 2.0, 0.0);
+    pb.close();
+    // pb.move_to(100.0, 100.0);
     // pb.line_to(200.0, 100.0);
     // pb.line_to(200.0, 200.0);
     // pb.line_to(100.0, 200.0);
