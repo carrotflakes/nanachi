@@ -30,8 +30,10 @@ pub fn path_flatten(path: &Path, tolerance: f64) -> Path {
                 };
                 let mut p = vec[0];
                 for q in vec {
-                    pis.push(PathItem::Line(Line(p, q)));
-                    p = q;
+                    if p != q {
+                        pis.push(PathItem::Line(Line(p, q)));
+                        p = q;
+                    }
                 }
             }
             PathItem::Ellipse(ellipse) => {
@@ -51,8 +53,10 @@ pub fn path_flatten(path: &Path, tolerance: f64) -> Path {
                 };
                 let mut p = vec[0];
                 for q in vec {
-                    pis.push(PathItem::Line(Line(p, q)));
-                    p = q;
+                    if p != q {
+                        pis.push(PathItem::Line(Line(p, q)));
+                        p = q;
+                    }
                 }
             }
             PathItem::Quad(quad) => {
@@ -63,8 +67,10 @@ pub fn path_flatten(path: &Path, tolerance: f64) -> Path {
                 }.flattened(tolerance).map(|x| x.to_tuple().into());
                 let mut p = quad.start;
                 for q in it {
-                    pis.push(PathItem::Line(Line(p, q)));
-                    p = q;
+                    if p != q {
+                        pis.push(PathItem::Line(Line(p, q)));
+                        p = q;
+                    }
                 }
             }
             PathItem::Cubic(cubic) => {
@@ -76,9 +82,17 @@ pub fn path_flatten(path: &Path, tolerance: f64) -> Path {
                 }.flattened(tolerance).map(|x| x.to_tuple().into());
                 let mut p = cubic.start;
                 for q in it {
-                    pis.push(PathItem::Line(Line(p, q)));
-                    p = q;
+                    if p != q {
+                        pis.push(PathItem::Line(Line(p, q)));
+                        p = q;
+                    }
                 }
+            }
+            PathItem::CloseAndJump => {
+                pis.push(PathItem::CloseAndJump);
+            }
+            PathItem::Jump => {
+                pis.push(PathItem::Jump);
             }
         }
     }

@@ -159,6 +159,8 @@ fn path_edges_to_elms(path: &Path) -> Vec<ElmContainer> {
                 }));
             }
             PathItem::Cubic(_) => {panic!("Can't draw cubic curve, Use path_flatten.")}
+            PathItem::CloseAndJump => {}
+            PathItem::Jump => {}
         }
     }
     elms.into_iter().filter(|e| e.bound.2 < e.bound.3).collect()

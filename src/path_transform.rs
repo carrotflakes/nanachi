@@ -31,6 +31,8 @@ pub fn path_transform(path: &Path, am: &Matrix2d) -> Path {
                 control1: am.apply(cubic.control1),
                 control2: am.apply(cubic.control2),
             }),
+            PathItem::CloseAndJump => PathItem::CloseAndJump,
+            PathItem::Jump => PathItem::Jump,
         });
     }
     Path::new(pis)

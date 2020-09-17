@@ -9,6 +9,8 @@ pub enum PathItem {
     Ellipse(Ellipse),
     Quad(Quad),
     Cubic(Cubic),
+    CloseAndJump,
+    Jump,
 }
 
 impl PathItem {
@@ -40,6 +42,8 @@ impl PathItem {
                 control1: cubic.control2.clone(),
                 control2: cubic.control1.clone(),
             }),
+            PathItem::CloseAndJump => unreachable!(),
+            PathItem::Jump => unreachable!(),
         }
     }
 
@@ -64,6 +68,12 @@ impl PathItem {
             }
             PathItem::Cubic(cubic) => {
                 cubic.end
+            }
+            PathItem::CloseAndJump => {
+                unreachable!()
+            }
+            PathItem::Jump => {
+                unreachable!()
             }
         }
     }
@@ -90,6 +100,12 @@ impl PathItem {
             PathItem::Cubic(cubic) => {
                 cubic.start
             }
+            PathItem::CloseAndJump => {
+                unreachable!()
+            }
+            PathItem::Jump => {
+                unreachable!()
+            }
         }
     }
 
@@ -100,6 +116,15 @@ impl PathItem {
             PathItem::Ellipse(ellipse) => {(ellipse.radius_x == 0.0 && ellipse.radius_y == 0.0) || ellipse.angle1 == ellipse.angle2}
             PathItem::Quad(quad) => {quad.start == quad.end && quad.start == quad.control1}
             PathItem::Cubic(cubic) => {cubic.start == cubic.end && cubic.start == cubic.control1 && cubic.start == cubic.control2}
+            PathItem::CloseAndJump => false,
+            PathItem::Jump => false,
+        }
+    }
+
+    pub fn is_jump(&self) -> bool {
+        match self {
+            PathItem::CloseAndJump | PathItem::Jump => true,
+            _ => false,
         }
     }
 
