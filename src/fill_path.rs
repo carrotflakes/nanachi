@@ -1,6 +1,6 @@
 use crate::geometry;
 use crate::models::{Line, Arc, Ellipse};
-use crate::path3::{Path, PathItem};
+use crate::path::{Path, PathItem};
 use crate::point::Point;
 use crate::bezier_area::QuadPart;
 use crate::fill_rule::FillRule;

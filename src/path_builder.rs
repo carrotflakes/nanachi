@@ -1,6 +1,6 @@
 use crate::{
     models::{Line, Arc, Ellipse, Quad, Cubic},
-    path3::{Path, PathItem},
+    path::{Path, PathItem},
     point::Point
 };
 

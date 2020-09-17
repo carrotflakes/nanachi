@@ -1,6 +1,6 @@
 use nanachi::{
     image::{ImageBuffer, Rgba},
-    path3::Path,
+    path::Path,
     path_builder::PathBuilder,
     fill_color,
     path_transform::path_transform,
@@ -35,7 +35,7 @@ fn main() {
 fn draw_stars(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
     let spoke = (2.0 * PI / 5.0).cos() / (1.0 * PI / 5.0).cos();
     let mut pb = PathBuilder::new();
-    pb.start(0.0, 10.0);
+    pb.move_to(0.0, 10.0);
     for i in 1..10 {
         let p = i as f64 / 10.0 * PI * 2.0;
         let (s, c) = p.sin_cos();

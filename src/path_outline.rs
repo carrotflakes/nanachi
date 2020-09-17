@@ -1,5 +1,5 @@
 use crate::point::Point;
-use crate::path3::{Path, PathItem};
+use crate::path::{Path, PathItem};
 use crate::models::{Line, Arc, Ellipse, Quad};
 use crate::geometry;
 

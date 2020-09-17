@@ -1,6 +1,6 @@
 use crate::point::Point;
 use crate::models::Line;
-use crate::path3::{Path, PathItem};
+use crate::path::{Path, PathItem};
 use lyon_geom::{
     euclid::{Angle, default::Point2D},
     Arc, QuadraticBezierSegment, CubicBezierSegment,

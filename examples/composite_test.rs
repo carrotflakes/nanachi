@@ -1,6 +1,6 @@
 use nanachi::{
     image::{ImageBuffer, Rgb, Rgba},
-    path3::Path,
+    path::Path,
     path_builder::PathBuilder,
     fill_color,
     path_transform::path_transform,
@@ -13,7 +13,7 @@ fn main() {
 
     fn f<C: nanachi::compositor::Compositor<Rgba<u8>> + 'static>(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>, i: usize, c: C) {
         let mut pb = PathBuilder::new();
-        pb.start(0.0, 0.0);
+        pb.move_to(0.0, 0.0);
         pb.line_to(40.0, 0.0);
         pb.line_to(40.0, 40.0);
         pb.line_to(0.0, 40.0);

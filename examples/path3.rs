@@ -1,6 +1,6 @@
 use nanachi::{
     image::{ImageBuffer, Rgb, Rgba},
-    path3::Path,
+    path::Path,
     path_builder::PathBuilder,
     fill_color,
     path_transform::path_transform,

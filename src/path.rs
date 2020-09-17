@@ -1,35 +1,165 @@
-use crate::matrix::Matrix2d;
 use crate::point::Point;
+use crate::models::{Line, Arc, Ellipse, Quad, Cubic};
 
 #[derive(Debug, Clone)]
-pub struct Path {
-    points: Vec<Point>,
+pub enum PathItem {
+    Line(Line),
+    Arc(Arc),
+    Ellipse(Ellipse),
+    Quad(Quad),
+    Cubic(Cubic),
+    CloseAndJump,
+    Jump,
 }
+
+impl PathItem {
+    pub fn flip(&self) -> PathItem {
+        match self {
+            PathItem::Line(line) => PathItem::Line(Line(line.1, line.0)),
+            PathItem::Arc(arc) => PathItem::Arc(Arc {
+                center: arc.center,
+                radius: arc.radius,
+                angle1: arc.angle2,
+                angle2: arc.angle1,
+            }),
+            PathItem::Ellipse(ellipse) => PathItem::Ellipse(Ellipse {
+                center: ellipse.center,
+                radius_x: ellipse.radius_x,
+                radius_y: ellipse.radius_y,
+                rotation: ellipse.rotation,
+                angle1: ellipse.angle2,
+                angle2: ellipse.angle1,
+            }),
+            PathItem::Quad(quad) => PathItem::Quad(Quad{
+                start: quad.end.clone(),
+                end: quad.start.clone(),
+                control1: quad.control1.clone(),
+            }),
+            PathItem::Cubic(cubic) => PathItem::Cubic(Cubic{
+                start: cubic.end.clone(),
+                end: cubic.start.clone(),
+                control1: cubic.control2.clone(),
+                control2: cubic.control1.clone(),
+            }),
+            PathItem::CloseAndJump => unreachable!(),
+            PathItem::Jump => unreachable!(),
+        }
+    }
+
+    pub fn right_point(&self) -> Point {
+        match self {
+            PathItem::Line(line) => line.1,
+            PathItem::Arc(arc) => {
+                arc.center
+                    + Point(
+                        arc.angle2.cos() * arc.radius,
+                        arc.angle2.sin() * arc.radius,
+                    )
+            }
+            PathItem::Ellipse(ellipse) => {
+                let (sin, cos) = ellipse.rotation.sin_cos();
+                let x = ellipse.angle2.cos() * ellipse.radius_x;
+                let y = ellipse.angle2.sin() * ellipse.radius_y;
+                ellipse.center + Point(x * cos - y * sin, x * sin + y * cos)
+            }
+            PathItem::Quad(quad) => {
+                quad.end
+            }
+            PathItem::Cubic(cubic) => {
+                cubic.end
+            }
+            PathItem::CloseAndJump => {
+                unreachable!()
+            }
+            PathItem::Jump => {
+                unreachable!()
+            }
+        }
+    }
+
+    pub fn left_point(&self) -> Point {
+        match self {
+            PathItem::Line(line) => line.0,
+            PathItem::Arc(arc) => {
+                arc.center
+                    + Point(
+                        arc.angle1.cos() * arc.radius,
+                        arc.angle1.sin() * arc.radius,
+                    )
+            }
+            PathItem::Ellipse(ellipse) => {
+                let (sin, cos) = ellipse.rotation.sin_cos();
+                let x = ellipse.angle1.cos() * ellipse.radius_x;
+                let y = ellipse.angle1.sin() * ellipse.radius_y;
+                ellipse.center + Point(x * cos - y * sin, x * sin + y * cos)
+            }
+            PathItem::Quad(quad) => {
+                quad.start
+            }
+            PathItem::Cubic(cubic) => {
+                cubic.start
+            }
+            PathItem::CloseAndJump => {
+                unreachable!()
+            }
+            PathItem::Jump => {
+                unreachable!()
+            }
+        }
+    }
+
+    pub fn is_zero(&self) -> bool {
+        match self {
+            PathItem::Line(line) => {line.0 == line.1}
+            PathItem::Arc(arc) => {arc.radius == 0.0 || arc.angle1 == arc.angle2}
+            PathItem::Ellipse(ellipse) => {(ellipse.radius_x == 0.0 && ellipse.radius_y == 0.0) || ellipse.angle1 == ellipse.angle2}
+            PathItem::Quad(quad) => {quad.start == quad.end && quad.start == quad.control1}
+            PathItem::Cubic(cubic) => {cubic.start == cubic.end && cubic.start == cubic.control1 && cubic.start == cubic.control2}
+            PathItem::CloseAndJump => false,
+            PathItem::Jump => false,
+        }
+    }
+
+    pub fn is_jump(&self) -> bool {
+        match self {
+            PathItem::CloseAndJump | PathItem::Jump => true,
+            _ => false,
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Path(pub Vec<PathItem>);
 
 impl Path {
+    pub fn new(items: Vec<PathItem>) -> Path {
+        Path(items)
+    }
+
     pub fn is_closed(&self) -> bool {
-        if self.points.is_empty() {
-            true
-        } else {
-            &self.points[0] == self.points.last().unwrap()
+        self.0[0].left_point() == self.0[self.0.len() - 1].right_point()
+    }
+
+    pub fn from_points(points: &Vec<Point>) -> Path {
+        let mut pis = Vec::new();
+        for i in 0..points.len() - 1 {
+            pis.push(PathItem::Line(Line(
+                points[i],
+                points[i + 1],
+            )));
         }
+        Path(pis)
     }
 
-    pub fn transform_mut(&mut self, am: &Matrix2d) {
-        for p in self.points.as_mut_slice() {
-            *p = am.apply(*p);
+    pub fn from_bezier2_points(points: &Vec<Point>) -> Path {
+        let mut pis = Vec::new();
+        for i in 0..points.len() / 2 {
+            pis.push(PathItem::Quad(Quad {
+                start: points[i * 2],
+                end: points[i * 2 + 2],
+                control1: points[i * 2 + 1],
+            }));
         }
-    }
-}
-
-impl From<Vec<Point>> for Path {
-    fn from(points: Vec<Point>) -> Path {
-        Path { points }
-    }
-}
-
-impl Into<Vec<Point>> for Path {
-    fn into(self) -> Vec<Point> {
-        self.points
+        Path(pis)
     }
 }

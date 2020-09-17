@@ -1,7 +1,7 @@
 use crate::point::Point;
 use crate::models::{Line, Ellipse, Quad, Cubic};
 use crate::matrix::Matrix2d;
-use crate::path3::{Path, PathItem};
+use crate::path::{Path, PathItem};
 use std::f64::consts::PI;
 
 pub fn path_transform(path: &Path, am: &Matrix2d) -> Path {

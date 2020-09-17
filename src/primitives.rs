@@ -1,4 +1,4 @@
-use crate::{path::Path, point::Point};
+use crate::{legacy_path::Path, point::Point};
 
 pub fn square(size: f64) -> Path {
     vec![
