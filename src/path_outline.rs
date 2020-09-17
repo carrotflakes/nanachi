@@ -101,41 +101,6 @@ pub fn path_outline(path: &Path, width: f64, join: &Join, cap: &Cap) -> Vec<Path
     res
 }
 
-// pub fn path_outline(path: &Path, width: f64, join: &Join, cap: &Cap) -> Vec<PathItem> {
-//     assert_ne!(width, 0.0);
-//     let mut it = path.0.iter().filter(|p| !p.is_zero());
-//     let mut pis = Vec::with_capacity(path.0.len() * 4);
-//     path_item_offset(&mut pis, it.next().unwrap(), width);
-//     let mut m = pis.len();
-//     for pi in it {
-//         let l = pis.len();
-//         path_item_offset(&mut pis, pi, width);
-//         let p11 = pis[m - 2].right_point();
-//         let p12 = pis[l].left_point();
-//         let p21 = pis[l + 1].right_point();
-//         let p22 = pis[m - 1].left_point();
-//         let p0 = pi.left_point();
-//         m = pis.len();
-//         add_join(&mut pis, join, p0, p11, p12, p21, p22);
-//     }
-//     if path.is_closed() {
-//         let p11 = pis[m - 2].right_point();
-//         let p12 = pis[0].left_point();
-//         let p21 = pis[1].right_point();
-//         let p22 = pis[m - 1].left_point();
-//         let p0 = path.0[0].left_point();
-//         add_join(&mut pis, join, p0, p11, p12, p21, p22);
-//     } else {
-//         let p1 = pis[m - 2].right_point();
-//         let p2 = pis[m - 1].left_point();
-//         add_cap(&mut pis, cap, p1, p2);
-//         let p1 = pis[1].right_point();
-//         let p2 = pis[0].left_point();
-//         add_cap(&mut pis, cap, p1, p2);
-//     }
-//     pis
-// }
-
 fn add_join(pis: &mut Vec<PathItem>, join: &Join, center: Point, start1: Point, end1: Point) {
     let mut bevel = || {
         pis.push(PathItem::Line(Line(start1, end1)));
