@@ -439,7 +439,7 @@ pub fn draw_fill_no_aa<F: FnMut(u32, u32, f64), FR: FillRule>(
 
 impl ElmContainer {
     fn intersect(&self, y: f64) -> f64 {
-        if self.bound.0 < y && y < self.bound.1 {
+        if self.bound.2 < y && y < self.bound.3 {
             match &self.elm {
                 Elm::Line(line) => {
                     geometry::intersect_line_and_horizon(line.0, line.1, y)
