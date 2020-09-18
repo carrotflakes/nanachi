@@ -21,6 +21,15 @@ impl FillRule for EvenOdd {
 }
 
 #[derive(Clone, Copy)]
+pub struct Abs;
+
+impl FillRule for Abs {
+    fn apply(&self, value: f64) -> f64 {
+        value.abs()
+    }
+}
+
+#[derive(Clone, Copy)]
 pub struct Raw;
 
 impl FillRule for Raw {
