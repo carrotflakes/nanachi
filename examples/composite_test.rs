@@ -13,20 +13,20 @@ fn main() {
 
     fn f<C: nanachi::compositor::Compositor<Rgba<u8>> + 'static>(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>, i: usize, c: C) {
         let mut pb = PathBuilder::new();
-        pb.move_to(0.0, 0.0);
-        pb.line_to(40.0, 0.0);
-        pb.line_to(40.0, 40.0);
-        pb.line_to(0.0, 40.0);
+        pb.move_to(-10.0, -20.0);
+        pb.line_to(10.0, -20.0);
+        pb.line_to(10.0, 20.0);
+        pb.line_to(-10.0, 20.0);
         pb.close();
         let path = pb.end();
 
         let mut img2 = ImageBuffer::from_pixel(60, 60, Rgba([250u8, 250, 250, 0]));
         draw_fill(
-            &mut img2, &path_transform(&path, &Matrix2d::new()),
+            &mut img2, &path_transform(&path, &Matrix2d::new().translate(20.0, 20.0)),
             &nanachi::compositor::basic::SrcOver,
             &fill_color::Constant::new(Rgba([255, 0, 0, 200])));
         draw_fill(
-            &mut img2, &path_transform(&path, &Matrix2d::new().translate(10.0, 10.0)),
+            &mut img2, &path_transform(&path, &Matrix2d::new().rotate(std::f64::consts::FRAC_PI_2).translate(20.0, 20.0)),
             &c,
             &fill_color::Constant::new(Rgba([0, 0, 255, 150])));
         let x = (60 * (i % 5) + 10) as u32;
@@ -56,6 +56,13 @@ fn main() {
     f(&mut img, {i += 1; i}, nanachi::compositor::basic::Lighten);
     f(&mut img, {i += 1; i}, nanachi::compositor::basic::Multiply);
     f(&mut img, {i += 1; i}, nanachi::compositor::basic::Screen);
+    f(&mut img, {i += 1; i}, nanachi::compositor::basic::Overlay);
+    f(&mut img, {i += 1; i}, nanachi::compositor::basic::HardLight);
+    f(&mut img, {i += 1; i}, nanachi::compositor::basic::Dodge);
+    f(&mut img, {i += 1; i}, nanachi::compositor::basic::Burn);
+    f(&mut img, {i += 1; i}, nanachi::compositor::basic::SoftLight);
+    f(&mut img, {i += 1; i}, nanachi::compositor::basic::Difference);
+    f(&mut img, {i += 1; i}, nanachi::compositor::basic::Exclusion);
 
     let res = img.save("./composite_test.png");
     println!("save: {:?}", res);
