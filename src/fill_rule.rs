@@ -21,6 +21,24 @@ impl FillRule for EvenOdd {
 }
 
 #[derive(Clone, Copy)]
+pub struct InverseNonZero;
+
+impl FillRule for InverseNonZero {
+    fn apply(&self, value: f64) -> f64 {
+        1.0 - value.abs().min(1.0)
+    }
+}
+
+#[derive(Clone, Copy)]
+pub struct InverseEvenOdd;
+
+impl FillRule for InverseEvenOdd {
+    fn apply(&self, value: f64) -> f64 {
+        (value.rem_euclid(2.0) - 1.0).abs()
+    }
+}
+
+#[derive(Clone, Copy)]
 pub struct Abs;
 
 impl FillRule for Abs {
