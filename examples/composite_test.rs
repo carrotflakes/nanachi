@@ -19,16 +19,40 @@ fn main() {
         pb.line_to(-10.0, 20.0);
         pb.close();
         let path = pb.end();
+        let fc1 = fill_color::LinearGradient::new(
+            (-10.0, 0.0),
+            (10.0, 0.0),
+            vec![
+                (0.3, Rgba([255, 0, 0, 150])),
+                (0.4, Rgba([255, 0, 0, 255])),
+                (0.6, Rgba([255, 0, 0, 255])),
+                (0.7, Rgba([255, 255, 0, 255])),
+            ]);
+        let fc2 = fill_color::LinearGradient::new(
+            (-10.0, 0.0),
+            (10.0, 0.0),
+            vec![
+                (0.3, Rgba([0, 0, 255, 150])),
+                (0.4, Rgba([0, 0, 255, 255])),
+                (0.6, Rgba([0, 0, 255, 255])),
+                (0.7, Rgba([0, 255, 255, 255])),
+            ]);
 
         let mut img2 = ImageBuffer::from_pixel(60, 60, Rgba([250u8, 250, 250, 0]));
         draw_fill(
-            &mut img2, &path_transform(&path, &Matrix2d::new().translate(20.0, 20.0)),
+            &mut img2,
+            &path,
             &nanachi::compositor::basic::SrcOver,
-            &fill_color::Constant::new(Rgba([255, 0, 0, 200])));
+            &fc1,
+            Matrix2d::new().translate(20.0, 20.0),
+        );
         draw_fill(
-            &mut img2, &path_transform(&path, &Matrix2d::new().rotate(std::f64::consts::FRAC_PI_2).translate(20.0, 20.0)),
+            &mut img2,
+            &path,
             &c,
-            &fill_color::Constant::new(Rgba([0, 0, 255, 150])));
+            &fc2,
+            Matrix2d::new().rotate(std::f64::consts::FRAC_PI_2).translate(20.0, 20.0),
+        );
         let x = (60 * (i % 5) + 10) as u32;
         let y = (60 * (i / 5) + 10) as u32;
         for dy in 0..60 {
@@ -68,17 +92,20 @@ fn main() {
     println!("save: {:?}", res);
 }
 
-fn draw_fill<C: fill_color::FillColor<Rgba<u8>>, M: nanachi::compositor::Compositor<Rgba<u8>> + 'static>(
+fn draw_fill<C: fill_color::FillColor<Rgba<u8>> + Clone, M: nanachi::compositor::Compositor<Rgba<u8>> + 'static>(
     img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>,
     path: &Path,
     compositor: &M,
     fill_color: &C,
+    matrix: Matrix2d,
 ) {
+    let path = path_transform(path, &matrix);
+    let fill_color = nanachi::fill_color_transform::Transform::new(fill_color.clone(), matrix);
     nanachi::fill_path::draw_fill(
         img.width() as u32,
         img.height() as u32,
-        path,
+        &path,
         nanachi::fill_rule::NonZero,
-        &mut nanachi::writer::img_writer(img, fill_color, compositor),
+        &mut nanachi::writer::img_writer(img, &fill_color, compositor),
     );
 }
