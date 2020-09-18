@@ -4,8 +4,6 @@ pub mod bezier_area;
 pub mod compositor;
 pub mod draw_image;
 pub mod fill_color;
-pub mod fill_color_pattern;
-pub mod fill_color_transform;
 pub mod fill_path;
 pub mod fill_rule;
 pub mod geometry;

@@ -101,7 +101,7 @@ fn draw_fill<C: fill_color::FillColor<Rgba<u8>> + Clone, M: nanachi::compositor:
     matrix: Matrix2d,
 ) {
     let path = path_transform(path, &matrix);
-    let fill_color = nanachi::fill_color_transform::Transform::new(fill_color.clone(), matrix);
+    let fill_color = nanachi::fill_color::Transform::new(fill_color.clone(), matrix);
     nanachi::fill_path::draw_fill(
         img.width() as u32,
         img.height() as u32,

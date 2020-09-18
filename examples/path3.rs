@@ -20,7 +20,7 @@ fn main() {
         draw_fill(&mut img, &path, nanachi::compositor::basic::SrcOver, &pc);
         img
     };
-    let bg_fill_color = nanachi::fill_color_pattern::Pattern::new(&bg_image);
+    let bg_fill_color = nanachi::fill_color::Pattern::new(&bg_image);
     let mut img = ImageBuffer::from_fn(width, height, |x, y| {
         use nanachi::fill_color::FillColor;
         bg_fill_color.fill_color(x as f64, y as f64)
