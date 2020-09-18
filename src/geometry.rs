@@ -30,20 +30,6 @@ pub fn intersect_segment_and_vertical(ax: f64, ay: f64, bx: f64, by: f64, vx: f6
     }
 }
 
-pub fn transform(
-    p: &(f64, f64),
-    translation: (f64, f64),
-    rotation: f64,
-    scale: (f64, f64),
-) -> (f64, f64) {
-    let (x, y) = p;
-    let (sin, cos) = rotation.sin_cos();
-    let (x, y) = (x * cos - y * sin, x * sin + y * cos);
-    let (x, y) = (x * scale.0, y * scale.1);
-    let (x, y) = (x + translation.0, y + translation.1);
-    (x, y)
-}
-
 pub fn distance_between_line_and_point<P1: Into<Point>, P2: Into<Point>>(
     p1: P1,
     p2: P1,

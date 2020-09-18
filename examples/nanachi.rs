@@ -1,5 +1,5 @@
 use nanachi::{
-    legacy_draw as draw, geometry,
+    legacy_draw as draw,
     image::{ImageBuffer, Rgb},
     fill_color,
 };
@@ -47,7 +47,7 @@ fn draw_stars(img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>) {
             let s = rnd.next_u32() as f64 / std::u32::MAX as f64 * 4.0 + 5.0;
             points
                 .iter()
-                .map(|p| geometry::transform(p, t, r, (s, s)))
+                .map(|p| transform(p, t, r, (s, s)))
                 .collect::<Vec<_>>()
         })
         .collect::<Vec<_>>();
@@ -242,4 +242,18 @@ fn draw_nanachi(img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>) {
             draw::draw_line(img, s[0], s[1], Rgb([64, 8, 8]));
         }
     }
+}
+
+ fn transform(
+    p: &(f64, f64),
+    translation: (f64, f64),
+    rotation: f64,
+    scale: (f64, f64),
+) -> (f64, f64) {
+    let (x, y) = p;
+    let (sin, cos) = rotation.sin_cos();
+    let (x, y) = (x * cos - y * sin, x * sin + y * cos);
+    let (x, y) = (x * scale.0, y * scale.1);
+    let (x, y) = (x + translation.0, y + translation.1);
+    (x, y)
 }
