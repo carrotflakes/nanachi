@@ -40,6 +40,39 @@ macro_rules! def_linear_compositor {
 }
 
 def_linear_compositor! {
+    Clear(a, b => c, ax, bx) {
+        let c = 0.0;
+        let ax = 0.0;
+        let bx = 0.0;
+    } {
+        let ax = 0.0;
+        let bx = 0.0;
+    }
+}
+
+def_linear_compositor! {
+    Src(a, b => c, ax, bx) {
+        let c = b;
+        let ax = 0.0;
+        let bx = b;
+    } {
+        let ax = 0.0;
+        let bx = b;
+    }
+}
+
+def_linear_compositor! {
+    Dst(a, b => c, ax, bx) {
+        let c = a;
+        let ax = a;
+        let bx = 0.0;
+    } {
+        let ax = a;
+        let bx = 0.0;
+    }
+}
+
+def_linear_compositor! {
     SrcOver(a, b => c, ax, bx) {
         let c = a + b - a * b;
         let ax = (a * (1.0 - b)) / c;
