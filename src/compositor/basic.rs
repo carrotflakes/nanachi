@@ -1,5 +1,5 @@
-use image::{Rgb, Rgba};
 use super::Compositor;
+use image::{Rgb, Rgba};
 
 macro_rules! def_linear_compositor {
     (
@@ -39,7 +39,7 @@ macro_rules! def_linear_compositor {
     };
 }
 
-def_linear_compositor!{
+def_linear_compositor! {
     SrcOver(a, b => c, ax, bx) {
         let c = a + b - a * b;
         let ax = (a * (1.0 - b)) / c;
@@ -50,7 +50,7 @@ def_linear_compositor!{
     }
 }
 
-def_linear_compositor!{
+def_linear_compositor! {
     SrcIn(a, b => c, ax, bx) {
         let c = a * b;
         let ax = 0.0;
@@ -61,7 +61,7 @@ def_linear_compositor!{
     }
 }
 
-def_linear_compositor!{
+def_linear_compositor! {
     SrcOut(a, b => c, ax, bx) {
         let c = (1.0 - a) * b;
         let ax = 0.0;
@@ -72,7 +72,7 @@ def_linear_compositor!{
     }
 }
 
-def_linear_compositor!{
+def_linear_compositor! {
     SrcAtop(a, b => c, ax, bx) {
         let c = b;
         let ax = 1.0 - b;
@@ -83,7 +83,7 @@ def_linear_compositor!{
     }
 }
 
-def_linear_compositor!{
+def_linear_compositor! {
     DstOver(a, b => c, ax, bx) {
         let c = a + b - a * b;
         let ax = a / c;
@@ -94,7 +94,7 @@ def_linear_compositor!{
     }
 }
 
-def_linear_compositor!{
+def_linear_compositor! {
     DstIn(a, b => c, ax, bx) {
         let c = a * b;
         let ax = 1.0;
@@ -105,7 +105,7 @@ def_linear_compositor!{
     }
 }
 
-def_linear_compositor!{
+def_linear_compositor! {
     DstOut(a, b => c, ax, bx) {
         let c = a * (1.0 - b);
         let ax = 1.0;
@@ -116,7 +116,7 @@ def_linear_compositor!{
     }
 }
 
-def_linear_compositor!{
+def_linear_compositor! {
     DstAtop(a, b => c, ax, bx) {
         let c = a;
         let ax = a;
@@ -127,7 +127,7 @@ def_linear_compositor!{
     }
 }
 
-def_linear_compositor!{
+def_linear_compositor! {
     Xor(a, b => c, ax, bx) {
         let ax = a * (1.0 - b);
         let bx = (1.0 - a) * b;
@@ -138,7 +138,7 @@ def_linear_compositor!{
     }
 }
 
-def_linear_compositor!{
+def_linear_compositor! {
     Add(a, b => c, ax, bx) {
         let c = (a + b).min(1.0);
         let ax = a / c;
@@ -183,7 +183,7 @@ macro_rules! def_compositor {
     };
 }
 
-def_compositor!{
+def_compositor! {
     Darken(a, b, aa, ba, ca) {
         let ca = aa + ba - aa * ba;
         let ax = (aa * (1.0 - ba)) / ca;
@@ -197,7 +197,7 @@ def_compositor!{
     ]
 }
 
-def_compositor!{
+def_compositor! {
     Lighten(a, b, aa, ba, ca) {
         let ca = aa + ba - aa * ba;
         let ax = (aa * (1.0 - ba)) / ca;
@@ -211,7 +211,7 @@ def_compositor!{
     ]
 }
 
-def_compositor!{
+def_compositor! {
     Multiply(a, b, aa, ba, ca) {
         let ca = aa + ba - aa * ba;
         let ax = (aa * (1.0 - ba)) / ca;
@@ -225,8 +225,7 @@ def_compositor!{
     ]
 }
 
-
-def_compositor!{
+def_compositor! {
     Screen(a, b, aa, ba, ca) {
         let ca = aa + ba - aa * ba;
         let ax = (aa * (1.0 - ba)) / ca;

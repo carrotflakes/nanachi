@@ -24,10 +24,7 @@ impl Point {
 
     pub fn rotate(self, angle: f64) -> Self {
         let (sin, cos) = angle.sin_cos();
-        Point(
-            self.0 * cos - self.1 * sin,
-            self.0 * sin + self.1 * cos,
-        )
+        Point(self.0 * cos - self.1 * sin, self.0 * sin + self.1 * cos)
     }
 
     pub fn unit(self) -> Point {

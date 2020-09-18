@@ -1,5 +1,5 @@
-use crate::fill_color::FillColor;
 use crate::compositor::Compositor;
+use crate::fill_color::FillColor;
 use image::{ImageBuffer, Pixel};
 
 pub fn img_writer<'a, X, F: FillColor<X>, C>(

@@ -94,19 +94,34 @@ impl Matrix2d {
 
 #[test]
 fn test() {
-    let am = Matrix2d::new().translate(1.0, 2.0).rotate(1.0).scale(0.5, 0.6);
+    let am = Matrix2d::new()
+        .translate(1.0, 2.0)
+        .rotate(1.0)
+        .scale(0.5, 0.6);
     assert!((Point(3.0, 4.0) - am.inverse().apply(am.apply(Point(3.0, 4.0)))).norm() < 0.00001);
 
     assert_eq!(
         am.rotate(0.1).then(&Matrix2d::new().translate(-0.5, -0.6)),
-        am.rotate(0.1).translate(-0.5, -0.6));
+        am.rotate(0.1).translate(-0.5, -0.6)
+    );
     assert_eq!(
         am.rotate(0.1).then(&Matrix2d::new().scale(-0.5, -0.6)),
-        am.rotate(0.1).scale(-0.5, -0.6));
+        am.rotate(0.1).scale(-0.5, -0.6)
+    );
     assert_eq!(
         am.rotate(0.1).then(&Matrix2d::new().rotate(0.3)),
-        am.rotate(0.1).rotate(0.3));
+        am.rotate(0.1).rotate(0.3)
+    );
     assert_eq!(
-        am.rotate(0.1).then(&Matrix2d::new().scale(0.5, 0.6).translate(-0.5, -0.6).rotate(0.3)),
-        am.rotate(0.1).scale(0.5, 0.6).translate(-0.5, -0.6).rotate(0.3));
+        am.rotate(0.1).then(
+            &Matrix2d::new()
+                .scale(0.5, 0.6)
+                .translate(-0.5, -0.6)
+                .rotate(0.3)
+        ),
+        am.rotate(0.1)
+            .scale(0.5, 0.6)
+            .translate(-0.5, -0.6)
+            .rotate(0.3)
+    );
 }

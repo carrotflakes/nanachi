@@ -3,7 +3,7 @@ use std::marker::PhantomData;
 use crate::{fill_color::FillColor, matrix::Matrix2d, point::Point};
 
 #[derive(Debug, Clone)]
-pub struct Transform<C: Clone, FC: FillColor<C>>{
+pub struct Transform<C: Clone, FC: FillColor<C>> {
     fill_color: FC,
     matrix: Matrix2d,
     c: PhantomData<C>,

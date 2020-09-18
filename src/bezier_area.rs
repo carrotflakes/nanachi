@@ -42,7 +42,11 @@ pub struct QuadPart {
 
 impl QuadPart {
     pub fn from_quad(quad: &Quad) -> QuadPart {
-        let Quad {start, end, control1} = quad;
+        let Quad {
+            start,
+            end,
+            control1,
+        } = quad;
         match (start.0 < end.0, start.1 < end.1) {
             (true, true) => QuadPart {
                 qex: QuadEq::from_abc(start.0, end.0, control1.0),
@@ -92,7 +96,7 @@ impl QuadPart {
                 (lower - upper) * right
             } else {
                 integral(&self.qex, &self.qey, lower_t) - integral(&self.qex, &self.qey, right_t)
-                + (y - upper) * right
+                    + (y - upper) * right
             }
         } else {
             let upper_t = self.qey.y2x(upper);
@@ -103,7 +107,7 @@ impl QuadPart {
                 integral(&self.qex, &self.qey, lower_t) - integral(&self.qex, &self.qey, upper_t)
             } else {
                 integral(&self.qex, &self.qey, right_t) - integral(&self.qex, &self.qey, upper_t)
-                + (lower - y) * right
+                    + (lower - y) * right
             }
         }
     }
@@ -126,7 +130,11 @@ fn integral(x: &QuadEq, y: &QuadEq, t: f64) -> f64 {
 }
 
 pub fn separate_quad(quad: &Quad) -> Vec<Quad> {
-    let Quad {start, end, control1} = quad;
+    let Quad {
+        start,
+        end,
+        control1,
+    } = quad;
     let qex = QuadEq::from_abc(start.0, end.0, control1.0);
     let qey = QuadEq::from_abc(start.1, end.1, control1.1);
     if control1.1 < start.1.min(end.1) || start.1.max(end.1) < control1.1 {

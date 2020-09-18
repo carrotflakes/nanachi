@@ -1,9 +1,9 @@
-use crate::point::Point;
 use crate::models::Line;
 use crate::path::{Path, PathItem};
+use crate::point::Point;
 use lyon_geom::{
-    euclid::{Angle, default::Point2D},
-    Arc, QuadraticBezierSegment, CubicBezierSegment,
+    euclid::{default::Point2D, Angle},
+    Arc, CubicBezierSegment, QuadraticBezierSegment,
 };
 
 pub fn path_flatten(path: &Path, tolerance: f64) -> Path {
@@ -22,9 +22,17 @@ pub fn path_flatten(path: &Path, tolerance: f64) -> Path {
                     x_rotation: Angle::radians(0.0),
                 };
                 let vec: Vec<_> = if arc.sweep_angle.radians.is_sign_positive() {
-                    vec![arc.from()].into_iter().chain(arc.flattened(tolerance)).map(|x| x.to_tuple().into()).collect()
+                    vec![arc.from()]
+                        .into_iter()
+                        .chain(arc.flattened(tolerance))
+                        .map(|x| x.to_tuple().into())
+                        .collect()
                 } else {
-                    let mut vec: Vec<_> = vec![arc.to()].into_iter().chain(arc.flip().flattened(tolerance)).map(|x| x.to_tuple().into()).collect();
+                    let mut vec: Vec<_> = vec![arc.to()]
+                        .into_iter()
+                        .chain(arc.flip().flattened(tolerance))
+                        .map(|x| x.to_tuple().into())
+                        .collect();
                     vec.reverse();
                     vec
                 };
@@ -45,9 +53,17 @@ pub fn path_flatten(path: &Path, tolerance: f64) -> Path {
                     x_rotation: Angle::radians(ellipse.rotation),
                 };
                 let vec: Vec<_> = if arc.sweep_angle.radians.is_sign_positive() {
-                    vec![arc.from()].into_iter().chain(arc.flattened(tolerance)).map(|x| x.to_tuple().into()).collect()
+                    vec![arc.from()]
+                        .into_iter()
+                        .chain(arc.flattened(tolerance))
+                        .map(|x| x.to_tuple().into())
+                        .collect()
                 } else {
-                    let mut vec: Vec<_> = vec![arc.to()].into_iter().chain(arc.flip().flattened(tolerance)).map(|x| x.to_tuple().into()).collect();
+                    let mut vec: Vec<_> = vec![arc.to()]
+                        .into_iter()
+                        .chain(arc.flip().flattened(tolerance))
+                        .map(|x| x.to_tuple().into())
+                        .collect();
                     vec.reverse();
                     vec
                 };
@@ -60,11 +76,13 @@ pub fn path_flatten(path: &Path, tolerance: f64) -> Path {
                 }
             }
             PathItem::Quad(quad) => {
-                let it = QuadraticBezierSegment{
+                let it = QuadraticBezierSegment {
                     from: point_to_point2d(&quad.start),
                     ctrl: point_to_point2d(&quad.control1),
                     to: point_to_point2d(&quad.end),
-                }.flattened(tolerance).map(|x| x.to_tuple().into());
+                }
+                .flattened(tolerance)
+                .map(|x| x.to_tuple().into());
                 let mut p = quad.start;
                 for q in it {
                     if p != q {
@@ -79,7 +97,9 @@ pub fn path_flatten(path: &Path, tolerance: f64) -> Path {
                     ctrl1: point_to_point2d(&cubic.control1),
                     ctrl2: point_to_point2d(&cubic.control2),
                     to: point_to_point2d(&cubic.end),
-                }.flattened(tolerance).map(|x| x.to_tuple().into());
+                }
+                .flattened(tolerance)
+                .map(|x| x.to_tuple().into());
                 let mut p = cubic.start;
                 for q in it {
                     if p != q {
@@ -105,7 +125,7 @@ fn point_to_point2d(p: &Point) -> Point2D<f64> {
 
 #[test]
 fn test() {
-    let a= Arc{
+    let a = Arc {
         center: Point2D::new(0.0f64, 0.0),
         radii: (1.0f64, 1.0).into(),
         start_angle: Angle::radians(std::f64::consts::PI),

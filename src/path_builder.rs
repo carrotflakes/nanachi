@@ -1,7 +1,7 @@
 use crate::{
-    models::{Line, Arc, Ellipse, Quad, Cubic},
+    models::{Arc, Cubic, Ellipse, Line, Quad},
     path::{Path, PathItem},
-    point::Point
+    point::Point,
 };
 
 #[derive(Debug, Clone)]
@@ -35,7 +35,7 @@ impl PathBuilder {
 
     pub fn move_to(&mut self, x: f64, y: f64) {
         match self.items.last() {
-            Some(PathItem::CloseAndJump) | Some(PathItem::Jump) | None => {},
+            Some(PathItem::CloseAndJump) | Some(PathItem::Jump) | None => {}
             Some(_) => {
                 self.push(PathItem::Jump);
             }
@@ -53,8 +53,11 @@ impl PathBuilder {
 
     pub fn arc(&mut self, x: f64, y: f64, radius: f64, angle1: f64, angle2: f64) {
         let center = Point(x, y);
-        let arc = PathItem::Arc(Arc{
-            center, radius, angle1, angle2
+        let arc = PathItem::Arc(Arc {
+            center,
+            radius,
+            angle1,
+            angle2,
         });
         if let Some(last_pos) = self.last_pos {
             let left_point = arc.left_point();
@@ -66,10 +69,24 @@ impl PathBuilder {
         self.push(arc);
     }
 
-    pub fn ellipse(&mut self, x: f64, y: f64, radius_x: f64, radius_y: f64, rotation: f64, angle1: f64, angle2: f64) {
+    pub fn ellipse(
+        &mut self,
+        x: f64,
+        y: f64,
+        radius_x: f64,
+        radius_y: f64,
+        rotation: f64,
+        angle1: f64,
+        angle2: f64,
+    ) {
         let center = Point(x, y);
-        let ellipse = PathItem::Ellipse(Ellipse{
-            center, radius_x, radius_y, rotation, angle1, angle2
+        let ellipse = PathItem::Ellipse(Ellipse {
+            center,
+            radius_x,
+            radius_y,
+            rotation,
+            angle1,
+            angle2,
         });
         if let Some(last_pos) = self.last_pos {
             let left_point = ellipse.left_point();
@@ -83,7 +100,7 @@ impl PathBuilder {
 
     pub fn quad(&mut self, control_x: f64, control_y: f64, x: f64, y: f64) {
         if let Some(last_pos) = self.last_pos {
-            let quad = PathItem::Quad(Quad{
+            let quad = PathItem::Quad(Quad {
                 start: last_pos,
                 end: Point(x, y),
                 control1: Point(control_x, control_y),
@@ -99,9 +116,17 @@ impl PathBuilder {
         }
     }
 
-    pub fn cubic(&mut self, control_x1: f64, control_y1: f64, control_x2: f64, control_y2: f64, x: f64, y: f64) {
+    pub fn cubic(
+        &mut self,
+        control_x1: f64,
+        control_y1: f64,
+        control_x2: f64,
+        control_y2: f64,
+        x: f64,
+        y: f64,
+    ) {
         if let Some(last_pos) = self.last_pos {
-            let cubic = PathItem::Cubic(Cubic{
+            let cubic = PathItem::Cubic(Cubic {
                 start: last_pos,
                 end: Point(x, y),
                 control1: Point(control_x1, control_y1),

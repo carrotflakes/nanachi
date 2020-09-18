@@ -8,8 +8,7 @@ pub fn draw_image_pixel_perfect<X, C>(
     src_pos: (u32, u32),
     size: (u32, u32),
     compositor: &C,
-)
-where
+) where
     X: Pixel<Subpixel = u8> + 'static,
     C: Compositor<X> + 'static,
 {

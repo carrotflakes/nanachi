@@ -1,7 +1,7 @@
-use crate::point::Point;
-use crate::path::{Path, PathItem};
-use crate::models::{Line, Arc, Ellipse, Quad};
 use crate::geometry;
+use crate::models::{Arc, Ellipse, Line, Quad};
+use crate::path::{Path, PathItem};
+use crate::point::Point;
 
 #[derive(Debug, Clone)]
 pub enum Join {
@@ -119,7 +119,11 @@ fn add_join(pis: &mut Vec<PathItem>, join: &Join, center: Point, start: Point, e
 fn add_cap(pis: &mut Vec<PathItem>, cap: &Cap, start: Point, end: Point) {
     match cap {
         Cap::Round => {
-            pis.push(PathItem::Arc(Arc::from_points((start + end) / 2.0, start, end)));
+            pis.push(PathItem::Arc(Arc::from_points(
+                (start + end) / 2.0,
+                start,
+                end,
+            )));
         }
         Cap::Butt => {
             pis.push(PathItem::Line(Line(start, end)));
@@ -142,7 +146,7 @@ pub fn path_item_offset(pis: &mut Vec<PathItem>, path_item: &PathItem, width: f6
         }
         PathItem::Arc(arc) => {
             let signum = (arc.angle2 - arc.angle1).signum();
-            pis.push(PathItem::Arc(Arc{
+            pis.push(PathItem::Arc(Arc {
                 radius: (arc.radius + width * signum).max(0.0),
                 angle1: arc.angle1,
                 angle2: arc.angle2,
@@ -151,7 +155,7 @@ pub fn path_item_offset(pis: &mut Vec<PathItem>, path_item: &PathItem, width: f6
         }
         PathItem::Ellipse(ellipse) => {
             let signum = (ellipse.angle2 - ellipse.angle1).signum();
-            pis.push(PathItem::Ellipse(Ellipse{
+            pis.push(PathItem::Ellipse(Ellipse {
                 radius_x: (ellipse.radius_x + width * signum).max(0.0),
                 radius_y: (ellipse.radius_y + width * signum).max(0.0),
                 angle1: ellipse.angle1,
@@ -172,8 +176,8 @@ pub fn path_item_offset(pis: &mut Vec<PathItem>, path_item: &PathItem, width: f6
                 let v0 = quad.start - quad.control1;
                 let v1 = quad.end - quad.control1;
                 0.0 <= v1.0 * v0.0 + v1.1 * v0.1 // whether acute angle
-             } {
-                let t= quad.closest_t_to_control();
+            } {
+                let t = quad.closest_t_to_control();
                 let (q1, q2) = quad.separate(t);
                 let middle_d = {
                     let n = (q2.control1 - q2.start).unit();
@@ -184,27 +188,36 @@ pub fn path_item_offset(pis: &mut Vec<PathItem>, path_item: &PathItem, width: f6
                     start: q1.start + start_d,
                     end: q1.end + middle_d,
                     control1: geometry::intersect_line_and_line(
-                        q1.start + start_d, q1.control1 + start_d,
-                        q1.end + middle_d, q1.control1 + middle_d),
+                        q1.start + start_d,
+                        q1.control1 + start_d,
+                        q1.end + middle_d,
+                        q1.control1 + middle_d,
+                    ),
                 }));
                 pis.push(PathItem::Quad(Quad {
                     start: q1.end - middle_d,
                     end: q1.start - start_d,
                     control1: geometry::intersect_line_and_line(
-                        q1.start - start_d, q1.control1 - start_d,
-                        q1.end - middle_d, q1.control1 - middle_d),
+                        q1.start - start_d,
+                        q1.control1 - start_d,
+                        q1.end - middle_d,
+                        q1.control1 - middle_d,
+                    ),
                 }));
             } else {
                 pis.push(PathItem::Quad(Quad {
                     start: quad.start + start_d,
                     end: quad.end + end_d,
                     control1: geometry::intersect_line_and_line(
-                        quad.start + start_d, quad.control1 + start_d,
-                        quad.end + end_d, quad.control1 + end_d),
+                        quad.start + start_d,
+                        quad.control1 + start_d,
+                        quad.end + end_d,
+                        quad.control1 + end_d,
+                    ),
                 }));
             }
         }
-        PathItem::Cubic(_) => {panic!("path_outline not support cubic curve.")}
-        _ => {unreachable!()}
+        PathItem::Cubic(_) => panic!("path_outline not support cubic curve."),
+        _ => unreachable!(),
     }
 }
