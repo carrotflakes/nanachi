@@ -11,56 +11,6 @@ fn main() {
     let (width, height) = (320, 320);
     let mut img = ImageBuffer::from_pixel(width, height, Rgba([250u8, 250, 250, 0]));
 
-    fn f<C: nanachi::compositor::Compositor<Rgba<u8>> + 'static>(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>, i: usize, c: C) {
-        let mut pb = PathBuilder::new();
-        pb.move_to(-10.0, -20.0);
-        pb.line_to(10.0, -20.0);
-        pb.line_to(10.0, 20.0);
-        pb.line_to(-10.0, 20.0);
-        pb.close();
-        let path = pb.end();
-        let fc1 = fill_color::LinearGradient::new(
-            (-10.0, 0.0),
-            (10.0, 0.0),
-            vec![
-                (0.2, Rgba([255, 0, 0, 150])),
-                (0.4, Rgba([255, 0, 0, 255])),
-                (0.6, Rgba([255, 0, 0, 255])),
-                (0.8, Rgba([255, 255, 0, 255])),
-            ]);
-        let fc2 = fill_color::LinearGradient::new(
-            (-10.0, 0.0),
-            (10.0, 0.0),
-            vec![
-                (0.2, Rgba([0, 0, 255, 150])),
-                (0.4, Rgba([0, 0, 255, 255])),
-                (0.6, Rgba([0, 0, 255, 255])),
-                (0.8, Rgba([0, 255, 255, 255])),
-            ]);
-
-        let mut img2 = ImageBuffer::from_pixel(60, 60, Rgba([250u8, 250, 250, 0]));
-        draw_fill(
-            &mut img2,
-            &path,
-            &nanachi::compositor::basic::SrcOver,
-            &fc1,
-            Matrix2d::new().translate(20.0, 20.0),
-        );
-        draw_fill(
-            &mut img2,
-            &path,
-            &c,
-            &fc2,
-            Matrix2d::new().rotate(std::f64::consts::FRAC_PI_2).translate(20.0, 20.0),
-        );
-        let x = (60 * (i % 5) + 10) as u32;
-        let y = (60 * (i / 5) + 10) as u32;
-        for dy in 0..60 {
-            for dx in 0..60 {
-                img.put_pixel(x+dx, y+dy, *img2.get_pixel(dx, dy));
-            }
-        }
-    }
     #[allow(arithmetic_overflow)]
     let mut i = 0 - 1;
     f(&mut img, {i += 1; i}, nanachi::compositor::basic::Clear);
@@ -90,6 +40,57 @@ fn main() {
 
     let res = img.save("./composite_test.png");
     println!("save: {:?}", res);
+}
+
+fn f<C: nanachi::compositor::Compositor<Rgba<u8>> + 'static>(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>, i: usize, c: C) {
+    let mut pb = PathBuilder::new();
+    pb.move_to(-10.0, -20.0);
+    pb.line_to(10.0, -20.0);
+    pb.line_to(10.0, 20.0);
+    pb.line_to(-10.0, 20.0);
+    pb.close();
+    let path = pb.end();
+    let fc1 = fill_color::LinearGradient::new(
+        (-10.0, 0.0),
+        (10.0, 0.0),
+        vec![
+            (0.1, Rgba([255, 0, 0, 150])),
+            (0.4, Rgba([255, 0, 0, 255])),
+            (0.6, Rgba([255, 0, 0, 255])),
+            (0.9, Rgba([255, 255, 0, 255])),
+        ]);
+    let fc2 = fill_color::LinearGradient::new(
+        (-10.0, 0.0),
+        (10.0, 0.0),
+        vec![
+            (0.1, Rgba([0, 0, 255, 150])),
+            (0.4, Rgba([0, 0, 255, 255])),
+            (0.6, Rgba([0, 0, 255, 255])),
+            (0.9, Rgba([0, 255, 255, 255])),
+        ]);
+
+    let mut img2 = ImageBuffer::from_pixel(60, 60, Rgba([250u8, 250, 250, 0]));
+    draw_fill(
+        &mut img2,
+        &path,
+        &nanachi::compositor::basic::SrcOver,
+        &fc1,
+        Matrix2d::new().translate(20.0, 20.0),
+    );
+    draw_fill(
+        &mut img2,
+        &path,
+        &c,
+        &fc2,
+        Matrix2d::new().rotate(std::f64::consts::FRAC_PI_2).translate(20.0, 20.0),
+    );
+    let x = (60 * (i % 5) + 10) as u32;
+    let y = (60 * (i / 5) + 10) as u32;
+    for dy in 0..60 {
+        for dx in 0..60 {
+            img.put_pixel(x+dx, y+dy, *img2.get_pixel(dx, dy));
+        }
+    }
 }
 
 fn draw_fill<C: fill_color::FillColor<Rgba<u8>> + Clone, M: nanachi::compositor::Compositor<Rgba<u8>> + 'static>(
