@@ -252,9 +252,9 @@ def_compositor! {
         let cx = aa * ba / ca;
         let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f64, a.0[1] as f64, a.0[2] as f64, b.0[0] as f64, b.0[1] as f64, b.0[2] as f64);
     } [
-        (a0 * ax + b0 * bx + a0 * b0 * cx).round() as u8,
-        (a1 * ax + b1 * bx + a1 * b1 * cx).round() as u8,
-        (a2 * ax + b2 * bx + a2 * b2 * cx).round() as u8,
+        (a0 * ax + b0 * bx + a0 * b0 / 255.0 * cx).round() as u8,
+        (a1 * ax + b1 * bx + a1 * b1 / 255.0 * cx).round() as u8,
+        (a2 * ax + b2 * bx + a2 * b2 / 255.0 * cx).round() as u8,
     ]
 }
 
@@ -266,9 +266,9 @@ def_compositor! {
         let cx = aa * ba / ca;
         let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f64, a.0[1] as f64, a.0[2] as f64, b.0[0] as f64, b.0[1] as f64, b.0[2] as f64);
     } [
-        (a0 * ax + b0 * bx + (a0 + b0 - a0 * b0) * cx).round() as u8,
-        (a1 * ax + b1 * bx + (a1 + b1 - a1 * b1) * cx).round() as u8,
-        (a2 * ax + b2 * bx + (a2 + b2 - a2 * b2) * cx).round() as u8,
+        (a0 * ax + b0 * bx + (a0 + b0 - a0 * b0 / 255.0) * cx).round() as u8,
+        (a1 * ax + b1 * bx + (a1 + b1 - a1 * b1 / 255.0) * cx).round() as u8,
+        (a2 * ax + b2 * bx + (a2 + b2 - a2 * b2 / 255.0) * cx).round() as u8,
     ]
 }
 
@@ -280,9 +280,9 @@ def_compositor! {
         let cx = aa * ba / ca;
         let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f64, a.0[1] as f64, a.0[2] as f64, b.0[0] as f64, b.0[1] as f64, b.0[2] as f64);
     } [
-        (a0 * ax + b0 * bx + if 0.5 < a0 {2.0 * a0 * b0} else {1.0 - 2.0 * (1.0 - a0) * (1.0 - b0)} * cx).round() as u8,
-        (a1 * ax + b1 * bx + if 0.5 < a1 {2.0 * a1 * b1} else {1.0 - 2.0 * (1.0 - a1) * (1.0 - b1)} * cx).round() as u8,
-        (a2 * ax + b2 * bx + if 0.5 < a2 {2.0 * a2 * b2} else {1.0 - 2.0 * (1.0 - a2) * (1.0 - b2)} * cx).round() as u8,
+        (a0 * ax + b0 * bx + if a0 < 127.0 {2.0 * a0 * b0 / 255.0} else {255.0 - 2.0 * (255.0 - a0) * (255.0 - b0) / 255.0} * cx).round() as u8,
+        (a1 * ax + b1 * bx + if a1 < 127.0 {2.0 * a1 * b1 / 255.0} else {255.0 - 2.0 * (255.0 - a1) * (255.0 - b1) / 255.0} * cx).round() as u8,
+        (a2 * ax + b2 * bx + if a2 < 127.0 {2.0 * a2 * b2 / 255.0} else {255.0 - 2.0 * (255.0 - a2) * (255.0 - b2) / 255.0} * cx).round() as u8,
     ]
 }
 
@@ -294,9 +294,9 @@ def_compositor! {
         let cx = aa * ba / ca;
         let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f64, a.0[1] as f64, a.0[2] as f64, b.0[0] as f64, b.0[1] as f64, b.0[2] as f64);
     } [
-        (a0 * ax + b0 * bx + if 0.5 < b0 {2.0 * a0 * b0} else {1.0 - 2.0 * (1.0 - a0) * (1.0 - b0)} * cx).round() as u8,
-        (a1 * ax + b1 * bx + if 0.5 < b1 {2.0 * a1 * b1} else {1.0 - 2.0 * (1.0 - a1) * (1.0 - b1)} * cx).round() as u8,
-        (a2 * ax + b2 * bx + if 0.5 < b2 {2.0 * a2 * b2} else {1.0 - 2.0 * (1.0 - a2) * (1.0 - b2)} * cx).round() as u8,
+        (a0 * ax + b0 * bx + if b0 < 127.0 {2.0 * a0 * b0 / 255.0} else {255.0 - 2.0 * (255.0 - a0) * (255.0 - b0) / 255.0} * cx).round() as u8,
+        (a1 * ax + b1 * bx + if b1 < 127.0 {2.0 * a1 * b1 / 255.0} else {255.0 - 2.0 * (255.0 - a1) * (255.0 - b1) / 255.0} * cx).round() as u8,
+        (a2 * ax + b2 * bx + if b2 < 127.0 {2.0 * a2 * b2 / 255.0} else {255.0 - 2.0 * (255.0 - a2) * (255.0 - b2) / 255.0} * cx).round() as u8,
     ]
 }
 
@@ -308,9 +308,9 @@ def_compositor! {
         let cx = aa * ba / ca;
         let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f64, a.0[1] as f64, a.0[2] as f64, b.0[0] as f64, b.0[1] as f64, b.0[2] as f64);
     } [
-        (a0 * ax + b0 * bx + if 1.0 < b0 {(a0 / (1.0 - b0)).min(1.0)} else {1.0} * cx).round() as u8,
-        (a1 * ax + b1 * bx + if 1.0 < b1 {(a1 / (1.0 - b1)).min(1.0)} else {1.0} * cx).round() as u8,
-        (a2 * ax + b2 * bx + if 1.0 < b2 {(a2 / (1.0 - b2)).min(1.0)} else {1.0} * cx).round() as u8,
+        (a0 * ax + b0 * bx + if b0 < 255.0 {(a0 / (255.0 - b0)).min(1.0) * 255.0} else {255.0} * cx).round() as u8,
+        (a1 * ax + b1 * bx + if b1 < 255.0 {(a1 / (255.0 - b1)).min(1.0) * 255.0} else {255.0} * cx).round() as u8,
+        (a2 * ax + b2 * bx + if b2 < 255.0 {(a2 / (255.0 - b2)).min(1.0) * 255.0} else {255.0} * cx).round() as u8,
     ]
 }
 
@@ -322,9 +322,9 @@ def_compositor! {
         let cx = aa * ba / ca;
         let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f64, a.0[1] as f64, a.0[2] as f64, b.0[0] as f64, b.0[1] as f64, b.0[2] as f64);
     } [
-        (a0 * ax + b0 * bx + if 0.0 < b0 {1.0 - ((1.0 - a0) / b0).min(1.0)} else {0.0} * cx).round() as u8,
-        (a1 * ax + b1 * bx + if 0.0 < b1 {1.0 - ((1.0 - a1) / b1).min(1.0)} else {0.0} * cx).round() as u8,
-        (a2 * ax + b2 * bx + if 0.0 < b2 {1.0 - ((1.0 - a2) / b2).min(1.0)} else {0.0} * cx).round() as u8,
+        (a0 * ax + b0 * bx + if 0.0 < b0 {255.0 - ((255.0 - a0) / b0).min(1.0) * 255.0} else {0.0} * cx).round() as u8,
+        (a1 * ax + b1 * bx + if 0.0 < b1 {255.0 - ((255.0 - a1) / b1).min(1.0) * 255.0} else {0.0} * cx).round() as u8,
+        (a2 * ax + b2 * bx + if 0.0 < b2 {255.0 - ((255.0 - a2) / b2).min(1.0) * 255.0} else {0.0} * cx).round() as u8,
     ]
 }
 
@@ -337,7 +337,9 @@ def_compositor! {
         let cx = aa * ba / ca;
         let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f64, a.0[1] as f64, a.0[2] as f64, b.0[0] as f64, b.0[1] as f64, b.0[2] as f64);
         fn f(a: f64, b: f64) -> f64 {
-            if 0.5 < b {
+            let a = a / 255.0;
+            let b = b / 255.0;
+            255.0 * if 0.5 < b {
                 a - (1.0 - 2.0 * b) * a * (1.0 - a)
             } else {
                 let g = if a < 0.25 {
@@ -377,8 +379,8 @@ def_compositor! {
         let cx = aa * ba / ca;
         let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f64, a.0[1] as f64, a.0[2] as f64, b.0[0] as f64, b.0[1] as f64, b.0[2] as f64);
     } [
-        (a0 * ax + b0 * bx + (a0 + b0 - 2.0 * a0 * b0) * cx).round() as u8,
-        (a1 * ax + b1 * bx + (a1 + b1 - 2.0 * a1 * b1) * cx).round() as u8,
-        (a2 * ax + b2 * bx + (a2 + b2 - 2.0 * a2 * b2) * cx).round() as u8,
+        (a0 * ax + b0 * bx + (a0 + b0 - 2.0 * a0 * b0 / 255.0) * cx).round() as u8,
+        (a1 * ax + b1 * bx + (a1 + b1 - 2.0 * a1 * b1 / 255.0) * cx).round() as u8,
+        (a2 * ax + b2 * bx + (a2 + b2 - 2.0 * a2 * b2 / 255.0) * cx).round() as u8,
     ]
 }
