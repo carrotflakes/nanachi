@@ -162,4 +162,33 @@ impl Path {
         }
         Path(pis)
     }
+
+    pub fn continuations<'a>(&'a self) -> Vec<(&'a [PathItem], bool)> {
+        let mut pis = self.0.as_slice();
+        let mut i = 0;
+        let mut res = Vec::new();
+        while let Some(pi) = pis.get(i) {
+            match pi {
+                PathItem::CloseAndJump => {
+                    let (left, right) = pis.split_at(i);
+                    res.push((left, true));
+                    pis = &right[1..];
+                    i = 0;
+                }
+                PathItem::Jump => {
+                    let (left, right) = pis.split_at(i);
+                    res.push((left, false));
+                    pis = &right[1..];
+                    i = 0;
+                }
+                _ => {
+                    i += 1;
+                }
+            }
+        }
+        if 1 <= pis.len() {
+            res.push((pis, false));
+        }
+        res
+    }
 }

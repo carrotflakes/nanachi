@@ -19,29 +19,9 @@ pub enum Cap {
 
 pub fn path_outline(path: &Path, width: f64, join: &Join, cap: &Cap) -> Vec<PathItem> {
     assert_ne!(width, 0.0);
-    let pis = &path.0;
-    let mut i = 0;
-    let mut res = Vec::with_capacity(pis.len() * 4);
+    let mut res = Vec::with_capacity(path.0.len() * 4);
     let mut tmp = Vec::with_capacity(4);
-    while i < pis.len() {
-        let mut closed = false;
-        let mut j = pis.len();
-        for (k, pi) in pis.iter().skip(i).enumerate() {
-            match pi {
-                PathItem::CloseAndJump => {
-                    closed = true;
-                    j = i + k;
-                    break;
-                }
-                PathItem::Jump => {
-                    j = i + k;
-                    break;
-                }
-                _ => {}
-            }
-        }
-
-        let pis = &pis[i..j];
+    for (pis, closed) in path.continuations() {
         if closed {
             // outer
             let m = res.len();
@@ -96,39 +76,38 @@ pub fn path_outline(path: &Path, width: f64, join: &Join, cap: &Cap) -> Vec<Path
             add_cap(&mut res, cap, s, first);
             res.push(PathItem::CloseAndJump);
         }
-        i = j + 1;
     }
     res
 }
 
-fn add_join(pis: &mut Vec<PathItem>, join: &Join, center: Point, start1: Point, end1: Point) {
+fn add_join(pis: &mut Vec<PathItem>, join: &Join, center: Point, start: Point, end: Point) {
     let mut bevel = || {
-        pis.push(PathItem::Line(Line(start1, end1)));
+        pis.push(PathItem::Line(Line(start, end)));
     };
     match join {
         Join::Round => {
-            if geometry::point_is_right_side_of_line(start1 - center, end1 - center) {
-                pis.push(PathItem::Line(Line(start1, end1)));
+            if geometry::point_is_right_side_of_line(start - center, end - center) {
+                bevel();
             } else {
-                pis.push(PathItem::Arc(Arc::from_points(center, start1, end1)));
+                pis.push(PathItem::Arc(Arc::from_points(center, start, end)));
             }
         }
         Join::Bevel => {
             bevel();
         }
         Join::Miter(limit) => {
-            if geometry::point_is_right_side_of_line(start1 - center, end1 - center) {
+            if geometry::point_is_right_side_of_line(start - center, end - center) {
                 bevel();
             } else {
                 let p = geometry::intersect_line_and_line(
-                    start1,
-                    start1 + Point(start1.1 - center.1, center.0 - start1.0),
-                    end1,
-                    end1 + Point(center.1 - end1.1, end1.0 - center.0),
+                    start,
+                    start + Point(start.1 - center.1, center.0 - start.0),
+                    end,
+                    end + Point(center.1 - end.1, end.0 - center.0),
                 );
                 if ((p - center).norm() as f32) < *limit {
-                    pis.push(PathItem::Line(Line(start1, p)));
-                    pis.push(PathItem::Line(Line(p, end1)));
+                    pis.push(PathItem::Line(Line(start, p)));
+                    pis.push(PathItem::Line(Line(p, end)));
                 } else {
                     bevel();
                 }
