@@ -1,6 +1,6 @@
 use crate::{
     compositor::Compositor,
-    fill_color::FillColor,
+    fill_color::{FillColor, Transform},
     fill_path::{draw_fill, draw_fill_no_aa},
     fill_rule::FillRule,
     matrix::Matrix2d,
@@ -32,17 +32,6 @@ where
     C: Compositor<P> + 'static,
     FR: FillRule,
 {
-    #[inline]
-    fn fill<'a>(&self, image: &'a mut ImageBuffer<P, Vec<u8>>, path: &Path, antialiasing: bool) {
-        let width = image.width();
-        let height = image.height();
-        let mut writer = img_writer(image, &self.color, &self.compositor);
-        if antialiasing {
-            draw_fill(width, height, &path, self.fill_rule, &mut writer);
-        } else {
-            draw_fill_no_aa(width, height, &path, self.fill_rule, &mut writer);
-        }
-    }
 }
 
 pub struct Context<'a, P>
@@ -116,7 +105,7 @@ where
             let path = path_transform(path, &self.matrix);
             path_flatten(&path, self.flatten_tolerance)
         };
-        fill_style.fill(self.image, &path, self.antialiasing);
+        self.fill_(fill_style, &path, self.antialiasing);
     }
 
     pub fn stroke<FC: FillColor<P>, C: Compositor<P>, FR: FillRule>(
@@ -132,7 +121,7 @@ where
             path_flatten(&path, self.flatten_tolerance)
         };
         let path = path_outline(&path, width / 2.0, &self.join, &self.cap);
-        fill_style.fill(self.image, &path, self.antialiasing);
+        self.fill_(fill_style, &path, self.antialiasing);
     }
 
     pub fn stroke_with_style<FC: FillColor<P>, C: Compositor<P>, FR: FillRule>(
@@ -150,6 +139,24 @@ where
             path_flatten(&path, self.flatten_tolerance)
         };
         let path = path_outline(&path, width / 2.0, join, cap);
-        fill_style.fill(self.image, &path, self.antialiasing);
+        self.fill_(fill_style, &path, self.antialiasing);
+    }
+
+    #[inline]
+    fn fill_<FC: FillColor<P>, C: Compositor<P>, FR: FillRule>(
+        &mut self,
+        fill_style: &FillStyle<P, FC, C, FR>,
+        path: &Path,
+        antialiasing: bool,
+    ) {
+        let width = self.image.width();
+        let height = self.image.height();
+        let color = Transform::new(&fill_style.color, self.matrix);
+        let mut writer = img_writer(self.image, &color, &fill_style.compositor);
+        if antialiasing {
+            draw_fill(width, height, &path, fill_style.fill_rule, &mut writer);
+        } else {
+            draw_fill_no_aa(width, height, &path, fill_style.fill_rule, &mut writer);
+        }
     }
 }

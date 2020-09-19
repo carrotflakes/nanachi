@@ -1,10 +1,11 @@
 use nanachi::{
-    compositor::basic,
-    context::{Context, FillStyle},
-    fill_color, fill_rule,
     image::{ImageBuffer, Rgba},
-    matrix::Matrix2d,
     path_builder::PathBuilder,
+    fill_color,
+    matrix::Matrix2d,
+    context::{Context, FillStyle},
+    fill_rule,
+    compositor::basic,
 };
 use std::f64::consts::PI;
 
@@ -29,55 +30,39 @@ fn main() {
     pb.close();
     let path = pb.end();
 
-    let mut context = context.transformed_context(
-        &Matrix2d::new()
-            .translate(-250.0, -250.0)
-            .rotate(0.9)
-            .scale(1.0, 0.6)
-            .skew_x(-0.1)
-            .translate(250.0, 280.0),
+    let mut context = context.transformed_context(&Matrix2d::new()
+        .translate(-250.0, -250.0)
+        .rotate(0.9)
+        .scale(1.0, 0.6)
+        .skew_x(-0.1)
+        .translate(250.0, 280.0)
     );
 
     let t = std::time::Instant::now();
     {
-        let color = fill_color::LinearGradient::new(
-            (200.0, 200.0),
-            (300.0, 430.0),
-            vec![
-                (0.0, Rgba([255, 100, 100, 100])),
-                (1.0, Rgba([200, 255, 10, 255])),
-            ],
-        );
-        context.fill(
-            &path,
-            &FillStyle {
-                color,
-                fill_rule: fill_rule::NonZero,
-                compositor: basic::SrcOver,
-                pixel: Default::default(),
-            },
-        );
+        let color = fill_color::LinearGradient::new((200.0, 200.0), (300.0, 430.0), vec![
+            (0.0, Rgba([255, 100, 100, 100])),
+            (1.0, Rgba([200, 255, 10, 255])),
+        ]);
+        context.fill(&path, &FillStyle {
+            color,
+            fill_rule: fill_rule::NonZero,
+            compositor: basic::SrcOver,
+            pixel: Default::default(),
+        });
     }
     {
-        let color = fill_color::RadialGradient::new(
-            (250.0, 220.0),
-            220.0,
-            vec![
-                (0.0, Rgba([255, 255, 255, 255])),
-                (0.9, Rgba([200, 10, 10, 255])),
-                (1.0, Rgba([10, 10, 255, 10])),
-            ],
-        );
-        context.stroke(
-            &path,
-            &FillStyle {
-                color,
-                fill_rule: fill_rule::NonZero,
-                compositor: basic::SrcOver,
-                pixel: Default::default(),
-            },
-            8.0,
-        );
+        let color = fill_color::RadialGradient::new((250.0, 220.0), 220.0, vec![
+            (0.0, Rgba([255, 255, 255, 255])),
+            (0.9, Rgba([200, 10, 10, 255])),
+            (1.0, Rgba([10, 10, 255, 10])),
+        ]);
+        context.stroke(&path, &FillStyle {
+            color,
+            fill_rule: fill_rule::NonZero,
+            compositor: basic::SrcOver,
+            pixel: Default::default(),
+        }, 8.0);
     }
     dbg!(t.elapsed());
 
