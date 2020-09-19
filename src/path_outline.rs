@@ -17,7 +17,7 @@ pub enum Cap {
     Square,
 }
 
-pub fn path_outline(path: &Path, width: f64, join: &Join, cap: &Cap) -> Vec<PathItem> {
+pub fn path_outline(path: &Path, width: f64, join: &Join, cap: &Cap) -> Path {
     assert_ne!(width, 0.0);
     let mut res = Vec::with_capacity(path.0.len() * 4);
     let mut tmp = Vec::with_capacity(4);
@@ -77,7 +77,7 @@ pub fn path_outline(path: &Path, width: f64, join: &Join, cap: &Cap) -> Vec<Path
             res.push(PathItem::CloseAndJump);
         }
     }
-    res
+    Path(res)
 }
 
 fn add_join(pis: &mut Vec<PathItem>, join: &Join, center: Point, start: Point, end: Point) {

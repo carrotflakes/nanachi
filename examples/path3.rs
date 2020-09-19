@@ -67,7 +67,7 @@ fn main() {
     }
     {
         use nanachi::path_outline::{path_outline, Join, Cap};
-        let path = Path::new(path_outline(&path, 8.0, &Join::Round, &Cap::Round));
+        let path = path_outline(&path, 8.0, &Join::Round, &Cap::Round);
         let pc = fill_color::RadialGradient::new((250.0, 220.0), 220.0, vec![
             (0.0, Rgba([255, 255, 255, 255])),
             (0.9, Rgba([200, 10, 10, 255])),

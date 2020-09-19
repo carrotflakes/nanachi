@@ -72,7 +72,7 @@ fn draw_stars(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
             &path_outline::Cap::Round,
         );
         fill_path::draw_fill(
-            img.width() as u32, img.height() as u32, &Path::new(outline), fill_rule::NonZero,
+            img.width() as u32, img.height() as u32, &outline, fill_rule::NonZero,
             &mut img_writer(img, &fc, &compositor)
         );
     }
@@ -252,11 +252,11 @@ fn draw_nanachi(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
     for ps in nanachi.iter() {
         let path = Path::from_points(&ps);
         // let path = Path::from_bezier2_points(&k_curve(ps.clone(), false, 3));
-        let outline = Path::new(path_outline::path_outline(
+        let outline = path_outline::path_outline(
             &path, 2.0,
             &path_outline::Join::Round,
             &path_outline::Cap::Round,
-        ));
+        );
         fill_path::draw_fill(
             img.width() as u32, img.height() as u32,
             &outline,
@@ -268,11 +268,11 @@ fn draw_nanachi(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
     for ps in moji.iter() {
         let path = Path::from_points(&ps);
         // let path = Path::from_bezier2_points(&k_curve(ps.clone(), false, 3));
-        let outline = Path::new(path_outline::path_outline(
+        let outline = path_outline::path_outline(
             &path, 2.0,
             &path_outline::Join::Round,
             &path_outline::Cap::Round,
-        ));
+        );
         fill_path::draw_fill(
             img.width() as u32, img.height() as u32,
             &outline,
