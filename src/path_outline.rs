@@ -195,14 +195,11 @@ pub fn path_item_offset(pis: &mut Vec<PathItem>, path_item: &PathItem, width: f6
                     ),
                 }));
                 pis.push(PathItem::Quad(Quad {
-                    start: q1.end - middle_d,
-                    end: q1.start - start_d,
+                    start: q2.start + middle_d,
+                    end: q2.end + end_d,
                     control1: geometry::intersect_line_and_line(
-                        q1.start - start_d,
-                        q1.control1 - start_d,
-                        q1.end - middle_d,
-                        q1.control1 - middle_d,
-                    ),
+                        q2.start + middle_d, q2.control1 + middle_d,
+                        q2.end + end_d, q2.control1 + end_d),
                 }));
             } else {
                 pis.push(PathItem::Quad(Quad {
