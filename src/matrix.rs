@@ -92,6 +92,12 @@ impl Matrix2d {
     }
 }
 
+impl Default for Matrix2d {
+    fn default() -> Self {
+        Matrix2d::new()
+    }
+}
+
 #[test]
 fn test() {
     let am = Matrix2d::new()
