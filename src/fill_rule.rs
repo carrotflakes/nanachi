@@ -1,4 +1,4 @@
-pub trait FillRule {
+pub trait FillRule: Copy {
     fn apply(&self, value: f64) -> f64;
 }
 
