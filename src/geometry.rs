@@ -6,12 +6,6 @@ pub fn intersect_line_and_horizon(a: Point, b: Point, hy: f64) -> f64 {
     a.0 * (1.0 - r) + b.0 * r
 }
 
-pub fn intersect_line_and_vertical(a: Point, b: Point, vx: f64) -> f64 {
-    assert!(a.0 != b.0);
-    let r = (vx - a.0) / (b.0 - a.0);
-    a.1 * (1.0 - r) + b.1 * r
-}
-
 pub fn intersect_segment_and_horizon(ax: f64, ay: f64, bx: f64, by: f64, hy: f64) -> Option<f64> {
     if ay != by && ((hy < ay) ^ (hy < by)) {
         let r = (hy - ay) / (by - ay);
@@ -19,27 +13,6 @@ pub fn intersect_segment_and_horizon(ax: f64, ay: f64, bx: f64, by: f64, hy: f64
     } else {
         None
     }
-}
-
-pub fn intersect_segment_and_vertical(ax: f64, ay: f64, bx: f64, by: f64, vx: f64) -> Option<f64> {
-    if ax != bx && ((vx < ax) ^ (vx < bx)) {
-        let r = (vx - ax) / (bx - ax);
-        Some(ay * (1.0 - r) + by * r)
-    } else {
-        None
-    }
-}
-
-pub fn distance_between_line_and_point<P1: Into<Point>, P2: Into<Point>>(
-    p1: P1,
-    p2: P1,
-    p0: P2,
-) -> f64 {
-    let p1: Point = p1.into();
-    let p2: Point = p2.into();
-    let p0: Point = p0.into();
-    ((p2.1 - p1.1) * p0.0 - (p2.0 - p1.0) * p0.1 + p2.0 * p1.1 - p2.1 * p1.0).abs()
-        / (p2.1 - p1.1).hypot(p2.0 - p1.0)
 }
 
 pub fn squared_distance_between_line_segment_and_point<P1: Into<Point>, P2: Into<Point>>(
@@ -71,18 +44,6 @@ pub fn intersect_line_and_line(p1: Point, p2: Point, p3: Point, p4: Point) -> Po
   let x = t * p1.0 + (1.0 - t) * p2.0;
   let y = t * p1.1 + (1.0 - t) * p2.1;
   Point(x, y)
-}
-
-pub fn intersect_segment_and_segment(p1: Point, p2: Point, p3: Point, p4: Point) -> Option<Point> {
-  let det = (p1.0 - p2.0) * (p4.1 - p3.1) - (p4.0 - p3.0) * (p1.1 - p2.1);
-  let t = ((p4.1 - p3.1) * (p4.0 - p2.0) + (p3.0 - p4.0) * (p4.1 - p2.1)) / det;
-  if 0.0 <= t && t <= 1.0 {
-    let x = t * p1.0 + (1.0 - t) * p2.0;
-    let y = t * p1.1 + (1.0 - t) * p2.1;
-    Some(Point(x, y))
-  } else {
-    None
-  }
 }
 
 pub fn point_is_right_side_of_line(p1: Point, p2: Point) -> bool {
