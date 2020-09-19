@@ -2,7 +2,7 @@ pub trait FillRule {
     fn apply(&self, value: f64) -> f64;
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 pub struct NonZero;
 
 impl FillRule for NonZero {
@@ -11,7 +11,7 @@ impl FillRule for NonZero {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 pub struct EvenOdd;
 
 impl FillRule for EvenOdd {
@@ -20,7 +20,7 @@ impl FillRule for EvenOdd {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 pub struct InverseNonZero;
 
 impl FillRule for InverseNonZero {
@@ -29,7 +29,7 @@ impl FillRule for InverseNonZero {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 pub struct InverseEvenOdd;
 
 impl FillRule for InverseEvenOdd {
@@ -38,7 +38,7 @@ impl FillRule for InverseEvenOdd {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 pub struct Abs;
 
 impl FillRule for Abs {
@@ -47,7 +47,7 @@ impl FillRule for Abs {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 pub struct Raw;
 
 impl FillRule for Raw {
