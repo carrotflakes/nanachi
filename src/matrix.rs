@@ -90,6 +90,10 @@ impl Matrix2d {
             s[2] * t[3] + s[5] * t[4] + t[5],
         ])
     }
+
+    pub fn is_unit(&self) -> bool {
+        self == &Default::default()
+    }
 }
 
 impl Default for Matrix2d {
