@@ -20,7 +20,9 @@ fn main() {
         draw_fill(&mut img, &path, nanachi::compositor::basic::SrcOver, &pc);
         img
     };
-    let bg_fill_color = nanachi::fill_color::Pattern::new(&bg_image);
+    let bg_fill_color = fill_color::Transform::new(
+        fill_color::Pattern::new(&bg_image),
+        Matrix2d::new().rotate(PI * 0.25).scale(2.0, 2.0));
     let mut img = ImageBuffer::from_fn(width, height, |x, y| {
         use nanachi::fill_color::FillColor;
         bg_fill_color.fill_color(x as f64, y as f64)
@@ -56,7 +58,7 @@ fn main() {
         .translate(250.0, 280.0)
     ;
     let path = path_transform(&path, &am);
-    let path = nanachi::path_flatten::path_flatten(&path, 0.5);
+    let path = nanachi::path_flatten::path_flatten_only_cubic(&path, 0.5);
     let t = std::time::Instant::now();
     {
         let pc = fill_color::LinearGradient::new((200.0, 200.0), (300.0, 430.0), vec![
@@ -71,7 +73,7 @@ fn main() {
         let pc = fill_color::RadialGradient::new((250.0, 220.0), 220.0, vec![
             (0.0, Rgba([255, 255, 255, 255])),
             (0.9, Rgba([200, 10, 10, 255])),
-            (1.0, Rgba([10, 10, 255, 10])),
+            (1.0, Rgba([10, 10, 255, 100])),
         ]);
         draw_fill(&mut img, &path, nanachi::compositor::basic::SrcOver, &pc);
     }
