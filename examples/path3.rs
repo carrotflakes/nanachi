@@ -20,8 +20,9 @@ fn main() {
         draw_fill(&mut img, &path, nanachi::compositor::basic::SrcOver, &pc);
         img
     };
+    let pattern = fill_color::Pattern::new(&bg_image);
     let bg_fill_color = fill_color::Transform::new(
-        fill_color::Pattern::new(&bg_image),
+        &pattern,
         Matrix2d::new().rotate(PI * 0.25).scale(2.0, 2.0));
     let mut img = ImageBuffer::from_fn(width, height, |x, y| {
         use nanachi::fill_color::FillColor;
