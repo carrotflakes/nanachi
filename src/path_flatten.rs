@@ -119,18 +119,35 @@ pub fn path_flatten(path: &Path, tolerance: f64) -> Path {
     Path(pis)
 }
 
-fn point_to_point2d(p: &Point) -> Point2D<f64> {
-    Point2D::new(p.0, p.1)
+pub fn path_flatten_only_cubic(path: &Path, tolerance: f64) -> Path {
+    let mut pis = Vec::new();
+    for pi in path.0.iter() {
+        match pi {
+            PathItem::Cubic(cubic) => {
+                let it = CubicBezierSegment {
+                    from: point_to_point2d(&cubic.start),
+                    ctrl1: point_to_point2d(&cubic.control1),
+                    ctrl2: point_to_point2d(&cubic.control2),
+                    to: point_to_point2d(&cubic.end),
+                }
+                .flattened(tolerance)
+                .map(|x| x.to_tuple().into());
+                let mut p = cubic.start;
+                for q in it {
+                    if p != q {
+                        pis.push(PathItem::Line(Line(p, q)));
+                        p = q;
+                    }
+                }
+            }
+            _ => {
+                pis.push(pi.clone());
+            }
+        }
+    }
+    Path(pis)
 }
 
-#[test]
-fn test() {
-    let a = Arc {
-        center: Point2D::new(0.0f64, 0.0),
-        radii: (1.0f64, 1.0).into(),
-        start_angle: Angle::radians(std::f64::consts::PI),
-        sweep_angle: Angle::radians(-1.0),
-        x_rotation: Angle::radians(0.0),
-    };
-    dbg!(a.sample(1.0));
+fn point_to_point2d(p: &Point) -> Point2D<f64> {
+    Point2D::new(p.0, p.1)
 }
