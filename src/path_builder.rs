@@ -157,4 +157,8 @@ impl PathBuilder {
         std::mem::swap(&mut items, &mut self.items);
         Path(items)
     }
+
+    pub fn current_pos(&self) -> Option<(f64, f64)> {
+        self.last_pos.map(|p| p.into())
+    }
 }
