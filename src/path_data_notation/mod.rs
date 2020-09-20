@@ -193,10 +193,10 @@ pub fn parse(str: &str) -> Result<Path, String> {
             }
             Token::LargeA => {
                 let mut ns = parse_n_nums(&mut tokens, 7)?;
-                pb.ellipse_from_endpoint(ns[0], ns[1], ns[2], ns[3] != 0.0, ns[4] != 0.0, ns[5], ns[6]);
+                pb.ellipse_from_endpoint(ns[0], ns[1], ns[2].to_radians(), ns[3] != 0.0, ns[4] != 0.0, ns[5], ns[6]);
                 while is_num_or_comma(&tokens.peek().unwrap().to_owned()?) {
                     ns = parse_n_nums(&mut tokens, 7)?;
-                    pb.ellipse_from_endpoint(ns[0], ns[1], ns[2], ns[3] != 0.0, ns[4] != 0.0, ns[5], ns[6]);
+                    pb.ellipse_from_endpoint(ns[0], ns[1], ns[2].to_radians(), ns[3] != 0.0, ns[4] != 0.0, ns[5], ns[6]);
                 }
                 last_control_point = LastControlPoint::None;
             }
@@ -204,11 +204,11 @@ pub fn parse(str: &str) -> Result<Path, String> {
                 let mut ns = parse_n_nums(&mut tokens, 7)?;
                 let mut current: Point = pb.current_pos().unwrap_or((0.0, 0.0)).into();
                 current = current + Point(ns[5], ns[6]);
-                pb.ellipse_from_endpoint(ns[0], ns[1], ns[2], ns[3] != 0.0, ns[4] != 0.0, current.0, current.1);
+                pb.ellipse_from_endpoint(ns[0], ns[1], ns[2].to_radians(), ns[3] != 0.0, ns[4] != 0.0, current.0, current.1);
                 while is_num_or_comma(&tokens.peek().unwrap().to_owned()?) {
                     ns = parse_n_nums(&mut tokens, 7)?;
                     current = current + Point(ns[5], ns[6]);
-                    pb.ellipse_from_endpoint(ns[0], ns[1], ns[2], ns[3] != 0.0, ns[4] != 0.0, current.0, current.1);
+                    pb.ellipse_from_endpoint(ns[0], ns[1], ns[2].to_radians(), ns[3] != 0.0, ns[4] != 0.0, current.0, current.1);
                 }
                 last_control_point = LastControlPoint::None;
             }
