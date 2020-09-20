@@ -19,6 +19,23 @@ fn main() {
 
     {
         let path = path_data_notation::parse("
+        M 10,30
+        A 20,20 0,0,1 50,30
+        A 20,20 0,0,1 90,30
+        Q 90,60 50,90
+        Q 10,60 10,30 z").unwrap();
+        context.transformed_context(&Matrix2d::new()
+            .translate(0.0, 0.0)
+        ).stroke(&path, &FillStyle {
+            color: fill_color::Constant::new(Rgb([0, 0, 0])),
+            fill_rule: fill_rule::NonZero,
+            compositor: basic::SrcOver,
+            pixel: Default::default(),
+        }, 3.0);
+    }
+
+    {
+        let path = path_data_notation::parse("
         M 10,10 h 10
         m  0,10 h 10
         m  0,10 h 10
@@ -31,7 +48,7 @@ fn main() {
         m-20,10 h 10
         m-20,10 h 10").unwrap();
         context.transformed_context(&Matrix2d::new()
-            .translate(0.0, 0.0)
+            .translate(100.0, 0.0)
         ).stroke(&path, &FillStyle {
             color: fill_color::Constant::new(Rgb([0, 0, 0])),
             fill_rule: fill_rule::NonZero,
@@ -47,7 +64,7 @@ fn main() {
         V 10
         H 50").unwrap();
         context.transformed_context(&Matrix2d::new()
-            .translate(100.0, 0.0)
+            .translate(0.0, 100.0)
         ).stroke(&path, &FillStyle {
             color: fill_color::Constant::new(Rgb([0, 0, 0])),
             fill_rule: fill_rule::NonZero,
@@ -63,7 +80,7 @@ fn main() {
         v -80
         h -40").unwrap();
         context.transformed_context(&Matrix2d::new()
-            .translate(100.0, 0.0)
+            .translate(0.0, 100.0)
         ).stroke(&path, &FillStyle {
             color: fill_color::Constant::new(Rgb([0, 0, 0])),
             fill_rule: fill_rule::NonZero,
@@ -78,7 +95,7 @@ fn main() {
         C 30,90 25,10 50,10
         S 70,90 90,90").unwrap();
         context.transformed_context(&Matrix2d::new()
-            .translate(0.0, 100.0)
+            .translate(0.0, 200.0)
         ).stroke(&path, &FillStyle {
             color: fill_color::Constant::new(Rgb([0, 0, 0])),
             fill_rule: fill_rule::NonZero,
@@ -93,7 +110,7 @@ fn main() {
         c 20,0 15,-80 40,-80
         s 20,80 40,80").unwrap();
         context.transformed_context(&Matrix2d::new()
-            .translate(0.0, 100.0)
+            .translate(0.0, 200.0)
         ).stroke(&path, &FillStyle {
             color: fill_color::Constant::new(Rgb([0, 0, 0])),
             fill_rule: fill_rule::NonZero,
@@ -108,7 +125,7 @@ fn main() {
         Q 25,25 40,50
         t 30,0 30,0 30,0 30,0 30,0").unwrap();
         context.transformed_context(&Matrix2d::new()
-            .translate(0.0, 200.0)
+            .translate(0.0, 300.0)
         ).stroke(&path, &FillStyle {
             color: fill_color::Constant::new(Rgb([0, 0, 0])),
             fill_rule: fill_rule::NonZero,
