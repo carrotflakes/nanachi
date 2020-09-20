@@ -169,6 +169,9 @@ impl Path {
                 }
             }
         }
+        if !points.is_empty() {
+            vec.push(points);
+        }
         Some(vec)
     }
 
