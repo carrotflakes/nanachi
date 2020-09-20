@@ -3,6 +3,7 @@ use crate::{
     path::{Path, PathItem},
     point::Point,
 };
+use std::f64::consts::PI;
 
 #[derive(Debug, Clone)]
 pub struct PathBuilder {
@@ -79,6 +80,8 @@ impl PathBuilder {
         angle1: f64,
         angle2: f64,
     ) {
+        let radius_x = radius_x.abs();
+        let radius_y = radius_y.abs();
         let center = Point(x, y);
         let ellipse = PathItem::Ellipse(Ellipse {
             center,
@@ -95,6 +98,62 @@ impl PathBuilder {
             }
         }
         self.set_pos(ellipse.right_point());
+        self.push(ellipse);
+    }
+
+    pub fn ellipse_from_endpoint(
+        &mut self,
+        radius_x: f64,
+        radius_y: f64,
+        rotation: f64,
+        large: bool,
+        clockwise: bool,
+        x: f64,
+        y: f64,
+    ) {
+        let start = self.last_pos.unwrap_or_else(|| panic!("PathBuilder::start() is required"));
+        let end = Point(x, y);
+        if radius_x == 0.0 || radius_y == 0.0 {
+            self.set_pos(end);
+            self.push(PathItem::Line(Line(start, end)));
+            return;
+        }
+        let mut radius_x = radius_x.abs();
+        let mut radius_y = radius_y.abs();
+        let p = (start - end).rotate(-rotation) / 2.0;
+        {
+            let s = (p.0 / radius_x).powi(2) + (p.1 / radius_y).powi(2);
+            if 1.0 < s {
+                radius_x *= s.sqrt();
+                radius_y *= s.sqrt();
+            }
+        }
+        let (rx2, ry2) = (radius_x.powi(2), radius_y.powi(2));
+        let mut a = ((rx2 * ry2 - rx2 * p.1.powi(2) - ry2 * p.0.powi(2)) / (rx2 * p.1.powi(2) + ry2 * p.0.powi(2))).sqrt();
+        if large == clockwise {
+            a = -a;
+        }
+        let q = Point(radius_x * p.1 / radius_y, -radius_y * p.0 / radius_x) * a;
+        let center = q.rotate(rotation) + (start + end) / 2.0;
+        let a1 = Point((p.0 - q.0) / radius_x, (p.1 - q.1) / radius_y);
+        let mut angle1 = (a1.0 / a1.norm()).acos().copysign(a1.1);
+        let a2 = Point(-(p.0 + q.0) / radius_x, -(p.1 + q.1) / radius_y);
+        let mut angle2 = (a2.0 / a2.norm()).acos().copysign(a2.1);
+        if clockwise && angle2 < angle1 {
+            angle2 += PI * 2.0;
+        }
+        if !clockwise && angle1 < angle2 {
+            angle1 += PI * 2.0;
+        }
+        let ellipse = PathItem::Ellipse(Ellipse {
+            center,
+            radius_x,
+            radius_y,
+            rotation,
+            angle1,
+            angle2,
+        });
+        self.set_pos(end);
         self.push(ellipse);
     }
 
