@@ -134,6 +134,52 @@ fn main() {
         }, 3.0);
     }
 
+    {
+        let mut context = context.transformed_context(&Matrix2d::new()
+            .scale(5.0, 5.0)
+            .translate(0.0, 400.0)
+        );
+        let path = path_data_notation::parse("
+        M 6,10
+        A 6 4 10 1 0 14,10").unwrap();
+        context.stroke(&path, &FillStyle {
+            color: fill_color::Constant::new(Rgb([200, 0, 0])),
+            fill_rule: fill_rule::NonZero,
+            compositor: basic::SrcOver,
+            pixel: Default::default(),
+        }, 3.0);
+
+        let path = path_data_notation::parse("
+        M 6,10
+        A 6 4 10 1 1 14,10").unwrap();
+        context.stroke(&path, &FillStyle {
+            color: fill_color::Constant::new(Rgb([100, 200, 0])),
+            fill_rule: fill_rule::NonZero,
+            compositor: basic::SrcOver,
+            pixel: Default::default(),
+        }, 3.0);
+
+        let path = path_data_notation::parse("
+        M 6,10
+        A 6 4 10 0 1 14,10").unwrap();
+        context.stroke(&path, &FillStyle {
+            color: fill_color::Constant::new(Rgb([200, 0, 200])),
+            fill_rule: fill_rule::NonZero,
+            compositor: basic::SrcOver,
+            pixel: Default::default(),
+        }, 3.0);
+
+        let path = path_data_notation::parse("
+        M 6,10
+        A 6 4 10 0 0 14,10").unwrap();
+        context.stroke(&path, &FillStyle {
+            color: fill_color::Constant::new(Rgb([255, 200, 255])),
+            fill_rule: fill_rule::NonZero,
+            compositor: basic::SrcOver,
+            pixel: Default::default(),
+        }, 3.0);
+    }
+
     dbg!(t.elapsed());
 
     let res = img.save("./path_data_notation.png");
