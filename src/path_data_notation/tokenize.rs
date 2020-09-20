@@ -18,6 +18,10 @@ pub enum Token {
     SmallS,
     LargeQ,
     SmallQ,
+    LargeT,
+    SmallT,
+    LargeA,
+    SmallA,
     Num(f64),
     Comma,
     EOS,
@@ -162,6 +166,22 @@ impl<'a, T: Iterator<Item = char>> Iterator for Tokenize<'a, T> {
             Some('q') => {
                 self.chars.next();
                 Some(Ok(Token::SmallQ))
+            }
+            Some('T') => {
+                self.chars.next();
+                Some(Ok(Token::LargeT))
+            }
+            Some('t') => {
+                self.chars.next();
+                Some(Ok(Token::SmallT))
+            }
+            Some('A') => {
+                self.chars.next();
+                Some(Ok(Token::LargeA))
+            }
+            Some('a') => {
+                self.chars.next();
+                Some(Ok(Token::SmallA))
             }
             Some(c) => Some(Err(format!("Unexpected char: {}", c))),
             None => None,
