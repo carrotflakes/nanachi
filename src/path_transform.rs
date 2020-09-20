@@ -4,11 +4,11 @@ use crate::matrix::Matrix2d;
 use crate::path::{Path, PathItem};
 use std::f64::consts::PI;
 
-pub fn path_transform(path: &Path, am: &Matrix2d) -> Path {
+pub fn path_transform(path: &Path, matrix: &Matrix2d) -> Path {
     let mut pis = Vec::with_capacity(path.0.len());
     for pi in path.0.iter() {
         pis.push(match pi {
-            PathItem::Line(line) => PathItem::Line(Line(am.apply(line.0), am.apply(line.1))),
+            PathItem::Line(line) => PathItem::Line(Line(matrix.apply(line.0), matrix.apply(line.1))),
             PathItem::Arc(arc) =>
                 PathItem::Ellipse(transform_ellipse(&Ellipse {
                     center: arc.center,
@@ -17,19 +17,19 @@ pub fn path_transform(path: &Path, am: &Matrix2d) -> Path {
                     rotation: 0.0,
                     angle1: arc.angle1,
                     angle2: arc.angle2,
-                }, am)),
+                }, matrix)),
             PathItem::Ellipse(ellipse) =>
-                PathItem::Ellipse(transform_ellipse(ellipse, am)),
+                PathItem::Ellipse(transform_ellipse(ellipse, matrix)),
             PathItem::Quad(quad) => PathItem::Quad(Quad {
-                start: am.apply(quad.start),
-                end: am.apply(quad.end),
-                control1: am.apply(quad.control1),
+                start: matrix.apply(quad.start),
+                end: matrix.apply(quad.end),
+                control1: matrix.apply(quad.control1),
             }),
             PathItem::Cubic(cubic) => PathItem::Cubic(Cubic {
-                start: am.apply(cubic.start),
-                end: am.apply(cubic.end),
-                control1: am.apply(cubic.control1),
-                control2: am.apply(cubic.control2),
+                start: matrix.apply(cubic.start),
+                end: matrix.apply(cubic.end),
+                control1: matrix.apply(cubic.control1),
+                control2: matrix.apply(cubic.control2),
             }),
             PathItem::CloseAndJump => PathItem::CloseAndJump,
             PathItem::Jump => PathItem::Jump,
@@ -38,12 +38,12 @@ pub fn path_transform(path: &Path, am: &Matrix2d) -> Path {
     Path::new(pis)
 }
 
-pub fn transform_ellipse(ellipse: &Ellipse, am: &Matrix2d) -> Ellipse {
+pub fn transform_ellipse(ellipse: &Ellipse, matrix: &Matrix2d) -> Ellipse {
     let eam = Matrix2d::new()
         .scale(ellipse.radius_x, ellipse.radius_y)
         .rotate(ellipse.rotation)
         .translate(ellipse.center.0, ellipse.center.1);
-    let am = eam.then(&am);
+    let am = eam.then(&matrix);
     let center = Point(am.0[2], am.0[5]);
     // dbg!(am);
     let k = (am.0[1].atan2(am.0[4]) + am.0[3].atan2(am.0[0])).tan();
