@@ -123,6 +123,10 @@ impl Path {
         self.0[0].left_point() == self.0[self.0.len() - 1].right_point()
     }
 
+    pub fn merge(&mut self, rhs: &Path) {
+        self.0.extend_from_slice(rhs.0.as_slice());
+    }
+
     pub fn from_points(points: &Vec<Point>) -> Path {
         let mut pis = Vec::new();
         for i in 0..points.len() - 1 {
