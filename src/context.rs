@@ -83,7 +83,7 @@ where
         }
     }
 
-    pub fn transformed_context(&'a mut self, matrix: &Matrix2d) -> Context<'a, P> {
+    pub fn transformed_context<'b>(&'b mut self, matrix: &Matrix2d) -> Context<'b, P> {
         Context {
             image: self.image,
             flatten_tolerance: self.flatten_tolerance,
