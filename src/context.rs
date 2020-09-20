@@ -83,6 +83,17 @@ where
         }
     }
 
+    pub fn child<'b>(&'b mut self) -> Context<'b, P> {
+        Context {
+            image: self.image,
+            flatten_tolerance: self.flatten_tolerance,
+            antialiasing: self.antialiasing,
+            join: self.join.clone(),
+            cap: self.cap.clone(),
+            matrix: self.matrix,
+        }
+    }
+
     pub fn transformed_context<'b>(&'b mut self, matrix: &Matrix2d) -> Context<'b, P> {
         Context {
             image: self.image,
