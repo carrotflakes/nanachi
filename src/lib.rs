@@ -15,6 +15,8 @@ pub mod matrix;
 pub(crate) mod models;
 pub mod path;
 pub mod path_builder;
+#[cfg(feature = "path-data-notation")]
+pub mod path_data_notation;
 pub mod path_flatten;
 pub mod path_outline;
 pub mod path_transform;
