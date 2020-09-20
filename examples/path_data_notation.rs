@@ -1,3 +1,5 @@
+// https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/d
+
 use nanachi::{
     image::{ImageBuffer, Rgb},
     fill_color,
