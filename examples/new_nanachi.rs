@@ -32,8 +32,7 @@ fn main() {
 fn draw_stars<'a>(mut context: Context<'a, Rgba<u8>>) {
     let spoke = (2.0 * PI / 5.0).cos() / (1.0 * PI / 5.0).cos();
     let mut pb = PathBuilder::new();
-    pb.move_to(0.0, 10.0);
-    for i in 1..10 {
+    for i in 0..10 {
         let p = i as f64 / 10.0 * PI * 2.0;
         let (s, c) = p.sin_cos();
         let r = (1.0 - (i % 2) as f64 * (1.0 - spoke)) * 10.0;
@@ -144,16 +143,12 @@ fn draw_nanachi<'a>(mut context: Context<'a, Rgba<u8>>) {
     ",
     )
     .unwrap();
-    let nanachi = nanachi_path
-        .as_points_list()
-        .unwrap()
-        .into_iter()
-        .map(|v| {
-            v.iter()
-                .map(|p| Point(p.0 * width as f64, p.1 * height as f64))
-                .collect::<Vec<_>>()
-        })
-        .collect::<Vec<_>>();
+    let nanachi = path_transform(
+        &nanachi_path,
+        &Matrix2d::new().scale(width as f64, height as f64),
+    )
+    .as_points_list()
+    .unwrap();
 
     let mut shape = Vec::new();
     let f = |l: Point, c: Point, r: Point| {
@@ -223,16 +218,12 @@ fn draw_nanachi<'a>(mut context: Context<'a, Rgba<u8>>) {
     ",
     )
     .unwrap();
-    let moji = moji_path
-        .as_points_list()
-        .unwrap()
-        .into_iter()
-        .map(|v| {
-            v.iter()
-                .map(|p| Point(p.0 * width as f64, p.1 * height as f64))
-                .collect::<Vec<_>>()
-        })
-        .collect::<Vec<_>>();
+    let moji = path_transform(
+        &moji_path,
+        &Matrix2d::new().scale(width as f64, height as f64),
+    )
+    .as_points_list()
+    .unwrap();
 
     let fill_style = FillStyle {
         color: fill_color::Constant::new(Rgba([255, 235, 230, 255])),
@@ -240,7 +231,6 @@ fn draw_nanachi<'a>(mut context: Context<'a, Rgba<u8>>) {
         fill_rule: fill_rule::NonZero,
         pixel: Default::default(),
     };
-
     context.fill(&Path::from_points(&shape), &fill_style);
     context.fill(&Path::from_points(&moji_shape), &fill_style);
 
@@ -250,13 +240,7 @@ fn draw_nanachi<'a>(mut context: Context<'a, Rgba<u8>>) {
         fill_rule: fill_rule::NonZero,
         pixel: Default::default(),
     };
-    for ps in nanachi.iter() {
-        let path = Path::from_points(&ps);
-        // let path = Path::from_bezier2_points(&k_curve(ps.clone(), false, 3));
-        context.stroke(&path, &fill_style, 4.0);
-    }
-
-    for ps in moji.iter() {
+    for ps in nanachi.iter().chain(moji.iter()) {
         let path = Path::from_points(&ps);
         // let path = Path::from_bezier2_points(&k_curve(ps.clone(), false, 3));
         context.stroke(&path, &fill_style, 4.0);
