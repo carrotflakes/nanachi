@@ -6,23 +6,32 @@ pub enum Token {
     SmallM,
     LargeL,
     SmallL,
+    LargeH,
+    SmallH,
+    LargeV,
+    SmallV,
     LargeZ,
     SmallZ,
     LargeC,
     SmallC,
+    LargeS,
+    SmallS,
     LargeQ,
     SmallQ,
     Num(f64),
+    EOS,
 }
 
 pub struct Tokenize<'a, T: Iterator<Item = char>> {
     chars: Peekable<&'a mut T>,
+    ended: bool,
 }
 
 impl<'a, T: Iterator<Item = char>> Tokenize<'a, T> {
     pub fn new(it: &'a mut T) -> Tokenize<'a, T> {
         Tokenize {
-            chars: it.peekable()
+            chars: it.peekable(),
+            ended: false,
         }
     }
 
@@ -32,7 +41,8 @@ impl<'a, T: Iterator<Item = char>> Tokenize<'a, T> {
             "-"
         } else {
             ""
-        }.to_string();
+        }
+        .to_string();
         loop {
             match self.chars.peek().copied() {
                 Some(c) if c.is_numeric() || c == '.' => {
@@ -64,6 +74,15 @@ impl<'a, T: Iterator<Item = char>> Iterator for Tokenize<'a, T> {
             }
         }
 
+        if let None = self.chars.peek() {
+            if self.ended {
+                return None;
+            } else {
+                self.ended = true;
+                return Some(Ok(Token::EOS));
+            }
+        }
+
         match self.try_parse_num() {
             Some(Ok(n)) => {
                 return Some(Ok(Token::Num(n)));
@@ -91,6 +110,22 @@ impl<'a, T: Iterator<Item = char>> Iterator for Tokenize<'a, T> {
                 self.chars.next();
                 Some(Ok(Token::SmallL))
             }
+            Some('H') => {
+                self.chars.next();
+                Some(Ok(Token::LargeH))
+            }
+            Some('h') => {
+                self.chars.next();
+                Some(Ok(Token::SmallH))
+            }
+            Some('V') => {
+                self.chars.next();
+                Some(Ok(Token::LargeV))
+            }
+            Some('v') => {
+                self.chars.next();
+                Some(Ok(Token::SmallV))
+            }
             Some('Z') => {
                 self.chars.next();
                 Some(Ok(Token::LargeZ))
@@ -107,6 +142,14 @@ impl<'a, T: Iterator<Item = char>> Iterator for Tokenize<'a, T> {
                 self.chars.next();
                 Some(Ok(Token::SmallC))
             }
+            Some('S') => {
+                self.chars.next();
+                Some(Ok(Token::LargeS))
+            }
+            Some('s') => {
+                self.chars.next();
+                Some(Ok(Token::SmallS))
+            }
             Some('Q') => {
                 self.chars.next();
                 Some(Ok(Token::LargeQ))
@@ -115,12 +158,8 @@ impl<'a, T: Iterator<Item = char>> Iterator for Tokenize<'a, T> {
                 self.chars.next();
                 Some(Ok(Token::SmallQ))
             }
-            Some(c) => {
-                Some(Err(format!("Unexpected char: {}", c)))
-            }
-            None => {
-                None
-            }
+            Some(c) => Some(Err(format!("Unexpected char: {}", c))),
+            None => None,
         }
     }
 }
