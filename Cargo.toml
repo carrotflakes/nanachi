@@ -29,5 +29,9 @@ rand_core = "0.5"
 image = { version = "0.23", features = ["png"] }
 
 [[example]]
+name = "new_nanachi"
+required-features = ["path-data-notation"]
+
+[[example]]
 name = "path_data_notation"
 required-features = ["path-data-notation"]
