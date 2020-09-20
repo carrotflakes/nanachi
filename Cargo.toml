@@ -27,3 +27,7 @@ lyon_geom = "0.16"
 rand_pcg = "0.2"
 rand_core = "0.5"
 image = { version = "0.23", features = ["png"] }
+
+[[example]]
+name = "path_data_notation"
+required-features = ["path-data-notation"]

@@ -138,13 +138,12 @@ pub fn parse(str: &str) -> Result<Path, String> {
                 let mut ns = parse_n_nums(&mut tokens, 2)?;
                 let mut current = pb.current_pos().unwrap_or((0.0, 0.0)).into();
                 let mut cp = quad_reflection_point(&last_control_point, current);
-                current = current + Point(ns[0], ns[1]);
-                pb.quad(cp.0, cp.1, current.0, current.1);
+                pb.quad(cp.0, cp.1, current.0 + ns[0], current.1 + ns[1]);
                 while is_num_or_comma(&tokens.peek().unwrap().to_owned()?) {
                     cp = (current + Point(ns[0], ns[1])) * 2.0 - cp;
-                    ns = parse_n_nums(&mut tokens, 2)?;
                     current = current + Point(ns[0], ns[1]);
-                    pb.quad(cp.0, cp.1, current.0, current.1);
+                    ns = parse_n_nums(&mut tokens, 2)?;
+                    pb.quad(cp.0, cp.1, current.0 + ns[0], current.1 + ns[1]);
                 }
                 last_control_point = LastControlPoint::Quad(cp);
             }
