@@ -19,6 +19,7 @@ pub enum Token {
     LargeQ,
     SmallQ,
     Num(f64),
+    Comma,
     EOS,
 }
 
@@ -94,6 +95,10 @@ impl<'a, T: Iterator<Item = char>> Iterator for Tokenize<'a, T> {
         }
 
         match self.chars.peek() {
+            Some(',') => {
+                self.chars.next();
+                Some(Ok(Token::Comma))
+            }
             Some('M') => {
                 self.chars.next();
                 Some(Ok(Token::LargeM))
@@ -166,7 +171,7 @@ impl<'a, T: Iterator<Item = char>> Iterator for Tokenize<'a, T> {
 
 #[test]
 fn test() {
-    let src = "M 10 20 30.0 40.5";
+    let src = "M 10 20 30.0,40.5";
     let mut chars = src.chars();
     let tokens = Tokenize::new(&mut chars);
     dbg!(tokens.collect::<Vec<_>>());

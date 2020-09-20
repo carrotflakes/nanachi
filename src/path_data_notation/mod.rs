@@ -114,6 +114,7 @@ pub fn parse(str: &str) -> Result<Path, String> {
 fn parse_n_nums(tokens: &mut Peekable<Tokenize<Chars>>, n: usize) -> Result<Vec<f64>, String> {
     let mut v = Vec::new();
     for _ in 0..n {
+        skip_comma(tokens)?;
         match tokens.next().unwrap()? {
             Token::Num(n) => {
                 v.push(n);
@@ -130,5 +131,14 @@ fn is_num_token(token: &Token) -> bool {
     match token {
         Token::Num(_) => true,
         _ => false,
+    }
+}
+
+fn skip_comma(tokens: &mut Peekable<Tokenize<Chars>>) -> Result<(), String> {
+    match tokens.peek().unwrap()? {
+        Token::Comma => {
+            tokens.next().unwrap()?;
+        }
+        _ => {}
     }
 }
