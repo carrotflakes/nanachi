@@ -8,6 +8,7 @@ use crate::{
     path_flatten::path_flatten,
     path_outline::{path_outline, Cap, Join},
     path_transform::path_transform,
+    point::Point,
     writer::img_writer,
 };
 use image::{ImageBuffer, Pixel};
@@ -151,6 +152,17 @@ where
         };
         let path = path_outline(&path, width / 2.0, join, cap);
         self.fill_(fill_style, &path, self.antialiasing);
+    }
+
+    pub fn clear<FC: FillColor<P>>(&mut self, fill_color: &FC) {
+        let (w, h) = self.image.dimensions();
+        let inverted_matrix = self.matrix.inverse();
+        for y in 0..h {
+            for x in 0..w {
+                let p = inverted_matrix.apply(Point(x as f64, y as f64));
+                self.image.put_pixel(x, y, fill_color.fill_color(p.0, p.1));
+            }
+        }
     }
 
     #[inline]
