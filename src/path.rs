@@ -1,5 +1,5 @@
+use crate::models::{Arc, Cubic, Ellipse, Line, Quad};
 use crate::point::Point;
-use crate::models::{Line, Arc, Ellipse, Quad, Cubic};
 
 #[derive(Debug, Clone)]
 pub enum PathItem {
@@ -30,12 +30,12 @@ impl PathItem {
                 angle1: ellipse.angle2,
                 angle2: ellipse.angle1,
             }),
-            PathItem::Quad(quad) => PathItem::Quad(Quad{
+            PathItem::Quad(quad) => PathItem::Quad(Quad {
                 start: quad.end.clone(),
                 end: quad.start.clone(),
                 control1: quad.control1.clone(),
             }),
-            PathItem::Cubic(cubic) => PathItem::Cubic(Cubic{
+            PathItem::Cubic(cubic) => PathItem::Cubic(Cubic {
                 start: cubic.end.clone(),
                 end: cubic.start.clone(),
                 control1: cubic.control2.clone(),
@@ -50,11 +50,7 @@ impl PathItem {
         match self {
             PathItem::Line(line) => line.1,
             PathItem::Arc(arc) => {
-                arc.center
-                    + Point(
-                        arc.angle2.cos() * arc.radius,
-                        arc.angle2.sin() * arc.radius,
-                    )
+                arc.center + Point(arc.angle2.cos() * arc.radius, arc.angle2.sin() * arc.radius)
             }
             PathItem::Ellipse(ellipse) => {
                 let (sin, cos) = ellipse.rotation.sin_cos();
@@ -62,18 +58,10 @@ impl PathItem {
                 let y = ellipse.angle2.sin() * ellipse.radius_y;
                 ellipse.center + Point(x * cos - y * sin, x * sin + y * cos)
             }
-            PathItem::Quad(quad) => {
-                quad.end
-            }
-            PathItem::Cubic(cubic) => {
-                cubic.end
-            }
-            PathItem::CloseAndJump => {
-                unreachable!()
-            }
-            PathItem::Jump => {
-                unreachable!()
-            }
+            PathItem::Quad(quad) => quad.end,
+            PathItem::Cubic(cubic) => cubic.end,
+            PathItem::CloseAndJump => unreachable!(),
+            PathItem::Jump => unreachable!(),
         }
     }
 
@@ -81,11 +69,7 @@ impl PathItem {
         match self {
             PathItem::Line(line) => line.0,
             PathItem::Arc(arc) => {
-                arc.center
-                    + Point(
-                        arc.angle1.cos() * arc.radius,
-                        arc.angle1.sin() * arc.radius,
-                    )
+                arc.center + Point(arc.angle1.cos() * arc.radius, arc.angle1.sin() * arc.radius)
             }
             PathItem::Ellipse(ellipse) => {
                 let (sin, cos) = ellipse.rotation.sin_cos();
@@ -93,28 +77,27 @@ impl PathItem {
                 let y = ellipse.angle1.sin() * ellipse.radius_y;
                 ellipse.center + Point(x * cos - y * sin, x * sin + y * cos)
             }
-            PathItem::Quad(quad) => {
-                quad.start
-            }
-            PathItem::Cubic(cubic) => {
-                cubic.start
-            }
-            PathItem::CloseAndJump => {
-                unreachable!()
-            }
-            PathItem::Jump => {
-                unreachable!()
-            }
+            PathItem::Quad(quad) => quad.start,
+            PathItem::Cubic(cubic) => cubic.start,
+            PathItem::CloseAndJump => unreachable!(),
+            PathItem::Jump => unreachable!(),
         }
     }
 
     pub fn is_zero(&self) -> bool {
         match self {
-            PathItem::Line(line) => {line.0 == line.1}
-            PathItem::Arc(arc) => {arc.radius == 0.0 || arc.angle1 == arc.angle2}
-            PathItem::Ellipse(ellipse) => {(ellipse.radius_x == 0.0 && ellipse.radius_y == 0.0) || ellipse.angle1 == ellipse.angle2}
-            PathItem::Quad(quad) => {quad.start == quad.end && quad.start == quad.control1}
-            PathItem::Cubic(cubic) => {cubic.start == cubic.end && cubic.start == cubic.control1 && cubic.start == cubic.control2}
+            PathItem::Line(line) => line.0 == line.1,
+            PathItem::Arc(arc) => arc.radius == 0.0 || arc.angle1 == arc.angle2,
+            PathItem::Ellipse(ellipse) => {
+                (ellipse.radius_x == 0.0 && ellipse.radius_y == 0.0)
+                    || ellipse.angle1 == ellipse.angle2
+            }
+            PathItem::Quad(quad) => quad.start == quad.end && quad.start == quad.control1,
+            PathItem::Cubic(cubic) => {
+                cubic.start == cubic.end
+                    && cubic.start == cubic.control1
+                    && cubic.start == cubic.control2
+            }
             PathItem::CloseAndJump => false,
             PathItem::Jump => false,
         }
@@ -143,10 +126,7 @@ impl Path {
     pub fn from_points(points: &Vec<Point>) -> Path {
         let mut pis = Vec::new();
         for i in 0..points.len() - 1 {
-            pis.push(PathItem::Line(Line(
-                points[i],
-                points[i + 1],
-            )));
+            pis.push(PathItem::Line(Line(points[i], points[i + 1])));
         }
         Path(pis)
     }
@@ -161,6 +141,35 @@ impl Path {
             }));
         }
         Path(pis)
+    }
+
+    pub fn as_points_list(&self) -> Option<Vec<Vec<Point>>> {
+        let mut vec = Vec::new();
+        let mut points = Vec::new();
+        let mut first_line = true;
+        for pi in self.0.iter() {
+            match pi {
+                PathItem::Line(l) => {
+                    if first_line {
+                        points.push(l.0);
+                        first_line = false;
+                    }
+                    points.push(l.1);
+                }
+                PathItem::Arc(_)
+                | PathItem::Ellipse(_)
+                | PathItem::Quad(_)
+                | PathItem::Cubic(_) => {
+                    return None;
+                }
+                PathItem::CloseAndJump | PathItem::Jump => {
+                    vec.push(points);
+                    points = Vec::new();
+                    first_line = true
+                }
+            }
+        }
+        Some(vec)
     }
 
     pub fn continuations<'a>(&'a self) -> Vec<(&'a [PathItem], bool)> {
