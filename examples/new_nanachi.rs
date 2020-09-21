@@ -2,7 +2,7 @@ use nanachi::{
     compositor,
     context::{Context, FillStyle},
     fill_color, fill_rule,
-    image::{ImageBuffer, Rgba},
+    image::{RgbaImage, Rgba},
     k_curve::k_curve,
     matrix::Matrix2d,
     path::Path,
@@ -17,8 +17,12 @@ use std::f64::consts::PI;
 
 fn main() {
     let (width, height) = (512, 512);
-    let mut img = ImageBuffer::from_fn(width, height, |_, _| Rgba([0, 0, 0, 0]));
+    let mut img = RgbaImage::new(width, height);
     let mut context = Context::new(&mut img).high_quality();
+    context.clear(&fill_color::LinearGradient::new((0.0, 0.0), (0.0, height as f64), vec![
+        (0.0, Rgba([255, 255, 255, 255])),
+        (1.0, Rgba([160, 160, 160, 255])),
+    ]));
 
     let t = std::time::Instant::now();
     draw_stars(context.child());
@@ -62,13 +66,13 @@ fn draw_stars<'a>(mut context: Context<'a, Rgba<u8>>) {
             &path,
             &FillStyle {
                 color,
-                compositor: compositor::basic::SrcOver,
+                compositor: compositor::basic::SoftLight,
                 fill_rule: fill_rule::NonZero,
                 pixel: Default::default(),
             },
         );
         let color = fill_color::Constant::new(Rgba(
-            [[128, 64, 0, 255], [0, 128, 64, 255], [64, 0, 128, 255]][i % 3],
+            [[128, 64, 0, 120], [0, 128, 64, 120], [64, 0, 128, 120]][i % 3],
         ));
         context.stroke(
             &path,
