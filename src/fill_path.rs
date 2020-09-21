@@ -173,30 +173,20 @@ pub fn draw_fill<F: FnMut(u32, u32, f64), FR: FillRule>(
     fill_rule: FR,
     writer: &mut F,
 ) {
-    let ecs = path_edges_to_elms(path);
-    let upper = (ecs.iter().fold(std::f64::MAX, |a, ec| a.min(ec.bound.2)).max(0.0).floor() as i32).min(height as i32);
-    let lower = (ecs.iter().fold(0.0f64, |a, ec| a.max(ec.bound.3)).min(height as f64).ceil() as i32).max(0);
-    for y in 0..upper {
-        for x in 0..width as i32 {
-            writer(x as u32, y as u32, fill_rule.apply(0.0));
+    let mut buf = vec![0.0; (width * height) as usize]; // TODO: get out
+    for ec in path_edges_to_elms(path) {
+        for y in (ec.bound.2.floor() as u32).max(0)..(ec.bound.3.ceil() as u32).min(height) {
+            let mut acc = ec.area(y as f64, (y + 1) as f64, 0.0);
+            for x in 0..width {
+                let a = ec.area(y as f64, (y + 1) as f64, (x + 1) as f64);
+                buf[(y * width + x) as usize] += a - acc;
+                acc = a;
+            }
         }
     }
-    for y in upper..lower {
-        let mut acc: f64 = ecs.iter().map(|e|
-            e.area(y as f64, (y + 1) as f64, 0.0)
-        ).sum();
-        for x in 0..width as i32 {
-            let a = ecs.iter().map(|e|
-                e.area(y as f64, (y + 1) as f64, (x + 1) as f64)
-            ).sum();
-            let v = a - acc;
-            acc = a;
-            writer(x as u32, y as u32, fill_rule.apply(v));
-        }
-    }
-    for y in lower..height as i32 {
-        for x in 0..width as i32 {
-            writer(x as u32, y as u32, fill_rule.apply(0.0));
+    for y in 0..height {
+        for x in 0..width {
+            writer(x, y, fill_rule.apply(buf[(y * width + x) as usize]));
         }
     }
 }
