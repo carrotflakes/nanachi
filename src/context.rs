@@ -8,14 +8,15 @@ use crate::{
     path_flatten::path_flatten,
     path_outline::{path_outline, Cap, Join},
     path_transform::path_transform,
+    pixel::Pixel,
     point::Point,
     writer::img_writer,
 };
-use image::{ImageBuffer, Pixel};
+use image::ImageBuffer;
 
 pub struct FillStyle<P, FC, C, FR>
 where
-    P: Pixel<Subpixel = u8> + 'static,
+    P: Pixel,
     FC: FillColor<P>,
     C: Compositor<P> + 'static,
     FR: FillRule,
@@ -28,17 +29,14 @@ where
 
 impl<P, FC, C, FR> FillStyle<P, FC, C, FR>
 where
-    P: Pixel<Subpixel = u8> + 'static,
+    P: Pixel,
     FC: FillColor<P>,
     C: Compositor<P> + 'static,
     FR: FillRule,
 {
 }
 
-pub struct Context<'a, P>
-where
-    P: Pixel<Subpixel = u8> + 'static,
-{
+pub struct Context<'a, P: Pixel> {
     pub image: &'a mut ImageBuffer<P, Vec<u8>>,
     pub flatten_tolerance: f64,
     pub antialiasing: bool,
@@ -49,7 +47,7 @@ where
 
 impl<'a, P> Context<'a, P>
 where
-    P: Pixel<Subpixel = u8> + 'static,
+    P: Pixel,
 {
     pub fn new(image: &'a mut ImageBuffer<P, Vec<u8>>) -> Context<'a, P> {
         Context {

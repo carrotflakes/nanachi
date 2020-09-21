@@ -1,16 +1,17 @@
 use crate::compositor::Compositor;
-use image::{ImageBuffer, Pixel};
+use crate::pixel::Pixel;
+use image::ImageBuffer;
 
-pub fn draw_image_pixel_perfect<X, C>(
-    dst: &mut ImageBuffer<X, Vec<u8>>,
-    src: &ImageBuffer<X, Vec<u8>>,
+pub fn draw_image_pixel_perfect<P, C>(
+    dst: &mut ImageBuffer<P, Vec<u8>>,
+    src: &ImageBuffer<P, Vec<u8>>,
     dst_pos: (u32, u32),
     src_pos: (u32, u32),
     size: (u32, u32),
     compositor: &C,
 ) where
-    X: Pixel<Subpixel = u8> + 'static,
-    C: Compositor<X> + 'static,
+    P: Pixel,
+    C: Compositor<P>,
 {
     for dy in 0..size.1 {
         for dx in 0..size.0 {

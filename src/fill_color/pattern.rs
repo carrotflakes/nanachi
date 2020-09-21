@@ -1,15 +1,16 @@
 use crate::fill_color::FillColor;
-use image::{ImageBuffer, Pixel};
+use crate::pixel::Pixel;
+use image::ImageBuffer;
 
 #[derive(Debug, Clone)]
-pub struct Pattern<'a, C: Pixel<Subpixel = u8> + 'static> {
+pub struct Pattern<'a, P: Pixel> {
     width: f64,
     height: f64,
-    image: &'a ImageBuffer<C, Vec<u8>>,
+    image: &'a ImageBuffer<P, Vec<u8>>,
 }
 
-impl<'a, C: Pixel<Subpixel = u8> + 'static> Pattern<'a, C> {
-    pub fn new(image: &'a ImageBuffer<C, Vec<u8>>) -> Self {
+impl<'a, P: Pixel> Pattern<'a, P> {
+    pub fn new(image: &'a ImageBuffer<P, Vec<u8>>) -> Self {
         Pattern {
             width: image.width() as f64,
             height: image.height() as f64,
@@ -18,8 +19,8 @@ impl<'a, C: Pixel<Subpixel = u8> + 'static> Pattern<'a, C> {
     }
 }
 
-impl<'a, C: Pixel<Subpixel = u8> + 'static> FillColor<C> for Pattern<'a, C> {
-    fn fill_color(&self, x: f64, y: f64) -> C {
+impl<'a, P: Pixel> FillColor<P> for Pattern<'a, P> {
+    fn fill_color(&self, x: f64, y: f64) -> P {
         *self.image.get_pixel(
             x.rem_euclid(self.width) as u32,
             y.rem_euclid(self.height) as u32,

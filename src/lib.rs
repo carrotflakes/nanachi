@@ -21,5 +21,6 @@ pub mod path_data_notation;
 pub mod path_flatten;
 pub mod path_outline;
 pub mod path_transform;
+pub mod pixel;
 pub mod point;
 pub mod writer;

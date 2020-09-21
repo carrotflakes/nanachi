@@ -1,15 +1,16 @@
 use crate::compositor::Compositor;
 use crate::fill_color::FillColor;
-use image::{ImageBuffer, Pixel};
+use crate::pixel::Pixel;
+use image::ImageBuffer;
 
-pub fn img_writer<'a, X, F: FillColor<X>, C>(
-    buf: &'a mut ImageBuffer<X, Vec<u8>>,
+pub fn img_writer<'a, P, F: FillColor<P>, C>(
+    buf: &'a mut ImageBuffer<P, Vec<u8>>,
     fill_color: &'a F,
     compositor: &'a C,
 ) -> impl FnMut(u32, u32, f64) + 'a
 where
-    X: Pixel<Subpixel = u8> + 'static,
-    C: Compositor<X> + 'static,
+    P: Pixel,
+    C: Compositor<P> + 'static,
 {
     move |x: u32, y: u32, v: f64| {
         let pixel = fill_color.fill_color(x as f64, y as f64);
