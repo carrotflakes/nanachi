@@ -11,8 +11,8 @@ use crate::{
     pixel::Pixel,
     point::Point,
     writer::img_writer,
+    buffer::Buffer,
 };
-use image::ImageBuffer;
 
 pub struct FillStyle<P, FC, C, FR>
 where
@@ -36,20 +36,22 @@ where
 {
 }
 
-pub struct Context<'a, P: Pixel> {
-    pub image: &'a mut ImageBuffer<P, Vec<u8>>,
+pub struct Context<'a, P: Pixel, B: Buffer<P>> {
+    pub image: &'a mut B,
     pub flatten_tolerance: f64,
     pub antialiasing: bool,
     pub join: Join,
     pub cap: Cap,
     pub matrix: Matrix2d,
+    pub pixel: std::marker::PhantomData<P>,
 }
 
-impl<'a, P> Context<'a, P>
+impl<'a, P, B> Context<'a, P, B>
 where
     P: Pixel,
+    B: Buffer<P>,
 {
-    pub fn new(image: &'a mut ImageBuffer<P, Vec<u8>>) -> Context<'a, P> {
+    pub fn new(image: &'a mut B) -> Context<'a, P, B> {
         Context {
             image,
             flatten_tolerance: 1.0,
@@ -57,32 +59,31 @@ where
             join: Join::Bevel,
             cap: Cap::Butt,
             matrix: Matrix2d::default(),
+            pixel: Default::default(),
         }
     }
 
-    pub fn low_quality(self) -> Context<'a, P> {
+    pub fn low_quality(self) -> Context<'a, P, B> {
         Context {
-            image: self.image,
             flatten_tolerance: 2.0,
             antialiasing: false,
             join: Join::Bevel,
             cap: Cap::Butt,
-            matrix: self.matrix,
+            ..self
         }
     }
 
-    pub fn high_quality(self) -> Context<'a, P> {
+    pub fn high_quality(self) -> Context<'a, P, B> {
         Context {
-            image: self.image,
             flatten_tolerance: 0.1,
             antialiasing: true,
             join: Join::Round,
             cap: Cap::Round,
-            matrix: self.matrix,
+            ..self
         }
     }
 
-    pub fn child<'b>(&'b mut self) -> Context<'b, P> {
+    pub fn child<'b>(&'b mut self) -> Context<'b, P, B> {
         Context {
             image: self.image,
             flatten_tolerance: self.flatten_tolerance,
@@ -90,17 +91,14 @@ where
             join: self.join.clone(),
             cap: self.cap.clone(),
             matrix: self.matrix,
+            pixel: self.pixel,
         }
     }
 
-    pub fn transformed_context<'b>(&'b mut self, matrix: &Matrix2d) -> Context<'b, P> {
+    pub fn transformed_context<'b>(&'b mut self, matrix: &Matrix2d) -> Context<'b, P, B> {
         Context {
-            image: self.image,
-            flatten_tolerance: self.flatten_tolerance,
-            antialiasing: self.antialiasing,
-            join: self.join.clone(),
-            cap: self.cap.clone(),
             matrix: self.matrix.then(&matrix),
+            ..self.child()
         }
     }
 
@@ -170,8 +168,7 @@ where
         path: &Path,
         antialiasing: bool,
     ) {
-        let width = self.image.width();
-        let height = self.image.height();
+        let (width, height) = self.image.dimensions();
         let color = Transform::new(&fill_style.color, self.matrix);
         let mut writer = img_writer(self.image, &color, &fill_style.compositor);
         if antialiasing {

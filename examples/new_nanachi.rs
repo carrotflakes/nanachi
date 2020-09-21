@@ -33,7 +33,7 @@ fn main() {
     println!("{:?}", res);
 }
 
-fn draw_stars<'a>(mut context: Context<'a, Rgba<u8>>) {
+fn draw_stars<'a>(mut context: Context<'a, Rgba<u8>, RgbaImage>) {
     let spoke = (2.0 * PI / 5.0).cos() / (1.0 * PI / 5.0).cos();
     let mut pb = PathBuilder::new();
     for i in 0..10 {
@@ -87,7 +87,7 @@ fn draw_stars<'a>(mut context: Context<'a, Rgba<u8>>) {
     }
 }
 
-fn draw_nanachi<'a>(mut context: Context<'a, Rgba<u8>>) {
+fn draw_nanachi<'a>(mut context: Context<'a, Rgba<u8>, RgbaImage>) {
     let (width, height) = context.image.dimensions();
     let nanachi_path = path_data_notation::parse(
         "

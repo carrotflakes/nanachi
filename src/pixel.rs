@@ -1,4 +1,3 @@
-pub trait Pixel: image::Pixel<Subpixel = u8> + 'static {}
-
-impl Pixel for image::Rgb<u8> {}
-impl Pixel for image::Rgba<u8> {}
+pub trait Pixel: Clone + 'static {
+    fn lerp(&self, rhs: &Self, rate: f64) -> Self;
+}

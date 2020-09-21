@@ -1,6 +1,7 @@
 pub extern crate image;
 
 pub(crate) mod bezier_area;
+pub mod buffer;
 pub mod compositor;
 pub mod context;
 pub mod draw_image;
@@ -8,6 +9,7 @@ pub mod fill_color;
 pub mod fill_path;
 pub mod fill_rule;
 pub(crate) mod geometry;
+pub mod image_crate_adapter;
 pub mod k_curve;
 pub mod legacy_draw;
 pub mod legacy_path;

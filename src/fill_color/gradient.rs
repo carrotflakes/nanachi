@@ -5,16 +5,16 @@ type GradientPoint<P> = (f64, P);
 
 fn gradient<P: Pixel>(points: &Vec<GradientPoint<P>>, p: f64) -> P {
     if p <= points[0].0 {
-        return points[0].1;
+        return points[0].1.clone();
     }
     for i in 0..points.len() - 1 {
         let right = &points[i + 1];
         if p <= right.0 {
             let left = &points[i];
-            return blend_pixel(left.1, right.1, (p - left.0) / (right.0 - left.0));
+            return left.1.lerp(&right.1, (p - left.0) / (right.0 - left.0));
         }
     }
-    points.last().unwrap().1
+    points.last().unwrap().1.clone()
 }
 
 #[derive(Debug, Clone)]
@@ -74,10 +74,4 @@ impl<P: Pixel> FillColor<P> for RadialGradient<P> {
         let p = (x - self.start.0).hypot(y - self.start.1) / self.radius;
         gradient(&self.points, p)
     }
-}
-
-pub fn blend_pixel<P: Pixel>(p1: P, p2: P, r: f64) -> P {
-    p1.map2(&p2, |a, b| {
-        (a as f64 * (1.0 - r) + b as f64 * r).round() as u8
-    })
 }
