@@ -1,3 +1,4 @@
+#[cfg(feature = "image-crate")]
 pub extern crate image;
 
 pub(crate) mod bezier_area;
@@ -9,8 +10,10 @@ pub mod fill_color;
 pub mod fill_path;
 pub mod fill_rule;
 pub(crate) mod geometry;
+#[cfg(feature = "image-crate")]
 pub mod image_crate_adapter;
 pub mod k_curve;
+#[cfg(feature = "image-crate")]
 pub mod legacy_draw;
 pub mod legacy_path;
 pub mod legacy_primitives;
