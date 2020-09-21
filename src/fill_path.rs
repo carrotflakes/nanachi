@@ -175,7 +175,7 @@ pub fn draw_fill<F: FnMut(u32, u32, f64), FR: FillRule>(
 ) {
     let mut buf = vec![0.0; (width * height) as usize]; // TODO: get out
     for ec in path_edges_to_elms(path) {
-        for y in (ec.bound.2.floor() as u32).max(0)..(ec.bound.3.ceil() as u32).min(height) {
+        for y in (ec.bound.2.floor() as u32).max(0)..(ec.bound.3.ceil() as u32).max(0).min(height) {
             let mut acc = ec.area(y as f64, (y + 1) as f64, 0.0);
             for x in 0..width {
                 let a = ec.area(y as f64, (y + 1) as f64, (x + 1) as f64);
