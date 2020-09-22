@@ -1,5 +1,4 @@
 use nanachi::{
-    buffer::Buffer,
     compositor,
     context::{Context, FillStyle},
     fill_color, fill_rule,
@@ -11,7 +10,6 @@ use nanachi::{
     path_builder::PathBuilder,
     path_data_notation,
     path_transform::path_transform,
-    point::Point,
 };
 use rand_core::RngCore;
 use rand_pcg::Pcg32;
@@ -25,8 +23,8 @@ fn main() {
         (0.0, 0.0),
         (0.0, height as f64),
         vec![
-            (0.0, rgba(Rgba([255, 255, 255, 255]))),
-            (1.0, rgba(Rgba([160, 160, 160, 255]))),
+            (0.0, rgba(255, 255, 255, 255)),
+            (1.0, rgba(160, 160, 160, 255)),
         ],
     ));
 
@@ -66,9 +64,13 @@ fn draw_stars<'a>(mut context: Context<'a, Rgba<f32>, ImageBuffer<Rgba<f32>, Vec
             &Matrix2d::new().rotate(r).scale(s, s).translate(t.0, t.1),
         );
 
-        let color = fill_color::Constant::new(rgba(Rgba(
-            [[255, 128, 0, 230], [0, 255, 128, 230], [128, 0, 255, 230]][i % 3],
-        )));
+        let color = fill_color::Constant::new(
+            [
+                rgba(255, 128, 0, 230),
+                rgba(0, 255, 128, 230),
+                rgba(128, 0, 255, 230),
+            ][i % 3],
+        );
         context.fill(
             &path,
             &FillStyle {
@@ -78,9 +80,13 @@ fn draw_stars<'a>(mut context: Context<'a, Rgba<f32>, ImageBuffer<Rgba<f32>, Vec
                 pixel: Default::default(),
             },
         );
-        let color = fill_color::Constant::new(rgba(Rgba(
-            [[128, 64, 0, 120], [0, 128, 64, 120], [64, 0, 128, 120]][i % 3],
-        )));
+        let color = fill_color::Constant::new(
+            [
+                rgba(128, 64, 0, 120),
+                rgba(0, 128, 64, 120),
+                rgba(64, 0, 128, 120),
+            ][i % 3],
+        );
         context.stroke(
             &path,
             &FillStyle {
@@ -132,10 +138,10 @@ fn draw_nanachi<'a>(mut context: Context<'a, Rgba<f32>, ImageBuffer<Rgba<f32>, V
         0.33, 0.61
         0.37, 0.61
         0.38, 0.55
-        0.37, 0.50
+        0.37, 0.505
         M 0.60, 0.50
         0.70, 0.51
-        M 0.63, 0.50
+        M 0.63, 0.505
         0.62, 0.55
         0.63, 0.61
         0.67, 0.61
@@ -154,53 +160,10 @@ fn draw_nanachi<'a>(mut context: Context<'a, Rgba<f32>, ImageBuffer<Rgba<f32>, V
     ",
     )
     .unwrap();
-    let nanachi = path_transform(
+    let nanachi_path = path_transform(
         &nanachi_path,
         &Matrix2d::new().scale(width as f64, height as f64),
-    )
-    .as_points_list()
-    .unwrap();
-
-    let mut shape = Vec::new();
-    let f = |l: Point, c: Point, r: Point| {
-        let ll = (l.0 - c.0).atan2(l.1 - c.1);
-        let rr = (c.0 - r.0).atan2(c.1 - r.1);
-        Point(
-            c.0 - (ll.cos() + rr.cos()) * 8.0,
-            c.1 + (ll.sin() + rr.sin()) * 8.0,
-        )
-    };
-    shape.push(f(
-        nanachi[0][nanachi[0].len() - 1],
-        nanachi[0][0],
-        nanachi[0][1],
-    ));
-    for i in 0..nanachi[0].len() - 2 {
-        shape.push(f(nanachi[0][i], nanachi[0][i + 1], nanachi[0][i + 2]));
-    }
-    shape.push(f(
-        nanachi[0][nanachi[0].len() - 2],
-        nanachi[0][nanachi[0].len() - 1],
-        nanachi[0][0],
-    ));
-    shape.push(shape[0]);
-
-    let moji_shape = vec![
-        (0.30, 0.73),
-        (0.20, 0.75),
-        (0.15, 0.78),
-        (0.15, 0.86),
-        (0.30, 0.88),
-        (0.50, 0.89),
-        (0.67, 0.87),
-        (0.80, 0.90),
-        (0.85, 0.83),
-        (0.86, 0.74),
-        (0.30, 0.73),
-    ]
-    .iter()
-    .map(|p| Point(p.0 * width as f64, p.1 * height as f64))
-    .collect::<Vec<_>>();
+    );
 
     let moji_path = path_data_notation::parse(
         "
@@ -229,40 +192,91 @@ fn draw_nanachi<'a>(mut context: Context<'a, Rgba<f32>, ImageBuffer<Rgba<f32>, V
     ",
     )
     .unwrap();
-    let moji = path_transform(
+    let moji_path = path_transform(
         &moji_path,
         &Matrix2d::new().scale(width as f64, height as f64),
+    );
+
+    let shape = path_data_notation::parse(
+        "
+        M 208.47,399.93
+        149.30,394.00
+        91.01,362.17
+        76.59,307.00
+        87.69,260.33
+        112.05,219.44
+        157.23,199.38
+        137.96,127.77
+        154.76,54.84
+        184.87,32.19
+        219.72,73.44
+        215.63,144.64
+        200.96,197.62
+        243.31,178.76
+        282.96,181.49
+        276.25,125.47
+        304.19,43.01
+        344.24,15.83
+        373.10,48.65
+        358.35,132.44
+        327.44,189.84
+        387.81,202.65
+        423.84,249.63
+        435.11,308.60
+        410.14,368.63
+        336.15,404.38
+        265.52,405.09
+        Z
+        M 153.60,373.76
+        440.32,378.88
+        435.20,424.96
+        409.60,460.80
+        343.04,445.44
+        256.00,455.68
+        153.60,450.56
+        76.80,440.32
+        76.80,399.36
+        102.40,384.00
+        Z
+    ",
     )
-    .as_points_list()
     .unwrap();
-
     let fill_style = FillStyle {
-        color: fill_color::Constant::new(rgba(Rgba([255, 235, 230, 255]))),
+        color: fill_color::Constant::new(rgba(255, 235, 230, 255)),
         compositor: compositor::SrcOver,
         fill_rule: fill_rule::NonZero,
         pixel: Default::default(),
     };
-    context.fill(&Path::from_points(&shape), &fill_style);
-    context.fill(&Path::from_points(&moji_shape), &fill_style);
+    context.fill(&shape, &fill_style);
 
     let fill_style = FillStyle {
-        color: fill_color::Constant::new(rgba(Rgba([64, 8, 8, 255]))),
+        color: fill_color::Constant::new(rgba(64, 8, 8, 255)),
         compositor: compositor::SrcOver,
         fill_rule: fill_rule::NonZero,
         pixel: Default::default(),
     };
-    for ps in nanachi.iter().chain(moji.iter()) {
-        let path = Path::from_points(&ps);
-        // let path = Path::from_bezier2_points(&k_curve(ps.clone(), false, 3));
-        context.stroke(&path, &fill_style, 4.0);
-    }
+    let mut path = nanachi_path;
+    path.merge(&moji_path);
+    // let path = path
+    //     .as_points_list()
+    //     .unwrap()
+    //     .into_iter()
+    //     .map(|points| {
+    //         let close = points[0] == *points.last().unwrap();
+    //         Path::from_bezier2_points(&k_curve(points, close, 3))
+    //     })
+    //     .fold(Path::new(vec![]), |mut a, p| {
+    //         a.merge(&p);
+    //         a
+    //     });
+    context.stroke(&path, &fill_style, 4.0);
 }
 
-fn rgba(p: Rgba<u8>) -> Rgba<f32> {
+fn rgba(r: u8, g: u8, b: u8, a: u8) -> Rgba<f32> {
     Rgba([
-        p.0[0] as f32 / 255.0,
-        p.0[1] as f32 / 255.0,
-        p.0[2] as f32 / 255.0,
-        p.0[3] as f32 / 255.0,
+        r as f32 / 255.0,
+        g as f32 / 255.0,
+        b as f32 / 255.0,
+        a as f32 / 255.0,
     ])
 }
