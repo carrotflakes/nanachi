@@ -2,6 +2,7 @@
 pub mod basic;
 #[cfg(feature = "image-crate")]
 pub mod basic_enum;
+pub mod basic_f32;
 
 pub trait Compositor<T> {
     fn composite(&self, dst: &T, src: &T, alpha: f64) -> T;

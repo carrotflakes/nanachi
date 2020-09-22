@@ -17,9 +17,17 @@ impl Pixel for image::Rgba<u8> {
         })
     }
 }
+impl Pixel for image::Rgba<f32> {
+    fn lerp(&self, rhs: &Self, rate: f64) -> Self {
+        use image::Pixel;
+        self.clone().map2(&rhs, |a, b| {
+            a * (1.0 - rate as f32) + b * rate as f32
+        })
+    }
+}
 
-impl<P: Pixel + image::Pixel<Subpixel = u8> + 'static> Buffer<P>
-    for image::ImageBuffer<P, Vec<u8>>
+impl<S: image::Primitive + 'static, P: Pixel + image::Pixel<Subpixel = S> + 'static> Buffer<P>
+    for image::ImageBuffer<P, Vec<S>>
 {
     fn dimensions(&self) -> (u32, u32) {
         self.dimensions()

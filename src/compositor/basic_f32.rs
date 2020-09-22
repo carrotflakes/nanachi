@@ -1,5 +1,5 @@
 use super::Compositor;
-use crate::pixel::RgbaF32;
+use crate::image::Rgba;
 
 macro_rules! def_linear_compositor {
     (
@@ -8,13 +8,13 @@ macro_rules! def_linear_compositor {
     ) => {
         pub struct $name;
 
-        impl Compositor<RgbaF32> for $name {
+        impl Compositor<Rgba<f32>> for $name {
             #[allow(unused_variables)]
-            fn composite(&self, a: &RgbaF32, b: &RgbaF32, alpha: f64) -> RgbaF32 {
+            fn composite(&self, a: &Rgba<f32>, b: &Rgba<f32>, alpha: f64) -> Rgba<f32> {
                 let $aa = a.0[3];
                 let $ba = b.0[3] * alpha as f32;
                 $($rest1)+
-                RgbaF32([
+                Rgba([
                     a.0[0] * $ax + b.0[0] * $bx,
                     a.0[1] * $ax + b.0[1] * $bx,
                     a.0[2] * $ax + b.0[2] * $bx,
@@ -175,13 +175,13 @@ macro_rules! def_compositor {
     ) => {
         pub struct $name;
 
-        impl Compositor<RgbaF32> for $name {
+        impl Compositor<Rgba<f32>> for $name {
             #[allow(unused_variables)]
-            fn composite(&self, $a: &RgbaF32, $b: &RgbaF32, alpha: f64) -> RgbaF32 {
+            fn composite(&self, $a: &Rgba<f32>, $b: &Rgba<f32>, alpha: f64) -> Rgba<f32> {
                 let $aa = $a.0[3];
                 let $ba = $b.0[3] * alpha as f32;
                 $($rest1)+
-                RgbaF32([
+                Rgba([
                     $($rest2,)+
                     $ca,
                 ])
