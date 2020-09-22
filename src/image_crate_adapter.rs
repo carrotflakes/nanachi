@@ -46,7 +46,7 @@ impl<S: image::Primitive + 'static, P: Pixel + image::Pixel<Subpixel = S> + 'sta
     }
 }
 
-pub fn buffer_rgba_f32_to_image_buffer(buffer: &crate::buffer::GenericBuffer<crate::pixel::RgbaF32>) -> image::RgbaImage {
+pub fn buffer_rgba_f32_to_rgba_image(buffer: &impl Buffer<image::Rgba<f32>>) -> image::RgbaImage {
     image::RgbaImage::from_fn(buffer.dimensions().0, buffer.dimensions().1, |x, y| {
         let p = buffer.get_pixel(x, y);
         image::Rgba([
