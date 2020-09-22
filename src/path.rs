@@ -124,6 +124,9 @@ impl Path {
     }
 
     pub fn merge(&mut self, rhs: &Path) {
+        if !self.0.is_empty() && !self.0.last().unwrap().is_jump() {
+            self.0.push(PathItem::Jump);
+        }
         self.0.extend_from_slice(rhs.0.as_slice());
     }
 
