@@ -1,6 +1,5 @@
-use super::Compositor;
-use crate::image::Rgba;
-use super::basic::*;
+use super::*;
+use image::Rgba;
 
 macro_rules! def_linear_compositor {
     (
@@ -298,7 +297,6 @@ def_compositor! {
         a2 * ax + b2 * bx + if 0.0 < b2 {1.0 - ((1.0 - a2) / b2).min(1.0) * 1.0} else {0.0} * cx,
     ]
 }
-
 
 def_compositor! {
     SoftLight(a, b, aa, ba, ca) {

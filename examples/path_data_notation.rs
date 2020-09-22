@@ -6,7 +6,7 @@ use nanachi::{
     matrix::Matrix2d,
     context::{Context, FillStyle},
     fill_rule,
-    compositor::basic,
+    compositor,
     path_data_notation,
 };
 use std::f64::consts::PI;
@@ -31,7 +31,7 @@ fn main() {
         ).stroke(&path, &FillStyle {
             color: fill_color::Constant::new(Rgb([0, 0, 0])),
             fill_rule: fill_rule::NonZero,
-            compositor: basic::SrcOver,
+            compositor: compositor::SrcOver,
             pixel: Default::default(),
         }, 3.0);
     }
@@ -54,7 +54,7 @@ fn main() {
         ).stroke(&path, &FillStyle {
             color: fill_color::Constant::new(Rgb([0, 0, 0])),
             fill_rule: fill_rule::NonZero,
-            compositor: basic::SrcOver,
+            compositor: compositor::SrcOver,
             pixel: Default::default(),
         }, 3.0);
     }
@@ -70,7 +70,7 @@ fn main() {
         ).stroke(&path, &FillStyle {
             color: fill_color::Constant::new(Rgb([0, 0, 0])),
             fill_rule: fill_rule::NonZero,
-            compositor: basic::SrcOver,
+            compositor: compositor::SrcOver,
             pixel: Default::default(),
         }, 3.0);
     }
@@ -86,7 +86,7 @@ fn main() {
         ).stroke(&path, &FillStyle {
             color: fill_color::Constant::new(Rgb([0, 0, 0])),
             fill_rule: fill_rule::NonZero,
-            compositor: basic::SrcOver,
+            compositor: compositor::SrcOver,
             pixel: Default::default(),
         }, 3.0);
     }
@@ -101,7 +101,7 @@ fn main() {
         ).stroke(&path, &FillStyle {
             color: fill_color::Constant::new(Rgb([0, 0, 0])),
             fill_rule: fill_rule::NonZero,
-            compositor: basic::SrcOver,
+            compositor: compositor::SrcOver,
             pixel: Default::default(),
         }, 3.0);
     }
@@ -116,7 +116,7 @@ fn main() {
         ).stroke(&path, &FillStyle {
             color: fill_color::Constant::new(Rgb([0, 0, 0])),
             fill_rule: fill_rule::NonZero,
-            compositor: basic::SrcOver,
+            compositor: compositor::SrcOver,
             pixel: Default::default(),
         }, 3.0);
     }
@@ -131,7 +131,7 @@ fn main() {
         ).stroke(&path, &FillStyle {
             color: fill_color::Constant::new(Rgb([0, 0, 0])),
             fill_rule: fill_rule::NonZero,
-            compositor: basic::SrcOver,
+            compositor: compositor::SrcOver,
             pixel: Default::default(),
         }, 3.0);
     }
@@ -147,7 +147,7 @@ fn main() {
         context.stroke(&path, &FillStyle {
             color: fill_color::Constant::new(Rgb([200, 0, 0])),
             fill_rule: fill_rule::NonZero,
-            compositor: basic::SrcOver,
+            compositor: compositor::SrcOver,
             pixel: Default::default(),
         }, 3.0);
 
@@ -157,7 +157,7 @@ fn main() {
         context.stroke(&path, &FillStyle {
             color: fill_color::Constant::new(Rgb([100, 200, 0])),
             fill_rule: fill_rule::NonZero,
-            compositor: basic::SrcOver,
+            compositor: compositor::SrcOver,
             pixel: Default::default(),
         }, 3.0);
 
@@ -167,7 +167,7 @@ fn main() {
         context.stroke(&path, &FillStyle {
             color: fill_color::Constant::new(Rgb([200, 0, 200])),
             fill_rule: fill_rule::NonZero,
-            compositor: basic::SrcOver,
+            compositor: compositor::SrcOver,
             pixel: Default::default(),
         }, 3.0);
 
@@ -177,7 +177,7 @@ fn main() {
         context.stroke(&path, &FillStyle {
             color: fill_color::Constant::new(Rgb([255, 200, 255])),
             fill_rule: fill_rule::NonZero,
-            compositor: basic::SrcOver,
+            compositor: compositor::SrcOver,
             pixel: Default::default(),
         }, 3.0);
     }

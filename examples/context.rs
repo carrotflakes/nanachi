@@ -5,7 +5,7 @@ use nanachi::{
     matrix::Matrix2d,
     context::{Context, FillStyle},
     fill_rule,
-    compositor::basic,
+    compositor,
 };
 use std::f64::consts::PI;
 
@@ -47,7 +47,7 @@ fn main() {
         context.fill(&path, &FillStyle {
             color,
             fill_rule: fill_rule::NonZero,
-            compositor: basic::SrcOver,
+            compositor: compositor::SrcOver,
             pixel: Default::default(),
         });
     }
@@ -60,7 +60,7 @@ fn main() {
         context.stroke(&path, &FillStyle {
             color,
             fill_rule: fill_rule::NonZero,
-            compositor: basic::SrcOver,
+            compositor: compositor::SrcOver,
             pixel: Default::default(),
         }, 8.0);
     }

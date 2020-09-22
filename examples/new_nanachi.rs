@@ -66,7 +66,7 @@ fn draw_stars<'a>(mut context: Context<'a, Rgba<u8>, RgbaImage>) {
             &path,
             &FillStyle {
                 color,
-                compositor: compositor::basic::SoftLight,
+                compositor: compositor::SoftLight,
                 fill_rule: fill_rule::NonZero,
                 pixel: Default::default(),
             },
@@ -78,7 +78,7 @@ fn draw_stars<'a>(mut context: Context<'a, Rgba<u8>, RgbaImage>) {
             &path,
             &FillStyle {
                 color,
-                compositor: compositor::basic::SrcOver,
+                compositor: compositor::SrcOver,
                 fill_rule: fill_rule::NonZero,
                 pixel: Default::default(),
             },
@@ -231,7 +231,7 @@ fn draw_nanachi<'a>(mut context: Context<'a, Rgba<u8>, RgbaImage>) {
 
     let fill_style = FillStyle {
         color: fill_color::Constant::new(Rgba([255, 235, 230, 255])),
-        compositor: compositor::basic::SrcOver,
+        compositor: compositor::SrcOver,
         fill_rule: fill_rule::NonZero,
         pixel: Default::default(),
     };
@@ -240,7 +240,7 @@ fn draw_nanachi<'a>(mut context: Context<'a, Rgba<u8>, RgbaImage>) {
 
     let fill_style = FillStyle {
         color: fill_color::Constant::new(Rgba([64, 8, 8, 255])),
-        compositor: compositor::basic::SrcOver,
+        compositor: compositor::SrcOver,
         fill_rule: fill_rule::NonZero,
         pixel: Default::default(),
     };

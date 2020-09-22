@@ -5,6 +5,7 @@ use nanachi::{
     fill_color,
     path_transform::path_transform,
     matrix::Matrix2d,
+    compositor,
 };
 
 fn main() {
@@ -13,36 +14,36 @@ fn main() {
 
     #[allow(arithmetic_overflow)]
     let mut i = 0 - 1;
-    f(&mut img, {i += 1; i}, nanachi::compositor::basic::Clear);
-    f(&mut img, {i += 1; i}, nanachi::compositor::basic::Src);
-    f(&mut img, {i += 1; i}, nanachi::compositor::basic::Dst);
-    f(&mut img, {i += 1; i}, nanachi::compositor::basic::SrcOver);
-    f(&mut img, {i += 1; i}, nanachi::compositor::basic::SrcIn);
-    f(&mut img, {i += 1; i}, nanachi::compositor::basic::SrcOut);
-    f(&mut img, {i += 1; i}, nanachi::compositor::basic::SrcAtop);
-    f(&mut img, {i += 1; i}, nanachi::compositor::basic::DstOver);
-    f(&mut img, {i += 1; i}, nanachi::compositor::basic::DstIn);
-    f(&mut img, {i += 1; i}, nanachi::compositor::basic::DstOut);
-    f(&mut img, {i += 1; i}, nanachi::compositor::basic::DstAtop);
-    f(&mut img, {i += 1; i}, nanachi::compositor::basic::Xor);
-    f(&mut img, {i += 1; i}, nanachi::compositor::basic::Add);
-    f(&mut img, {i += 1; i}, nanachi::compositor::basic::Darken);
-    f(&mut img, {i += 1; i}, nanachi::compositor::basic::Lighten);
-    f(&mut img, {i += 1; i}, nanachi::compositor::basic::Multiply);
-    f(&mut img, {i += 1; i}, nanachi::compositor::basic::Screen);
-    f(&mut img, {i += 1; i}, nanachi::compositor::basic::Overlay);
-    f(&mut img, {i += 1; i}, nanachi::compositor::basic::HardLight);
-    f(&mut img, {i += 1; i}, nanachi::compositor::basic::Dodge);
-    f(&mut img, {i += 1; i}, nanachi::compositor::basic::Burn);
-    f(&mut img, {i += 1; i}, nanachi::compositor::basic::SoftLight);
-    f(&mut img, {i += 1; i}, nanachi::compositor::basic::Difference);
-    f(&mut img, {i += 1; i}, nanachi::compositor::basic::Exclusion);
+    f(&mut img, {i += 1; i}, compositor::Clear);
+    f(&mut img, {i += 1; i}, compositor::Src);
+    f(&mut img, {i += 1; i}, compositor::Dst);
+    f(&mut img, {i += 1; i}, compositor::SrcOver);
+    f(&mut img, {i += 1; i}, compositor::SrcIn);
+    f(&mut img, {i += 1; i}, compositor::SrcOut);
+    f(&mut img, {i += 1; i}, compositor::SrcAtop);
+    f(&mut img, {i += 1; i}, compositor::DstOver);
+    f(&mut img, {i += 1; i}, compositor::DstIn);
+    f(&mut img, {i += 1; i}, compositor::DstOut);
+    f(&mut img, {i += 1; i}, compositor::DstAtop);
+    f(&mut img, {i += 1; i}, compositor::Xor);
+    f(&mut img, {i += 1; i}, compositor::Add);
+    f(&mut img, {i += 1; i}, compositor::Darken);
+    f(&mut img, {i += 1; i}, compositor::Lighten);
+    f(&mut img, {i += 1; i}, compositor::Multiply);
+    f(&mut img, {i += 1; i}, compositor::Screen);
+    f(&mut img, {i += 1; i}, compositor::Overlay);
+    f(&mut img, {i += 1; i}, compositor::HardLight);
+    f(&mut img, {i += 1; i}, compositor::Dodge);
+    f(&mut img, {i += 1; i}, compositor::Burn);
+    f(&mut img, {i += 1; i}, compositor::SoftLight);
+    f(&mut img, {i += 1; i}, compositor::Difference);
+    f(&mut img, {i += 1; i}, compositor::Exclusion);
 
     let res = img.save("./composite_test.png");
     println!("save: {:?}", res);
 }
 
-fn f<C: nanachi::compositor::Compositor<Rgba<u8>> + 'static>(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>, i: usize, c: C) {
+fn f<C: compositor::Compositor<Rgba<u8>> + 'static>(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>, i: usize, c: C) {
     let mut pb = PathBuilder::new();
     pb.move_to(-10.0, -20.0);
     pb.line_to(10.0, -20.0);
@@ -73,7 +74,7 @@ fn f<C: nanachi::compositor::Compositor<Rgba<u8>> + 'static>(img: &mut ImageBuff
     draw_fill(
         &mut img2,
         &path,
-        &nanachi::compositor::basic::SrcOver,
+        &compositor::SrcOver,
         &fc1,
         Matrix2d::new().translate(20.0, 20.0),
     );
@@ -93,7 +94,7 @@ fn f<C: nanachi::compositor::Compositor<Rgba<u8>> + 'static>(img: &mut ImageBuff
     }
 }
 
-fn draw_fill<C: fill_color::FillColor<Rgba<u8>> + Clone, M: nanachi::compositor::Compositor<Rgba<u8>> + 'static>(
+fn draw_fill<C: fill_color::FillColor<Rgba<u8>> + Clone, M: compositor::Compositor<Rgba<u8>> + 'static>(
     img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>,
     path: &Path,
     compositor: &M,

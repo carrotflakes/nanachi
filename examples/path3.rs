@@ -5,6 +5,7 @@ use nanachi::{
     fill_color,
     path_transform::path_transform,
     matrix::Matrix2d,
+    compositor,
 };
 use std::f64::consts::PI;
 
@@ -17,7 +18,7 @@ fn main() {
         pb.arc(5.0, 5.0, 4.0, 0.0, PI * 2.0);
         let path = pb.end();
         let pc = fill_color::Constant::new(Rgba([80, 200, 255, 50]));
-        draw_fill(&mut img, &path, nanachi::compositor::basic::SrcOver, &pc);
+        draw_fill(&mut img, &path, compositor::SrcOver, &pc);
         img
     };
     let pattern = fill_color::Pattern::new(&bg_image);
@@ -66,7 +67,7 @@ fn main() {
             (0.0, Rgba([255, 100, 100, 100])),
             (1.0, Rgba([200, 255, 10, 255])),
         ]);
-        draw_fill(&mut img, &path, nanachi::compositor::basic::SrcOver, &pc);
+        draw_fill(&mut img, &path, compositor::SrcOver, &pc);
     }
     {
         use nanachi::path_outline::{path_outline, Join, Cap};
@@ -76,7 +77,7 @@ fn main() {
             (0.9, Rgba([200, 10, 10, 255])),
             (1.0, Rgba([10, 10, 255, 100])),
         ]);
-        draw_fill(&mut img, &path, nanachi::compositor::basic::SrcOver, &pc);
+        draw_fill(&mut img, &path, compositor::SrcOver, &pc);
     }
     dbg!(t.elapsed());
 
@@ -84,7 +85,7 @@ fn main() {
     println!("save: {:?}", res);
 }
 
-fn draw_fill<C: fill_color::FillColor<Rgba<u8>>, M: nanachi::compositor::Compositor<Rgba<u8>> + 'static>(
+fn draw_fill<C: fill_color::FillColor<Rgba<u8>>, M: compositor::Compositor<Rgba<u8>> + 'static>(
     img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>,
     path: &Path,
     compositor: M,

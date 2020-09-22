@@ -1,11 +1,62 @@
 #[cfg(feature = "image-crate")]
-pub mod basic;
-#[cfg(feature = "image-crate")]
-pub mod basic_enum;
 pub mod basic_f32;
+#[cfg(feature = "image-crate")]
+pub mod image_rgb_rgba;
 
 pub trait Compositor<T> {
     fn composite(&self, dst: &T, src: &T, alpha: f64) -> T;
+}
+
+pub struct Clear;
+pub struct Src;
+pub struct Dst;
+pub struct SrcOver;
+pub struct SrcIn;
+pub struct SrcOut;
+pub struct SrcAtop;
+pub struct DstOver;
+pub struct DstIn;
+pub struct DstOut;
+pub struct DstAtop;
+pub struct Xor;
+pub struct Add;
+pub struct Darken;
+pub struct Lighten;
+pub struct Multiply;
+pub struct Screen;
+pub struct Overlay;
+pub struct HardLight;
+pub struct Dodge;
+pub struct Burn;
+pub struct SoftLight;
+pub struct Difference;
+pub struct Exclusion;
+
+pub enum Basic {
+    Clear,
+    Src,
+    Dst,
+    SrcOver,
+    SrcIn,
+    SrcOut,
+    SrcAtop,
+    DstOver,
+    DstIn,
+    DstOut,
+    DstAtop,
+    Xor,
+    Add,
+    Darken,
+    Lighten,
+    Multiply,
+    Screen,
+    Overlay,
+    HardLight,
+    Dodge,
+    Burn,
+    SoftLight,
+    Difference,
+    Exclusion,
 }
 
 #[cfg(feature = "image-crate")]
