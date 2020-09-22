@@ -3,7 +3,7 @@ use crate::compositor::Compositor;
 use crate::fill_color::FillColor;
 use crate::pixel::Pixel;
 
-pub fn img_writer<'a, P, B, F: FillColor<P>, C>(
+pub fn img_writer<'a, P, B, F, C>(
     buffer: &'a mut B,
     fill_color: &'a F,
     compositor: &'a C,
@@ -11,6 +11,7 @@ pub fn img_writer<'a, P, B, F: FillColor<P>, C>(
 where
     P: Pixel,
     B: Buffer<P>,
+    F: FillColor<P>,
     C: Compositor<P> + 'static,
 {
     move |x: u32, y: u32, v: f64| {
