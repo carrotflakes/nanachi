@@ -37,3 +37,15 @@ impl<P: Pixel + image::Pixel<Subpixel = u8> + 'static> Buffer<P>
         <Self as image::GenericImage>::put_pixel(self, x, y, pixel)
     }
 }
+
+pub fn buffer_rgba_f32_to_image_buffer(buffer: &crate::buffer::GenericBuffer<crate::pixel::RgbaF32>) -> image::RgbaImage {
+    image::RgbaImage::from_fn(buffer.dimensions().0, buffer.dimensions().1, |x, y| {
+        let p = buffer.get_pixel(x, y);
+        image::Rgba([
+            (p.0[0].min(1.0).max(0.0) * 255.0).round() as u8,
+            (p.0[1].min(1.0).max(0.0) * 255.0).round() as u8,
+            (p.0[2].min(1.0).max(0.0) * 255.0).round() as u8,
+            (p.0[3].min(1.0).max(0.0) * 255.0).round() as u8,
+        ])
+    })
+}
