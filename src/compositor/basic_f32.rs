@@ -59,6 +59,9 @@ def_linear_compositor! {
 def_linear_compositor! {
     SrcOver(a, b => c, ax, bx) {
         let c = a + b - a * b;
+        if c == 0.0 {
+            return Rgba([0.0, 0.0, 0.0, 0.0]);
+        }
         let ax = (a * (1.0 - b)) / c;
         let bx = b / c;
     } {
@@ -92,6 +95,9 @@ def_linear_compositor! {
 def_linear_compositor! {
     SrcAtop(a, b => c, ax, bx) {
         let c = b;
+        if c == 0.0 {
+            return Rgba([0.0, 0.0, 0.0, 0.0]);
+        }
         let ax = 1.0 - b;
         let bx = b;
     } {
@@ -103,6 +109,9 @@ def_linear_compositor! {
 def_linear_compositor! {
     DstOver(a, b => c, ax, bx) {
         let c = a + b - a * b;
+        if c == 0.0 {
+            return Rgba([0.0, 0.0, 0.0, 0.0]);
+        }
         let ax = a / c;
         let bx = ((1.0 - a) * b) / c;
     } {
@@ -136,6 +145,9 @@ def_linear_compositor! {
 def_linear_compositor! {
     DstAtop(a, b => c, ax, bx) {
         let c = a;
+        if c == 0.0 {
+            return Rgba([0.0, 0.0, 0.0, 0.0]);
+        }
         let ax = a;
         let bx = 1.0 - a;
     } {
@@ -158,6 +170,9 @@ def_linear_compositor! {
 def_linear_compositor! {
     Add(a, b => c, ax, bx) {
         let c = (a + b).min(1.0);
+        if c == 0.0 {
+            return Rgba([0.0, 0.0, 0.0, 0.0]);
+        }
         let ax = a / c;
         let bx = b / c;
     } {
@@ -189,6 +204,9 @@ macro_rules! def_compositor {
 def_compositor! {
     Darken(a, b, aa, ba, ca) {
         let ca = aa + ba - aa * ba;
+        if ca == 0.0 {
+            return Rgba([0.0, 0.0, 0.0, 0.0]);
+        }
         let ax = (aa * (1.0 - ba)) / ca;
         let bx = (ba * (1.0 - aa)) / ca;
         let cx = aa * ba / ca;
@@ -203,6 +221,9 @@ def_compositor! {
 def_compositor! {
     Lighten(a, b, aa, ba, ca) {
         let ca = aa + ba - aa * ba;
+        if ca == 0.0 {
+            return Rgba([0.0, 0.0, 0.0, 0.0]);
+        }
         let ax = (aa * (1.0 - ba)) / ca;
         let bx = (ba * (1.0 - aa)) / ca;
         let cx = aa * ba / ca;
@@ -217,6 +238,9 @@ def_compositor! {
 def_compositor! {
     Multiply(a, b, aa, ba, ca) {
         let ca = aa + ba - aa * ba;
+        if ca == 0.0 {
+            return Rgba([0.0, 0.0, 0.0, 0.0]);
+        }
         let ax = (aa * (1.0 - ba)) / ca;
         let bx = (ba * (1.0 - aa)) / ca;
         let cx = aa * ba / ca;
@@ -231,6 +255,9 @@ def_compositor! {
 def_compositor! {
     Screen(a, b, aa, ba, ca) {
         let ca = aa + ba - aa * ba;
+        if ca == 0.0 {
+            return Rgba([0.0, 0.0, 0.0, 0.0]);
+        }
         let ax = (aa * (1.0 - ba)) / ca;
         let bx = (ba * (1.0 - aa)) / ca;
         let cx = aa * ba / ca;
@@ -245,6 +272,9 @@ def_compositor! {
 def_compositor! {
     Overlay(a, b, aa, ba, ca) {
         let ca = aa + ba - aa * ba;
+        if ca == 0.0 {
+            return Rgba([0.0, 0.0, 0.0, 0.0]);
+        }
         let ax = (aa * (1.0 - ba)) / ca;
         let bx = (ba * (1.0 - aa)) / ca;
         let cx = aa * ba / ca;
@@ -259,6 +289,9 @@ def_compositor! {
 def_compositor! {
     HardLight(a, b, aa, ba, ca) {
         let ca = aa + ba - aa * ba;
+        if ca == 0.0 {
+            return Rgba([0.0, 0.0, 0.0, 0.0]);
+        }
         let ax = (aa * (1.0 - ba)) / ca;
         let bx = (ba * (1.0 - aa)) / ca;
         let cx = aa * ba / ca;
@@ -273,6 +306,9 @@ def_compositor! {
 def_compositor! {
     Dodge(a, b, aa, ba, ca) {
         let ca = aa + ba - aa * ba;
+        if ca == 0.0 {
+            return Rgba([0.0, 0.0, 0.0, 0.0]);
+        }
         let ax = (aa * (1.0 - ba)) / ca;
         let bx = (ba * (1.0 - aa)) / ca;
         let cx = aa * ba / ca;
@@ -287,6 +323,9 @@ def_compositor! {
 def_compositor! {
     Burn(a, b, aa, ba, ca) {
         let ca = aa + ba - aa * ba;
+        if ca == 0.0 {
+            return Rgba([0.0, 0.0, 0.0, 0.0]);
+        }
         let ax = (aa * (1.0 - ba)) / ca;
         let bx = (ba * (1.0 - aa)) / ca;
         let cx = aa * ba / ca;
@@ -301,6 +340,9 @@ def_compositor! {
 def_compositor! {
     SoftLight(a, b, aa, ba, ca) {
         let ca = aa + ba - aa * ba;
+        if ca == 0.0 {
+            return Rgba([0.0, 0.0, 0.0, 0.0]);
+        }
         let ax = (aa * (1.0 - ba)) / ca;
         let bx = (ba * (1.0 - aa)) / ca;
         let cx = aa * ba / ca;
@@ -327,6 +369,9 @@ def_compositor! {
 def_compositor! {
     Difference(a, b, aa, ba, ca) {
         let ca = aa + ba - aa * ba;
+        if ca == 0.0 {
+            return Rgba([0.0, 0.0, 0.0, 0.0]);
+        }
         let ax = (aa * (1.0 - ba)) / ca;
         let bx = (ba * (1.0 - aa)) / ca;
         let cx = aa * ba / ca;
@@ -341,6 +386,9 @@ def_compositor! {
 def_compositor! {
     Exclusion(a, b, aa, ba, ca) {
         let ca = aa + ba - aa * ba;
+        if ca == 0.0 {
+            return Rgba([0.0, 0.0, 0.0, 0.0]);
+        }
         let ax = (aa * (1.0 - ba)) / ca;
         let bx = (ba * (1.0 - aa)) / ca;
         let cx = aa * ba / ca;
