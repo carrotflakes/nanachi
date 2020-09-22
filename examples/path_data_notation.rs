@@ -15,7 +15,7 @@ fn main() {
     let (width, height) = (512, 512);
 
     let mut img = ImageBuffer::from_pixel(width, height, Rgb([255u8, 255, 255]));
-    let mut context = Context::new(&mut img).high_quality();
+    let mut context = Context::from_image(&mut img).high_quality();
 
     let t = std::time::Instant::now();
 

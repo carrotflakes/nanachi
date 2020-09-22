@@ -13,7 +13,7 @@ fn main() {
     let (width, height) = (512, 512);
 
     let mut img = ImageBuffer::from_pixel(width, height, Rgba([0u8, 0, 0, 0]));
-    let mut context = Context::new(&mut img).low_quality();
+    let mut context = Context::from_image(&mut img).low_quality();
 
     let mut pb = PathBuilder::new();
     pb.move_to(10.0, 40.0);

@@ -20,7 +20,7 @@ use std::f64::consts::PI;
 fn main() {
     let (width, height) = (512, 512);
     let mut img = ImageBuffer::new(width, height);
-    let mut context = Context::new(&mut img).high_quality();
+    let mut context = Context::from_image(&mut img).high_quality();
     context.clear(&fill_color::LinearGradient::new(
         (0.0, 0.0),
         (0.0, height as f64),

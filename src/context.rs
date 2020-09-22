@@ -51,7 +51,7 @@ where
     P: Pixel,
     B: Buffer<P>,
 {
-    pub fn new(image: &'a mut B) -> Context<'a, P, B> {
+    pub fn from_image(image: &'a mut B) -> Context<'a, P, B> {
         Context {
             image,
             flatten_tolerance: 1.0,
