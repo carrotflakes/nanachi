@@ -172,7 +172,7 @@ where
         let color = Transform::new(&fill_style.color, self.matrix);
         let mut writer = img_writer(self.image, &color, &fill_style.compositor);
         if antialiasing {
-            draw_fill(width, height, &path, fill_style.fill_rule, &mut writer);
+            draw_fill(width, height, &path, fill_style.fill_rule, &mut writer, !fill_style.compositor.keep_dst_on_transparent_src());
         } else {
             draw_fill_no_aa(width, height, &path, fill_style.fill_rule, &mut writer);
         }

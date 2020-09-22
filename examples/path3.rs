@@ -97,5 +97,6 @@ fn draw_fill<C: fill_color::FillColor<Rgba<u8>>, M: compositor::Compositor<Rgba<
         path,
         nanachi::fill_rule::NonZero,
         &mut nanachi::writer::img_writer(img, fill_color, &compositor),
+        !compositor.keep_dst_on_transparent_src(),
     );
 }

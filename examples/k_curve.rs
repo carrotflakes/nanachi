@@ -39,5 +39,6 @@ fn draw_fill<C: fill_color::FillColor<Rgb<u8>>>(
         path,
         nanachi::fill_rule::NonZero,
         &mut nanachi::writer::img_writer(img, fill_color, &nanachi::compositor::SrcOver),
+        false,
     );
 }

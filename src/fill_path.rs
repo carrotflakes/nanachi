@@ -172,6 +172,7 @@ pub fn draw_fill<F: FnMut(u32, u32, f64), FR: FillRule>(
     path: &Path,
     fill_rule: FR,
     writer: &mut F,
+    write_transparent_src: bool,
 ) {
     let mut buf = vec![0.0; (width * height) as usize]; // TODO: get out
     for ec in path_edges_to_elms(path) {
@@ -184,9 +185,20 @@ pub fn draw_fill<F: FnMut(u32, u32, f64), FR: FillRule>(
             }
         }
     }
-    for y in 0..height {
-        for x in 0..width {
-            writer(x, y, fill_rule.apply(buf[(y * width + x) as usize]));
+    if write_transparent_src {
+        for y in 0..height {
+            for x in 0..width {
+                writer(x, y, fill_rule.apply(buf[(y * width + x) as usize]));
+            }
+        }
+    } else  {
+        for y in 0..height {
+            for x in 0..width {
+                let v = fill_rule.apply(buf[(y * width + x) as usize]);
+                if v != 0.0 {
+                    writer(x, y, v);
+                }
+            }
         }
     }
 }

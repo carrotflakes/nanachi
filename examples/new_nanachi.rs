@@ -24,7 +24,7 @@ fn main() {
         (0.0, height as f64),
         vec![
             (0.0, rgba(255, 255, 255, 255)),
-            (1.0, rgba(160, 160, 160, 255)),
+            (1.0, rgba(130, 130, 130, 255)),
         ],
     ));
 
@@ -242,8 +242,8 @@ fn draw_nanachi<'a>(mut context: Context<'a, Rgba<f32>, ImageBuffer<Rgba<f32>, V
     )
     .unwrap();
     let fill_style = FillStyle {
-        color: fill_color::Constant::new(rgba(255, 235, 230, 255)),
-        compositor: compositor::SrcOver,
+        color: fill_color::Constant::new(rgba(255, 220, 210, 220)),
+        compositor: compositor::Screen,
         fill_rule: fill_rule::NonZero,
         pixel: Default::default(),
     };
