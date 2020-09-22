@@ -1,13 +1,12 @@
 use super::Compositor;
 use crate::image::Rgba;
+use super::basic::*;
 
 macro_rules! def_linear_compositor {
     (
         $name:ident ($aa:ident, $ba:ident => $ca:ident, $ax:ident, $bx:ident)
         {$($rest1:tt)+} {$($rest2:tt)+}
     ) => {
-        pub struct $name;
-
         impl Compositor<Rgba<f32>> for $name {
             #[allow(unused_variables)]
             fn composite(&self, a: &Rgba<f32>, b: &Rgba<f32>, alpha: f64) -> Rgba<f32> {
@@ -173,8 +172,6 @@ macro_rules! def_compositor {
         $name:ident ($a:ident, $b:ident, $aa:ident, $ba:ident, $ca:ident)
         {$($rest1:tt)+} [$($rest2:expr,)+]
     ) => {
-        pub struct $name;
-
         impl Compositor<Rgba<f32>> for $name {
             #[allow(unused_variables)]
             fn composite(&self, $a: &Rgba<f32>, $b: &Rgba<f32>, alpha: f64) -> Rgba<f32> {
