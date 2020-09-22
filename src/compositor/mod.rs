@@ -28,4 +28,11 @@ pub mod perf {
             Rgb([a.0[0], b.0[0], alpha as u8])
         }
     }
+
+    impl Compositor<Rgba<f32>> for Perf {
+        #[allow(unused_variables)]
+        fn composite(&self, a: &Rgba<f32>, b: &Rgba<f32>, alpha: f64) -> Rgba<f32> {
+            Rgba([a.0[0], b.0[0], alpha as f32, 1.0])
+        }
+    }
 }
