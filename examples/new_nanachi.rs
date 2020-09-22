@@ -1,8 +1,10 @@
 use nanachi::{
+    buffer::Buffer,
     compositor,
     context::{Context, FillStyle},
     fill_color, fill_rule,
-    image::{RgbaImage, Rgba},
+    image::{ImageBuffer, Rgba},
+    image_crate_adapter::buffer_rgba_f32_to_rgba_image,
     k_curve::k_curve,
     matrix::Matrix2d,
     path::Path,
@@ -17,23 +19,28 @@ use std::f64::consts::PI;
 
 fn main() {
     let (width, height) = (512, 512);
-    let mut img = RgbaImage::new(width, height);
+    let mut img = ImageBuffer::new(width, height);
     let mut context = Context::new(&mut img).high_quality();
-    context.clear(&fill_color::LinearGradient::new((0.0, 0.0), (0.0, height as f64), vec![
-        (0.0, Rgba([255, 255, 255, 255])),
-        (1.0, Rgba([160, 160, 160, 255])),
-    ]));
+    context.clear(&fill_color::LinearGradient::new(
+        (0.0, 0.0),
+        (0.0, height as f64),
+        vec![
+            (0.0, rgba(Rgba([255, 255, 255, 255]))),
+            (1.0, rgba(Rgba([160, 160, 160, 255]))),
+        ],
+    ));
 
     let t = std::time::Instant::now();
     draw_stars(context.child());
     draw_nanachi(context.child());
     println!("elapsed: {:?}", t.elapsed());
 
+    let img = buffer_rgba_f32_to_rgba_image(&img);
     let res = img.save("./nanachi.png");
     println!("{:?}", res);
 }
 
-fn draw_stars<'a>(mut context: Context<'a, Rgba<u8>, RgbaImage>) {
+fn draw_stars<'a>(mut context: Context<'a, Rgba<f32>, ImageBuffer<Rgba<f32>, Vec<f32>>>) {
     let spoke = (2.0 * PI / 5.0).cos() / (1.0 * PI / 5.0).cos();
     let mut pb = PathBuilder::new();
     for i in 0..10 {
@@ -49,8 +56,8 @@ fn draw_stars<'a>(mut context: Context<'a, Rgba<u8>, RgbaImage>) {
 
     for i in 0..100 {
         let t = (
-            rnd.next_u32() as f64 / std::u32::MAX as f64 * context.image.width() as f64,
-            rnd.next_u32() as f64 / std::u32::MAX as f64 * context.image.height() as f64,
+            rnd.next_u32() as f64 / std::u32::MAX as f64 * context.image.dimensions().0 as f64,
+            rnd.next_u32() as f64 / std::u32::MAX as f64 * context.image.dimensions().1 as f64,
         );
         let r = rnd.next_u32() as f64 / std::u32::MAX as f64 * PI * 2.0;
         let s = rnd.next_u32() as f64 / std::u32::MAX as f64 * 4.0 + 5.0;
@@ -59,9 +66,9 @@ fn draw_stars<'a>(mut context: Context<'a, Rgba<u8>, RgbaImage>) {
             &Matrix2d::new().rotate(r).scale(s, s).translate(t.0, t.1),
         );
 
-        let color = fill_color::Constant::new(Rgba(
+        let color = fill_color::Constant::new(rgba(Rgba(
             [[255, 128, 0, 230], [0, 255, 128, 230], [128, 0, 255, 230]][i % 3],
-        ));
+        )));
         context.fill(
             &path,
             &FillStyle {
@@ -71,9 +78,9 @@ fn draw_stars<'a>(mut context: Context<'a, Rgba<u8>, RgbaImage>) {
                 pixel: Default::default(),
             },
         );
-        let color = fill_color::Constant::new(Rgba(
+        let color = fill_color::Constant::new(rgba(Rgba(
             [[128, 64, 0, 120], [0, 128, 64, 120], [64, 0, 128, 120]][i % 3],
-        ));
+        )));
         context.stroke(
             &path,
             &FillStyle {
@@ -87,7 +94,7 @@ fn draw_stars<'a>(mut context: Context<'a, Rgba<u8>, RgbaImage>) {
     }
 }
 
-fn draw_nanachi<'a>(mut context: Context<'a, Rgba<u8>, RgbaImage>) {
+fn draw_nanachi<'a>(mut context: Context<'a, Rgba<f32>, ImageBuffer<Rgba<f32>, Vec<f32>>>) {
     let (width, height) = context.image.dimensions();
     let nanachi_path = path_data_notation::parse(
         "
@@ -230,7 +237,7 @@ fn draw_nanachi<'a>(mut context: Context<'a, Rgba<u8>, RgbaImage>) {
     .unwrap();
 
     let fill_style = FillStyle {
-        color: fill_color::Constant::new(Rgba([255, 235, 230, 255])),
+        color: fill_color::Constant::new(rgba(Rgba([255, 235, 230, 255]))),
         compositor: compositor::SrcOver,
         fill_rule: fill_rule::NonZero,
         pixel: Default::default(),
@@ -239,7 +246,7 @@ fn draw_nanachi<'a>(mut context: Context<'a, Rgba<u8>, RgbaImage>) {
     context.fill(&Path::from_points(&moji_shape), &fill_style);
 
     let fill_style = FillStyle {
-        color: fill_color::Constant::new(Rgba([64, 8, 8, 255])),
+        color: fill_color::Constant::new(rgba(Rgba([64, 8, 8, 255]))),
         compositor: compositor::SrcOver,
         fill_rule: fill_rule::NonZero,
         pixel: Default::default(),
@@ -249,4 +256,13 @@ fn draw_nanachi<'a>(mut context: Context<'a, Rgba<u8>, RgbaImage>) {
         // let path = Path::from_bezier2_points(&k_curve(ps.clone(), false, 3));
         context.stroke(&path, &fill_style, 4.0);
     }
+}
+
+fn rgba(p: Rgba<u8>) -> Rgba<f32> {
+    Rgba([
+        p.0[0] as f32 / 255.0,
+        p.0[1] as f32 / 255.0,
+        p.0[2] as f32 / 255.0,
+        p.0[3] as f32 / 255.0,
+    ])
 }
