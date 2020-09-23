@@ -1,9 +1,8 @@
 use crate::point::Point;
 
 pub fn intersect_line_and_horizon(a: Point, b: Point, hy: f64) -> f64 {
-    assert!(a.1 != b.1);
-    let r = (hy - a.1) / (b.1 - a.1);
-    a.0 * (1.0 - r) + b.0 * r
+    debug_assert_ne!(a.1, b.1);
+    a.0 - (a.0 - b.0) / (b.1 - a.1) * (hy - a.1)
 }
 
 pub fn intersect_segment_and_horizon(ax: f64, ay: f64, bx: f64, by: f64, hy: f64) -> Option<f64> {
