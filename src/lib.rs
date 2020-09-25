@@ -8,6 +8,7 @@ pub mod context;
 pub mod draw_image;
 pub mod fill_color;
 pub mod fill_path;
+pub mod fill_path2;
 pub mod fill_rule;
 pub(crate) mod geometry;
 #[cfg(feature = "image-crate")]
