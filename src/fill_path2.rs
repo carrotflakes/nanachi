@@ -1,18 +1,18 @@
 use crate::models::Line;
-use crate::path::{Path, PathItem};
+use crate::path::PathItem;
 use crate::point::Point;
 use crate::fill_rule::FillRule;
 
 #[derive(Clone)]
-pub struct Rasterize {
+pub struct Rasterizer {
     width: u32,
     height: u32,
     buffer: Vec<f64>,
 }
 
-impl Rasterize {
-    pub fn new(width: u32, height: u32) -> Rasterize {
-        Rasterize {
+impl Rasterizer {
+    pub fn new(width: u32, height: u32) -> Rasterizer {
+        Rasterizer {
             width,
             height,
             buffer: vec![0.0; (width * height) as usize],
@@ -62,16 +62,16 @@ impl Rasterize {
                 let int = Intersection::new(a, b);
                 if 0.0 <= upper {
                     if lower <= upper.ceil() {
-                        f(&mut self.buffer, self.width, &int, signum, upper, lower);
+                        f1(&mut self.buffer, self.width, &int, signum, upper, lower);
                         continue;
                     }
-                    f(&mut self.buffer, self.width, &int, signum, upper, upper.ceil());
+                    f1(&mut self.buffer, self.width, &int, signum, upper, upper.ceil());
                 }
                 if lower < self.height as f64 {
-                    f(&mut self.buffer, self.width, &int, signum, lower.floor(), lower);
+                    f1(&mut self.buffer, self.width, &int, signum, lower.floor(), lower);
                 }
                 for y in (upper.ceil() as i32).max(0)..(lower.floor() as i32).min(self.height as i32) {
-                    f(&mut self.buffer, self.width, &int, signum, y as f64, (y + 1) as f64);
+                    f1(&mut self.buffer, self.width, &int, signum, y as f64, (y + 1) as f64);
                 }
             }
         }
@@ -103,7 +103,7 @@ impl Rasterize {
 }
 
 #[inline]
-fn f(buf: &mut Vec<f64>, width: u32, int: &Intersection, signum: f64, upper: f64, lower: f64) {
+fn f1(buf: &mut Vec<f64>, width: u32, int: &Intersection, signum: f64, upper: f64, lower: f64) {
     let offset = upper.floor() as usize * width as usize;
     let mut acc = 0.0;
     let mut v = 0.0;

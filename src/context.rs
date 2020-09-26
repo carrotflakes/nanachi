@@ -3,7 +3,7 @@ use crate::{
     compositor::Compositor,
     fill_color::{FillColor, Transform},
     fill_path::{draw_fill, draw_fill_no_aa},
-    fill_path2::Rasterize,
+    fill_path2::Rasterizer,
     fill_rule::FillRule,
     matrix::Matrix2d,
     path::Path,
@@ -40,7 +40,7 @@ where
 
 pub struct Context<'a, P: Pixel, B: Buffer<P>> {
     pub image: &'a mut B,
-    rasterize: Cow<'a, Rasterize>,
+    rasterizer: Cow<'a, Rasterizer>,
     pub flatten: bool,
     pub flatten_tolerance: f64,
     pub antialiasing: bool,
@@ -59,7 +59,7 @@ where
         let (width, height) = image.dimensions();
         Context {
             image,
-            rasterize: Cow::Owned(Rasterize::new(width, height)),
+            rasterizer: Cow::Owned(Rasterizer::new(width, height)),
             flatten: true,
             flatten_tolerance: 1.0,
             antialiasing: true,
@@ -95,7 +95,7 @@ where
     pub fn child<'b>(&'b mut self) -> Context<'b, P, B> {
         Context {
             image: self.image,
-            rasterize: Cow::Borrowed(self.rasterize.to_mut()),
+            rasterizer: Cow::Borrowed(self.rasterizer.to_mut()),
             flatten: self.flatten,
             flatten_tolerance: self.flatten_tolerance,
             antialiasing: self.antialiasing,
@@ -186,7 +186,7 @@ where
         let mut writer = img_writer(self.image, &color, &fill_style.compositor);
         if antialiasing {
             let pis = crate::path_flatten::Flatten::new(path.0.iter(), self.flatten_tolerance);
-            self.rasterize.to_mut().rasterize(
+            self.rasterizer.to_mut().rasterize(
                 pis,
                 fill_style.fill_rule,
                 &mut writer,
