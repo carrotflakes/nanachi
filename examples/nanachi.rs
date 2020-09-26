@@ -67,7 +67,7 @@ fn draw_stars<'a>(mut context: Context<'a, Rgba<f32>, ImageBuffer<Rgba<f32>, Vec
             &Matrix2d::new().rotate(r).scale(s, s).translate(t.0, t.1),
         );
 
-        let color = fill_color::Constant::new(
+        let color = fill_color::Solid::new(
             [
                 rgba(255, 128, 0, 230),
                 rgba(0, 255, 128, 230),
@@ -83,7 +83,7 @@ fn draw_stars<'a>(mut context: Context<'a, Rgba<f32>, ImageBuffer<Rgba<f32>, Vec
                 pixel: Default::default(),
             },
         );
-        let color = fill_color::Constant::new(
+        let color = fill_color::Solid::new(
             [
                 rgba(128, 64, 0, 120),
                 rgba(0, 128, 64, 120),
@@ -245,7 +245,7 @@ fn draw_nanachi<'a>(mut context: Context<'a, Rgba<f32>, ImageBuffer<Rgba<f32>, V
     )
     .unwrap();
     let fill_style = FillStyle {
-        color: fill_color::Constant::new(rgba(255, 220, 210, 220)),
+        color: fill_color::Solid::new(rgba(255, 220, 210, 220)),
         compositor: compositor::Screen,
         fill_rule: fill_rule::NonZero,
         pixel: Default::default(),
@@ -253,7 +253,7 @@ fn draw_nanachi<'a>(mut context: Context<'a, Rgba<f32>, ImageBuffer<Rgba<f32>, V
     context.fill(&shape, &fill_style);
 
     let fill_style = FillStyle {
-        color: fill_color::Constant::new(rgba(64, 8, 8, 255)),
+        color: fill_color::Solid::new(rgba(64, 8, 8, 255)),
         compositor: compositor::SrcOver,
         fill_rule: fill_rule::NonZero,
         pixel: Default::default(),

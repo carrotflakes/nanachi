@@ -53,7 +53,7 @@ fn draw_stars(img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>) {
         .collect::<Vec<_>>();
 
     for (si, ps) in shapes.iter().enumerate() {
-        let pc = fill_color::Constant::new(Rgb(
+        let pc = fill_color::Solid::new(Rgb(
             [[255, 128, 0], [0, 255, 128], [128, 0, 255]][si % 3]
         ));
         draw::draw_fill(img, &vec![ps], &pc);
@@ -224,7 +224,7 @@ fn draw_nanachi(img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>) {
     })
     .collect::<Vec<_>>();
 
-    let pc = fill_color::Constant::new(Rgb([255, 235, 230]));
+    let pc = fill_color::Solid::new(Rgb([255, 235, 230]));
 
     draw::draw_fill(img, &vec![&shape], &pc);
 

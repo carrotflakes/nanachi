@@ -12,8 +12,8 @@ fn main() {
             Rgb([255, 255, 255]),
         );
 
-        let color = nanachi::fill_color::Constant::new(Rgb([10, 10, 10]));
-        let color2 = nanachi::fill_color::Constant::new(Rgb([200, 10, 10]));
+        let color = nanachi::fill_color::Solid::new(Rgb([10, 10, 10]));
+        let color2 = nanachi::fill_color::Solid::new(Rgb([200, 10, 10]));
 
         let mut path: Vec<(f64, f64)> = vec![];
         // nanachi::draw::draw_path(&mut buffer, &path, color, 3.0);

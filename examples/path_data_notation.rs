@@ -29,7 +29,7 @@ fn main() {
         context.transformed_context(&Matrix2d::new()
             .translate(0.0, 0.0)
         ).stroke(&path, &FillStyle {
-            color: fill_color::Constant::new(Rgb([0, 0, 0])),
+            color: fill_color::Solid::new(Rgb([0, 0, 0])),
             fill_rule: fill_rule::NonZero,
             compositor: compositor::SrcOver,
             pixel: Default::default(),
@@ -52,7 +52,7 @@ fn main() {
         context.transformed_context(&Matrix2d::new()
             .translate(100.0, 0.0)
         ).stroke(&path, &FillStyle {
-            color: fill_color::Constant::new(Rgb([0, 0, 0])),
+            color: fill_color::Solid::new(Rgb([0, 0, 0])),
             fill_rule: fill_rule::NonZero,
             compositor: compositor::SrcOver,
             pixel: Default::default(),
@@ -68,7 +68,7 @@ fn main() {
         context.transformed_context(&Matrix2d::new()
             .translate(0.0, 100.0)
         ).stroke(&path, &FillStyle {
-            color: fill_color::Constant::new(Rgb([0, 0, 0])),
+            color: fill_color::Solid::new(Rgb([0, 0, 0])),
             fill_rule: fill_rule::NonZero,
             compositor: compositor::SrcOver,
             pixel: Default::default(),
@@ -84,7 +84,7 @@ fn main() {
         context.transformed_context(&Matrix2d::new()
             .translate(0.0, 100.0)
         ).stroke(&path, &FillStyle {
-            color: fill_color::Constant::new(Rgb([0, 0, 0])),
+            color: fill_color::Solid::new(Rgb([0, 0, 0])),
             fill_rule: fill_rule::NonZero,
             compositor: compositor::SrcOver,
             pixel: Default::default(),
@@ -99,7 +99,7 @@ fn main() {
         context.transformed_context(&Matrix2d::new()
             .translate(0.0, 200.0)
         ).stroke(&path, &FillStyle {
-            color: fill_color::Constant::new(Rgb([0, 0, 0])),
+            color: fill_color::Solid::new(Rgb([0, 0, 0])),
             fill_rule: fill_rule::NonZero,
             compositor: compositor::SrcOver,
             pixel: Default::default(),
@@ -114,7 +114,7 @@ fn main() {
         context.transformed_context(&Matrix2d::new()
             .translate(0.0, 200.0)
         ).stroke(&path, &FillStyle {
-            color: fill_color::Constant::new(Rgb([0, 0, 0])),
+            color: fill_color::Solid::new(Rgb([0, 0, 0])),
             fill_rule: fill_rule::NonZero,
             compositor: compositor::SrcOver,
             pixel: Default::default(),
@@ -129,7 +129,7 @@ fn main() {
         context.transformed_context(&Matrix2d::new()
             .translate(0.0, 300.0)
         ).stroke(&path, &FillStyle {
-            color: fill_color::Constant::new(Rgb([0, 0, 0])),
+            color: fill_color::Solid::new(Rgb([0, 0, 0])),
             fill_rule: fill_rule::NonZero,
             compositor: compositor::SrcOver,
             pixel: Default::default(),
@@ -145,7 +145,7 @@ fn main() {
         M 6,10
         A 6 4 10 1 0 14,10").unwrap();
         context.stroke(&path, &FillStyle {
-            color: fill_color::Constant::new(Rgb([200, 0, 0])),
+            color: fill_color::Solid::new(Rgb([200, 0, 0])),
             fill_rule: fill_rule::NonZero,
             compositor: compositor::SrcOver,
             pixel: Default::default(),
@@ -155,7 +155,7 @@ fn main() {
         M 6,10
         A 6 4 10 1 1 14,10").unwrap();
         context.stroke(&path, &FillStyle {
-            color: fill_color::Constant::new(Rgb([100, 200, 0])),
+            color: fill_color::Solid::new(Rgb([100, 200, 0])),
             fill_rule: fill_rule::NonZero,
             compositor: compositor::SrcOver,
             pixel: Default::default(),
@@ -165,7 +165,7 @@ fn main() {
         M 6,10
         A 6 4 10 0 1 14,10").unwrap();
         context.stroke(&path, &FillStyle {
-            color: fill_color::Constant::new(Rgb([200, 0, 200])),
+            color: fill_color::Solid::new(Rgb([200, 0, 200])),
             fill_rule: fill_rule::NonZero,
             compositor: compositor::SrcOver,
             pixel: Default::default(),
@@ -175,7 +175,7 @@ fn main() {
         M 6,10
         A 6 4 10 0 0 14,10").unwrap();
         context.stroke(&path, &FillStyle {
-            color: fill_color::Constant::new(Rgb([255, 200, 255])),
+            color: fill_color::Solid::new(Rgb([255, 200, 255])),
             fill_rule: fill_rule::NonZero,
             compositor: compositor::SrcOver,
             pixel: Default::default(),

@@ -17,7 +17,7 @@ fn main() {
         let mut pb = PathBuilder::new();
         pb.arc(5.0, 5.0, 4.0, 0.0, PI * 2.0);
         let path = pb.end();
-        let pc = fill_color::Constant::new(Rgba([80, 200, 255, 50]));
+        let pc = fill_color::Solid::new(Rgba([80, 200, 255, 50]));
         draw_fill(&mut img, &path, compositor::SrcOver, &pc);
         img
     };

@@ -11,15 +11,15 @@ pub trait FillColor<C> {
 }
 
 #[derive(Debug, Clone)]
-pub struct Constant<C: Clone>(C);
+pub struct Solid<C: Clone>(C);
 
-impl<C: Clone> Constant<C> {
+impl<C: Clone> Solid<C> {
     pub fn new(c: C) -> Self {
-        Constant(c)
+        Solid(c)
     }
 }
 
-impl<C: Clone> FillColor<C> for Constant<C> {
+impl<C: Clone> FillColor<C> for Solid<C> {
     fn fill_color(&self, _: f64, _: f64) -> C {
         self.0.clone()
     }

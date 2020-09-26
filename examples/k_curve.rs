@@ -21,7 +21,7 @@ fn main() {
     ];
     let path = Path::from_bezier2_points(&k_curve(ps, true, 3));
     let path = path_transform(&path, &Matrix2d::new().scale(512.0, 512.0));
-    let pc = fill_color::Constant::new(Rgb([100, 100, 250]));
+    let pc = fill_color::Solid::new(Rgb([100, 100, 250]));
     draw_fill(&mut img, &path, &pc);
 
     let res = img.save("./k_curve.png");
