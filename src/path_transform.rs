@@ -35,27 +35,33 @@ pub fn path_transform(path: &Path, matrix: &Matrix2d) -> Path {
             PathItem::Jump => PathItem::Jump,
         });
     }
-    Path::new(pis)
+    if matrix.is_direct() {
+        Path::new(pis)
+    } else {
+        Path::new(pis).flip()
+    }
 }
 
 pub fn transform_ellipse(ellipse: &Ellipse, matrix: &Matrix2d) -> Ellipse {
-    let eam = Matrix2d::new()
+    let matrix = Matrix2d::new()
         .scale(ellipse.radius_x, ellipse.radius_y)
         .rotate(ellipse.rotation)
-        .translate(ellipse.center.0, ellipse.center.1);
-    let am = eam.then(&matrix);
-    let center = Point(am.0[2], am.0[5]);
+        .translate(ellipse.center.0, ellipse.center.1)
+        .then(&matrix);
+    let center = Point(matrix.0[2], matrix.0[5]);
     // dbg!(am);
-    let k = (am.0[1].atan2(am.0[4]) + am.0[3].atan2(am.0[0])).tan();
-    let w = Point(am.0[0], am.0[3]).rotate(am.0[1].atan2(am.0[4])).0;
-    let h = am.0[1].hypot(am.0[4]);
+    let k = (matrix.0[1].atan2(matrix.0[4]) + matrix.0[3].atan2(matrix.0[0])).tan();
+    let w = Point(matrix.0[0], matrix.0[3]).rotate(matrix.0[1].atan2(matrix.0[4])).0;
+    let h = matrix.0[1].hypot(matrix.0[4]);
+    let signum = w.signum() * h.signum();
+    let (w, h) = (w.abs(), h.abs());
     // dbg!(k, w, h);
     if !k.is_normal() || k == 0.0 {
         return Ellipse {
             center,
             radius_x: w,
             radius_y: h,
-            rotation: am.0[3].atan2(am.0[0]),
+            rotation: matrix.0[3].atan2(matrix.0[0]),
             angle1: ellipse.angle1,
             angle2: ellipse.angle2,
         }
@@ -64,18 +70,21 @@ pub fn transform_ellipse(ellipse: &Ellipse, matrix: &Matrix2d) -> Ellipse {
     let radius_x = w * (1.0 - k / rotation.tan()).sqrt();
     let radius_y = w * (1.0 + k * rotation.tan()).sqrt();
     // dbg!(rotation, radius_x, radius_y);
-    let rotation = rotation + am.0[4].atan2(am.0[1]);
-    let am2 = Matrix2d::new()
+    let rotation = rotation + matrix.0[4].atan2(matrix.0[1]);
+    let matrix2 = Matrix2d::new()
         .scale(radius_x, radius_y)
         .rotate(rotation)
         .translate(center.0, center.1)
         .inverse();
-    let mut angle1 = am2.apply(am.apply(Point::from_angle(ellipse.angle1))).atan2();
-    let mut angle2 = am2.apply(am.apply(Point::from_angle(ellipse.angle2))).atan2();
-    if ellipse.angle1 < ellipse.angle2 && angle1 >= angle2 {
+    let mut angle1 = matrix2.apply(matrix.apply(Point::from_angle(ellipse.angle1))).atan2();
+    let mut angle2 = matrix2.apply(matrix.apply(Point::from_angle(ellipse.angle2))).atan2();
+    // if signum < 0.0 {
+    //     std::mem::swap(&mut angle1, &mut angle2);
+    // }
+    if (ellipse.angle1 < ellipse.angle2) ^ (signum < 0.0) && angle1 >= angle2 {
         angle2 += PI * 2.0;
     }
-    if ellipse.angle1 > ellipse.angle2 && angle1 <= angle2 {
+    if (ellipse.angle1 > ellipse.angle2) ^ (signum < 0.0) && angle1 <= angle2 {
         angle1 += PI * 2.0;
     }
     Ellipse {

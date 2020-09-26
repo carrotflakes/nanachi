@@ -94,6 +94,10 @@ impl Matrix2d {
     pub fn is_unit(&self) -> bool {
         self == &Default::default()
     }
+
+    pub fn is_direct(&self) -> bool {
+        self.0[1] * self.0[3] <= self.0[0] * self.0[4]
+    }
 }
 
 impl Default for Matrix2d {

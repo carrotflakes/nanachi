@@ -120,15 +120,16 @@ fn path_edges_to_elms(path: &Path) -> Vec<ElmContainer> {
                 let (a1, a2) = angle_norm(ellipse.angle1, ellipse.angle2);
                 // let aa = (ellipse.rotation.tan() * ellipse.radius_x / ellipse.radius_y).atan();
                 let aa = ellipse.angle_offset() - FRAC_PI_2;
-                match ((((a1 - aa) / FRAC_PI_2) as usize + 1) / 2, (((a2 - aa) / FRAC_PI_2) as usize + 1) / 2) {
-                    (0, 0) | (2, 2) => {
+                let a = ((((a1 - aa) / FRAC_PI_2) as usize + 1) / 2, (((a2 - aa) / FRAC_PI_2) as usize + 1) / 2);
+                match (a.0 % 2, a.1 + a.0 % 2 - a.0) {
+                    (0, 0) => {
                         elms.push(right_ellipse(ellipse.pos(a1).1, ellipse.pos(a2).1));
                     }
-                    (0, 1) | (2, 3) => {
+                    (0, 1) => {
                         elms.push(left_ellipse(ellipse.pos(a2).1, bound.3,));
                         elms.push(right_ellipse(ellipse.pos(a1).1, bound.3));
                     }
-                    (0, 2) | (2, 4) => {
+                    (0, 2) => {
                         elms.push(left_ellipse(bound.2, bound.3));
                         elms.push(right_ellipse(ellipse.pos(a1).1, bound.3));
                         elms.push(right_ellipse(bound.2, ellipse.pos(a2).1));
@@ -145,7 +146,7 @@ fn path_edges_to_elms(path: &Path) -> Vec<ElmContainer> {
                         elms.push(left_ellipse(bound.2, ellipse.pos(a1).1));
                         elms.push(right_ellipse(bound.2, bound.3));
                     }
-                    (a1, a2) => {dbg!(a1, a2);unreachable!()},
+                    (a1, a2) => {dbg!(ellipse, a1, a2);unreachable!()},
                 }
             }
             PathItem::Quad(quad) => {
@@ -473,6 +474,7 @@ impl ElmContainer {
 fn angle_norm(a1: f64, a2: f64) -> (f64, f64) {
     let (a1, a2) = if a1 < a2 { (a1, a2) } else { (a2, a1) };
     let a = a1.rem_euclid(PI * 2.0);
+    let a2 = a2 + a - a1;
     (a, if a2 - a < 0.0 { a2 + PI * 2.0 } else { a2 })
 }
 

@@ -210,4 +210,14 @@ impl Path {
         }
         res
     }
+
+    pub fn flip(&self) -> Path {
+        Path(self.continuations().into_iter().flat_map(|(pis, closed)| {
+            pis.iter().rev().map(|pi| pi.flip()).chain(vec![if closed {
+                PathItem::CloseAndJump
+            } else {
+                PathItem::Jump
+            }])
+        }).collect())
+    }
 }
