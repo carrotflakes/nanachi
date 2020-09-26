@@ -3,7 +3,6 @@ use crate::{
     compositor::Compositor,
     fill_color::{FillColor, Transform},
     fill_path::{draw_fill, draw_fill_no_aa},
-    fill_path2::Rasterizer,
     fill_rule::FillRule,
     matrix::Matrix2d,
     path::Path,
@@ -12,6 +11,7 @@ use crate::{
     path_transform::path_transform,
     pixel::Pixel,
     point::Point,
+    rasterizer::Rasterizer,
     writer::img_writer,
 };
 use std::borrow::Cow;
