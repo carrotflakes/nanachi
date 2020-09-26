@@ -19,14 +19,8 @@ impl Rasterize {
         }
     }
 
-    fn clear(&mut self) {
-        for i in 0..(self.width * self.height) as usize {
-            self.buffer[i] = 0.0;
-        }
-    }
-
     pub fn rasterize<I: Iterator<Item = PathItem>, F: FnMut(u32, u32, f64), FR: FillRule>(&mut self, pis: I, fill_rule: FR, writer: &mut F, write_transparent_src: bool) {
-        self.clear();
+        let mut bound = (self.width as f64, 0.0f64, self.height as f64, 0.0f64);
         for pi in pis {
             let Line(a, b)  = match pi {
                 PathItem::Line(l) => l,
@@ -46,6 +40,10 @@ impl Rasterize {
             if lower < 0.0 || self.height as f64 <= upper {
                 continue;
             }
+            bound.0 = bound.0.min(a.0.min(b.0));
+            bound.1 = bound.1.max(a.0.max(b.0));
+            bound.2 = bound.2.min(upper);
+            bound.3 = bound.3.max(lower);
             if a.0 == b.0 {
                 if 0.0 <= upper {
                     if lower <= upper.ceil() {
@@ -81,15 +79,19 @@ impl Rasterize {
             for y in 0..self.height {
                 let mut acc = 0.0;
                 for x in 0..self.width {
-                    acc += self.buffer[(y * self.width + x) as usize];
+                    let i = (y * self.width + x) as usize;
+                    acc += self.buffer[i];
+                    self.buffer[i] = 0.0;
                     writer(x, y, fill_rule.apply(acc));
                 }
             }
         } else  {
-            for y in 0..self.height {
+            for y in bound.2.max(0.0).floor() as u32..bound.3.min(self.height as f64).ceil() as u32 {
                 let mut acc = 0.0;
-                for x in 0..self.width {
-                    acc += self.buffer[(y * self.width + x) as usize];
+                for x in bound.0.max(0.0).floor() as u32..(bound.1 + 1.0).min(self.width as f64).ceil() as u32 {
+                    let i = (y * self.width + x) as usize;
+                    acc += self.buffer[i];
+                    self.buffer[i] = 0.0;
                     let v = fill_rule.apply(acc);
                     if v != 0.0 {
                         writer(x, y, v);
