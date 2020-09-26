@@ -15,7 +15,7 @@ exclude = [
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
-default = ["image-crate"]
+default = ["image-crate", "path-data-notation"]
 
 path-data-notation = []
 image-crate = ["image"]
@@ -31,8 +31,6 @@ image = { version = "0.23", features = ["png"] }
 
 [[example]]
 name = "new_nanachi"
-required-features = ["path-data-notation"]
 
 [[example]]
 name = "path_data_notation"
-required-features = ["path-data-notation"]
