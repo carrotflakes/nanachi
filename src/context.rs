@@ -2,7 +2,6 @@ use crate::{
     buffer::Buffer,
     compositor::Compositor,
     fill_color::{FillColor, Transform},
-    fill_path::{draw_fill, draw_fill_no_aa},
     fill_rule::FillRule,
     matrix::Matrix2d,
     path::Path,
@@ -181,20 +180,23 @@ where
         path: &Path,
         antialiasing: bool,
     ) {
-        let (width, height) = self.image.dimensions();
         let color = Transform::new(&fill_style.color, self.matrix);
         let mut writer = img_writer(self.image, &color, &fill_style.compositor);
+        let pis = crate::path_flatten::Flatten::new(path.0.iter(), self.flatten_tolerance);
         if antialiasing {
-            let pis = crate::path_flatten::Flatten::new(path.0.iter(), self.flatten_tolerance);
             self.rasterizer.to_mut().rasterize(
                 pis,
                 fill_style.fill_rule,
                 &mut writer,
                 !fill_style.compositor.keep_dst_on_transparent_src(),
             );
-        // draw_fill(width, height, &path, fill_style.fill_rule, &mut writer, !fill_style.compositor.keep_dst_on_transparent_src());
         } else {
-            draw_fill_no_aa(width, height, &path, fill_style.fill_rule, &mut writer);
+            self.rasterizer.to_mut().rasterize_no_aa(
+                pis,
+                fill_style.fill_rule,
+                &mut writer,
+                !fill_style.compositor.keep_dst_on_transparent_src(),
+            );
         }
     }
 }

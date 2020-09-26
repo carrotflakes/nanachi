@@ -1,7 +1,7 @@
+use crate::fill_rule::FillRule;
 use crate::models::Line;
 use crate::path::PathItem;
 use crate::point::Point;
-use crate::fill_rule::FillRule;
 
 #[derive(Clone)]
 pub struct Rasterizer {
@@ -19,10 +19,16 @@ impl Rasterizer {
         }
     }
 
-    pub fn rasterize<I: Iterator<Item = PathItem>, F: FnMut(u32, u32, f64), FR: FillRule>(&mut self, pis: I, fill_rule: FR, writer: &mut F, write_transparent_src: bool) {
-        let mut bound = (self.width as f64, 0.0f64, self.height as f64, 0.0f64);
+    pub fn rasterize<I: Iterator<Item = PathItem>, F: FnMut(u32, u32, f64), FR: FillRule>(
+        &mut self,
+        pis: I,
+        fill_rule: FR,
+        writer: &mut F,
+        write_transparent_src: bool,
+    ) {
+        let mut bound = [self.width as f64, 0.0f64, self.height as f64, 0.0f64];
         for pi in pis {
-            let Line(a, b)  = match pi {
+            let Line(a, b) = match pi {
                 PathItem::Line(l) => l,
                 PathItem::CloseAndJump | PathItem::Jump => continue,
                 _ => panic!("Un-line passed to draw_fill_only_lines"),
@@ -30,33 +36,52 @@ impl Rasterizer {
             if a.1 == b.1 {
                 continue;
             }
-            let (a, b, signum) = if a.1 < b.1 {
-                (a, b, -1.0)
-            } else {
-                (b, a, 1.0)
-            };
+            let (a, b, signum) = if a.1 < b.1 { (a, b, -1.0) } else { (b, a, 1.0) };
             let upper = a.1;
             let lower = b.1;
             if lower < 0.0 || self.height as f64 <= upper {
                 continue;
             }
-            bound.0 = bound.0.min(a.0.min(b.0));
-            bound.1 = bound.1.max(a.0.max(b.0));
-            bound.2 = bound.2.min(upper);
-            bound.3 = bound.3.max(lower);
+            bound[0] = bound[0].min(a.0.min(b.0));
+            bound[1] = bound[1].max(a.0.max(b.0));
+            bound[2] = bound[2].min(upper);
+            bound[3] = bound[3].max(lower);
             if a.0 == b.0 {
                 if 0.0 <= upper {
                     if lower <= upper.ceil() {
                         f2(&mut self.buffer, self.width, signum, upper, lower, a.0);
                         continue;
                     }
-                    f2(&mut self.buffer, self.width, signum, upper, upper.ceil(), a.0);
+                    f2(
+                        &mut self.buffer,
+                        self.width,
+                        signum,
+                        upper,
+                        upper.ceil(),
+                        a.0,
+                    );
                 }
                 if lower < self.height as f64 {
-                    f2(&mut self.buffer, self.width, signum, lower.floor(), lower, a.0);
+                    f2(
+                        &mut self.buffer,
+                        self.width,
+                        signum,
+                        lower.floor(),
+                        lower,
+                        a.0,
+                    );
                 }
-                for y in (upper.ceil() as i32).max(0)..(lower.floor() as i32).min(self.height as i32) {
-                    f2(&mut self.buffer, self.width, signum, y as f64, (y + 1) as f64, a.0);
+                for y in
+                    (upper.ceil() as i32).max(0)..(lower.floor() as i32).min(self.height as i32)
+                {
+                    f2(
+                        &mut self.buffer,
+                        self.width,
+                        signum,
+                        y as f64,
+                        (y + 1) as f64,
+                        a.0,
+                    );
                 }
             } else {
                 let int = Intersection::new(a, b);
@@ -65,16 +90,92 @@ impl Rasterizer {
                         f1(&mut self.buffer, self.width, &int, signum, upper, lower);
                         continue;
                     }
-                    f1(&mut self.buffer, self.width, &int, signum, upper, upper.ceil());
+                    f1(
+                        &mut self.buffer,
+                        self.width,
+                        &int,
+                        signum,
+                        upper,
+                        upper.ceil(),
+                    );
                 }
                 if lower < self.height as f64 {
-                    f1(&mut self.buffer, self.width, &int, signum, lower.floor(), lower);
+                    f1(
+                        &mut self.buffer,
+                        self.width,
+                        &int,
+                        signum,
+                        lower.floor(),
+                        lower,
+                    );
                 }
-                for y in (upper.ceil() as i32).max(0)..(lower.floor() as i32).min(self.height as i32) {
-                    f1(&mut self.buffer, self.width, &int, signum, y as f64, (y + 1) as f64);
+                for y in
+                    (upper.ceil() as i32).max(0)..(lower.floor() as i32).min(self.height as i32)
+                {
+                    f1(
+                        &mut self.buffer,
+                        self.width,
+                        &int,
+                        signum,
+                        y as f64,
+                        (y + 1) as f64,
+                    );
                 }
             }
         }
+        self.transfer(fill_rule, writer, write_transparent_src, bound);
+    }
+
+    pub fn rasterize_no_aa<I: Iterator<Item = PathItem>, F: FnMut(u32, u32, f64), FR: FillRule>(
+        &mut self,
+        pis: I,
+        fill_rule: FR,
+        writer: &mut F,
+        write_transparent_src: bool,
+    ) {
+        let mut bound = [self.width as f64, 0.0f64, self.height as f64, 0.0f64];
+        for pi in pis {
+            let Line(a, b) = match pi {
+                PathItem::Line(l) => l,
+                PathItem::CloseAndJump | PathItem::Jump => continue,
+                _ => panic!("Un-line passed to draw_fill_only_lines"),
+            };
+            if a.1 == b.1 {
+                continue;
+            }
+            let (a, b, signum) = if a.1 < b.1 { (a, b, -1.0) } else { (b, a, 1.0) };
+            let upper = a.1;
+            let lower = b.1;
+            if lower < 0.0 || self.height as f64 <= upper {
+                continue;
+            }
+            bound[0] = bound[0].min(a.0.min(b.0));
+            bound[1] = bound[1].max(a.0.max(b.0));
+            bound[2] = bound[2].min(upper);
+            bound[3] = bound[3].max(lower);
+            let int = Intersection::new(a, b);
+            let width = self.width as usize;
+            for y in (upper.round() as i32).max(0) as usize
+                ..(lower.round() as i32).min(self.height as i32) as usize
+            {
+                let x = int.intersect_h(y as f64 + 0.5).round() as usize;
+                if width <= x {
+                    continue;
+                }
+                self.buffer[(y * width as usize + x.max(0) as usize) as usize] += signum;
+            }
+        }
+        self.transfer(fill_rule, writer, write_transparent_src, bound);
+    }
+
+    #[inline]
+    fn transfer<F: FnMut(u32, u32, f64), FR: FillRule>(
+        &mut self,
+        fill_rule: FR,
+        writer: &mut F,
+        write_transparent_src: bool,
+        bound: [f64; 4],
+    ) {
         if write_transparent_src {
             for y in 0..self.height {
                 let mut acc = 0.0;
@@ -85,10 +186,14 @@ impl Rasterizer {
                     writer(x, y, fill_rule.apply(acc));
                 }
             }
-        } else  {
-            for y in bound.2.max(0.0).floor() as u32..bound.3.min(self.height as f64).ceil() as u32 {
+        } else {
+            for y in
+                bound[2].max(0.0).floor() as u32..bound[3].min(self.height as f64).ceil() as u32
+            {
                 let mut acc = 0.0;
-                for x in bound.0.max(0.0).floor() as u32..(bound.1 + 1.0).min(self.width as f64).ceil() as u32 {
+                for x in bound[0].max(0.0).floor() as u32
+                    ..(bound[1] + 1.0).min(self.width as f64).ceil() as u32
+                {
                     let i = (y * self.width + x) as usize;
                     acc += self.buffer[i];
                     self.buffer[i] = 0.0;
@@ -122,7 +227,7 @@ fn f1(buf: &mut Vec<f64>, width: u32, int: &Intersection, signum: f64, upper: f6
         }
         let xi = lower_x.floor() as i32;
         if xi < width as i32 {
-            let a= ((xi + 1) as f64 - (upper_x + lower_x) * 0.5) * (lower - upper);
+            let a = ((xi + 1) as f64 - (upper_x + lower_x) * 0.5) * (lower - upper);
             write(xi, a);
             if xi + 1 < width as i32 {
                 write(xi + 1, a + (lower - upper));
@@ -136,7 +241,7 @@ fn f1(buf: &mut Vec<f64>, width: u32, int: &Intersection, signum: f64, upper: f6
         }
         let xi = upper_x.floor() as i32;
         if xi < width as i32 {
-            let a= ((xi + 1) as f64 - (upper_x + lower_x) * 0.5) * (lower - upper);
+            let a = ((xi + 1) as f64 - (upper_x + lower_x) * 0.5) * (lower - upper);
             write(xi, a);
             if xi + 1 < width as i32 {
                 write(xi + 1, a + (lower - upper));
@@ -167,7 +272,12 @@ impl Intersection {
     fn new(a: Point, b: Point) -> Intersection {
         debug_assert_ne!(a.0, b.0);
         debug_assert_ne!(a.1, b.1);
-        Intersection(a.1, (b.0 - a.0) / (b.1 - a.1), a.0, (b.1 - a.1) / (b.0 - a.0))
+        Intersection(
+            a.1,
+            (b.0 - a.0) / (b.1 - a.1),
+            a.0,
+            (b.1 - a.1) / (b.0 - a.0),
+        )
     }
 
     #[inline]
