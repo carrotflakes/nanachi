@@ -14,6 +14,7 @@ use crate::{
     point::Point,
     writer::img_writer,
 };
+use std::borrow::Cow;
 
 pub struct FillStyle<P, FC, C, FR>
 where
@@ -39,7 +40,7 @@ where
 
 pub struct Context<'a, P: Pixel, B: Buffer<P>> {
     pub image: &'a mut B,
-    rasterize: Rasterize,
+    rasterize: Cow<'a, Rasterize>,
     pub flatten: bool,
     pub flatten_tolerance: f64,
     pub antialiasing: bool,
@@ -58,7 +59,7 @@ where
         let (width, height) = image.dimensions();
         Context {
             image,
-            rasterize: Rasterize::new(width, height),
+            rasterize: Cow::Owned(Rasterize::new(width, height)),
             flatten: true,
             flatten_tolerance: 1.0,
             antialiasing: true,
@@ -94,7 +95,7 @@ where
     pub fn child<'b>(&'b mut self) -> Context<'b, P, B> {
         Context {
             image: self.image,
-            rasterize: self.rasterize.clone(),
+            rasterize: Cow::Borrowed(self.rasterize.to_mut()),
             flatten: self.flatten,
             flatten_tolerance: self.flatten_tolerance,
             antialiasing: self.antialiasing,
@@ -185,7 +186,7 @@ where
         let mut writer = img_writer(self.image, &color, &fill_style.compositor);
         if antialiasing {
             let pis = crate::path_flatten::Flatten::new(path.0.iter(), self.flatten_tolerance);
-            self.rasterize.rasterize(
+            self.rasterize.to_mut().rasterize(
                 pis,
                 fill_style.fill_rule,
                 &mut writer,

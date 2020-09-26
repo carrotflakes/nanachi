@@ -19,7 +19,7 @@ impl Rasterize {
         }
     }
 
-    pub fn clear(&mut self) {
+    fn clear(&mut self) {
         for i in 0..(self.width * self.height) as usize {
             self.buffer[i] = 0.0;
         }
