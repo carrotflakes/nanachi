@@ -1,8 +1,8 @@
-use nanachi::image::{ImageBuffer, Rgb};
+use nanachi::image::{ImageBuffer, Rgba};
 use sdl2::pixels::{Color, PixelFormatEnum};
 pub use sdl2::{event::Event, keyboard::Keycode, EventPump};
 
-pub fn mount_gui(f: &dyn Fn(&mut dyn FnMut(&ImageBuffer<Rgb<u8>, Vec<u8>>), &mut EventPump)) {
+pub fn mount_gui(f: &dyn Fn(&mut dyn FnMut(&ImageBuffer<Rgba<u8>, Vec<u8>>), &mut EventPump)) {
     let (width, height) = (640usize, 480usize);
     let sdl_ctx = sdl2::init().unwrap();
     let video_subsys = sdl_ctx.video().unwrap();
@@ -20,7 +20,7 @@ pub fn mount_gui(f: &dyn Fn(&mut dyn FnMut(&ImageBuffer<Rgb<u8>, Vec<u8>>), &mut
 
     let mut event_pump = sdl_ctx.event_pump().unwrap();
 
-    let mut render = |buffer: &ImageBuffer<Rgb<u8>, Vec<u8>>| {
+    let mut render = |buffer: &ImageBuffer<Rgba<u8>, Vec<u8>>| {
         texture
             .with_lock(None, |buf: &mut [u8], pitch: usize| {
                 for y in 0..height {

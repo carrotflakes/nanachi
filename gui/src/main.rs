@@ -1,5 +1,11 @@
 mod gui;
-use nanachi::{image::Rgb, path_outline};
+use nanachi::{
+    compositor,
+    context::{Context, FillStyle},
+    fill_color, fill_rule,
+    image::Rgba,
+    image_crate_adapter::buffer_rgba_f32_to_rgba_image,
+};
 use std::thread;
 use std::time::Duration;
 
@@ -9,37 +15,53 @@ fn main() {
         let mut buffer = nanachi::image::ImageBuffer::from_pixel(
             width as u32,
             height as u32,
-            Rgb([255, 255, 255]),
+            Rgba([1.0f32, 1.0, 1.0, 1.0]),
         );
+        let mut context = Context::from_image(&mut buffer);
 
-        let color = nanachi::fill_color::Solid::new(Rgb([10, 10, 10]));
-        let color2 = nanachi::fill_color::Solid::new(Rgb([200, 10, 10]));
+        let color = nanachi::fill_color::Solid::new(Rgba([0.1f32, 0.1, 0.1, 1.0]));
+        let color2 = nanachi::fill_color::Solid::new(Rgba([0.9f32, 0.0, 0.0, 1.0]));
 
-        let mut path: Vec<(f64, f64)> = vec![];
-        // nanachi::draw::draw_path(&mut buffer, &path, color, 3.0);
+        let mut points: Vec<(f64, f64)> = vec![];
 
         'running: loop {
-            render(&buffer);
+            render(&buffer_rgba_f32_to_rgba_image(&context.image.clone()));
             for ev in event_pump.poll_iter() {
                 println!("{:?}", ev);
                 match ev {
                     gui::Event::MouseButtonDown { x, y, .. } => {
-                        buffer = nanachi::image::ImageBuffer::from_pixel(
-                            width as u32,
-                            height as u32,
-                            Rgb([255, 255, 255]),
-                        );
-                        path.push((x as f64, y as f64));
-                        if 2 <= path.len() {
-                            let path2 = nanachi::path3::Path::from_points(&path.iter().map(|x| (*x).into()).collect());
-                            let path2 = path_outline::path_outline(&path2, 1.0, &path_outline::Join::Round, &path_outline::Cap::Round);
-                            draw_fill(&mut buffer, &nanachi::path3::Path(path2), &color);
+                        context.clear(&fill_color::Solid::new(Rgba([1.0, 1.0, 1.0, 1.0])));
+                        points.push((x as f64, y as f64));
+                        if 2 <= points.len() {
+                            let path = nanachi::path::Path::from_points(
+                                &points.iter().map(|x| (*x).into()).collect(),
+                            );
+                            context.stroke(
+                                &path,
+                                &FillStyle {
+                                    color: color.clone(),
+                                    compositor: compositor::SrcOver,
+                                    fill_rule: fill_rule::NonZero,
+                                    pixel: Default::default(),
+                                },
+                                2.0,
+                            );
                         }
-                        if 2 <= path.len() {
-                            let path2 = path.iter().map(|x| (*x).into()).collect();
-                            let path2 = nanachi::path3::Path::from_bezier2_points(&nanachi::k_curve::k_curve(path2, false, 4));
-                            let path2 = path_outline::path_outline(&path2, 1.0, &path_outline::Join::Round, &path_outline::Cap::Round);
-                            draw_fill(&mut buffer, &nanachi::path3::Path(path2), &color2);
+                        if 2 <= points.len() {
+                            let path = points.iter().map(|x| (*x).into()).collect();
+                            let path = nanachi::path::Path::from_bezier2_points(
+                                &nanachi::k_curve::k_curve(path, false, 4),
+                            );
+                            context.stroke(
+                                &path,
+                                &FillStyle {
+                                    color: color2.clone(),
+                                    compositor: compositor::SrcOver,
+                                    fill_rule: fill_rule::NonZero,
+                                    pixel: Default::default(),
+                                },
+                                2.0,
+                            );
                         }
                     }
                     gui::Event::Quit { .. }
@@ -53,18 +75,4 @@ fn main() {
             thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
         }
     });
-}
-
-fn draw_fill<C: nanachi::fill_color::FillColor<Rgb<u8>>>(
-    img: &mut nanachi::image::ImageBuffer<Rgb<u8>, Vec<u8>>,
-    path: &nanachi::path3::Path,
-    fill_color: &C,
-) {
-    nanachi::fill_path::draw_fill(
-        img.width() as u32,
-        img.height() as u32,
-        path,
-        nanachi::fill_rule::NonZero,
-        &mut nanachi::writer::img_writer(img, fill_color, nanachi::compositor::basic::SrcOver),
-    );
 }
