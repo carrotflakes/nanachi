@@ -3,81 +3,97 @@ use crate::path::{Path, PathItem};
 use crate::point::Point;
 use crate::fill_rule::FillRule;
 
-pub fn draw_fill_only_lines<F: FnMut(u32, u32, f64), FR: FillRule>(
+#[derive(Clone)]
+pub struct Rasterize {
     width: u32,
     height: u32,
-    path: &Path,
-    fill_rule: FR,
-    writer: &mut F,
-    write_transparent_src: bool,
-) {
-    let mut buf = vec![0.0; (width * height) as usize]; // TODO: get out
-    for pi in path.0.iter() {
-        let Line(a, b)  = match pi {
-            PathItem::Line(l) => l,
-            PathItem::CloseAndJump | PathItem::Jump => continue,
-            _ => panic!("Un-line passed to draw_fill_only_lines"),
-        };
-        if a.1 == b.1 {
-            continue;
-        }
-        let (a, b, signum) = if a.1 < b.1 {
-            (a, b, -1.0)
-        } else {
-            (b, a, 1.0)
-        };
-        let upper = a.1;
-        let lower = b.1;
-        if lower < 0.0 || height as f64 <= upper {
-            continue;
-        }
-        if a.0 == b.0 {
-            if 0.0 <= upper {
-                if lower <= upper.ceil() {
-                    f2(&mut buf, width, signum, upper, lower, a.0);
-                    continue;
-                }
-                f2(&mut buf, width, signum, upper, upper.ceil(), a.0);
-            }
-            if lower < height as f64 {
-                f2(&mut buf, width, signum, lower.floor(), lower, a.0);
-            }
-            for y in (upper.ceil() as i32).max(0)..(lower.floor() as i32).min(height as i32) {
-                f2(&mut buf, width, signum, y as f64, (y + 1) as f64, a.0);
-            }
-        } else {
-            let int = Intersection::new(*a, *b);
-            if 0.0 <= upper {
-                if lower <= upper.ceil() {
-                    f(&mut buf, width, &int, signum, upper, lower);
-                    continue;
-                }
-                f(&mut buf, width, &int, signum, upper, upper.ceil());
-            }
-            if lower < height as f64 {
-                f(&mut buf, width, &int, signum, lower.floor(), lower);
-            }
-            for y in (upper.ceil() as i32).max(0)..(lower.floor() as i32).min(height as i32) {
-                f(&mut buf, width, &int, signum, y as f64, (y + 1) as f64);
-            }
+    buffer: Vec<f64>,
+}
+
+impl Rasterize {
+    pub fn new(width: u32, height: u32) -> Rasterize {
+        Rasterize {
+            width,
+            height,
+            buffer: vec![0.0; (width * height) as usize],
         }
     }
-    if write_transparent_src {
-        for y in 0..height {
-            let mut acc = 0.0;
-            for x in 0..width {
-                acc += buf[(y * width + x) as usize];
-                writer(x, y, fill_rule.apply(acc));
+
+    pub fn clear(&mut self) {
+        for i in 0..(self.width * self.height) as usize {
+            self.buffer[i] = 0.0;
+        }
+    }
+
+    pub fn rasterize<I: Iterator<Item = PathItem>, F: FnMut(u32, u32, f64), FR: FillRule>(&mut self, pis: I, fill_rule: FR, writer: &mut F, write_transparent_src: bool) {
+        self.clear();
+        for pi in pis {
+            let Line(a, b)  = match pi {
+                PathItem::Line(l) => l,
+                PathItem::CloseAndJump | PathItem::Jump => continue,
+                _ => panic!("Un-line passed to draw_fill_only_lines"),
+            };
+            if a.1 == b.1 {
+                continue;
+            }
+            let (a, b, signum) = if a.1 < b.1 {
+                (a, b, -1.0)
+            } else {
+                (b, a, 1.0)
+            };
+            let upper = a.1;
+            let lower = b.1;
+            if lower < 0.0 || self.height as f64 <= upper {
+                continue;
+            }
+            if a.0 == b.0 {
+                if 0.0 <= upper {
+                    if lower <= upper.ceil() {
+                        f2(&mut self.buffer, self.width, signum, upper, lower, a.0);
+                        continue;
+                    }
+                    f2(&mut self.buffer, self.width, signum, upper, upper.ceil(), a.0);
+                }
+                if lower < self.height as f64 {
+                    f2(&mut self.buffer, self.width, signum, lower.floor(), lower, a.0);
+                }
+                for y in (upper.ceil() as i32).max(0)..(lower.floor() as i32).min(self.height as i32) {
+                    f2(&mut self.buffer, self.width, signum, y as f64, (y + 1) as f64, a.0);
+                }
+            } else {
+                let int = Intersection::new(a, b);
+                if 0.0 <= upper {
+                    if lower <= upper.ceil() {
+                        f(&mut self.buffer, self.width, &int, signum, upper, lower);
+                        continue;
+                    }
+                    f(&mut self.buffer, self.width, &int, signum, upper, upper.ceil());
+                }
+                if lower < self.height as f64 {
+                    f(&mut self.buffer, self.width, &int, signum, lower.floor(), lower);
+                }
+                for y in (upper.ceil() as i32).max(0)..(lower.floor() as i32).min(self.height as i32) {
+                    f(&mut self.buffer, self.width, &int, signum, y as f64, (y + 1) as f64);
+                }
             }
         }
-    } else  {
-        for y in 0..height {
-            let mut acc = 0.0;
-            for x in 0..width {
-                acc += buf[(y * width + x) as usize];
-                let v = fill_rule.apply(acc);
-                if v != 0.0 {
-                    writer(x, y, v);
+        if write_transparent_src {
+            for y in 0..self.height {
+                let mut acc = 0.0;
+                for x in 0..self.width {
+                    acc += self.buffer[(y * self.width + x) as usize];
+                    writer(x, y, fill_rule.apply(acc));
+                }
+            }
+        } else  {
+            for y in 0..self.height {
+                let mut acc = 0.0;
+                for x in 0..self.width {
+                    acc += self.buffer[(y * self.width + x) as usize];
+                    let v = fill_rule.apply(acc);
+                    if v != 0.0 {
+                        writer(x, y, v);
+                    }
                 }
             }
         }

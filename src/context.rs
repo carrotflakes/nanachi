@@ -1,17 +1,18 @@
 use crate::{
+    buffer::Buffer,
     compositor::Compositor,
     fill_color::{FillColor, Transform},
     fill_path::{draw_fill, draw_fill_no_aa},
+    fill_path2::Rasterize,
     fill_rule::FillRule,
     matrix::Matrix2d,
     path::Path,
-    path_flatten::path_flatten,
+    path_flatten::{path_flatten, path_flatten_only_cubic},
     path_outline::{path_outline, Cap, Join},
     path_transform::path_transform,
     pixel::Pixel,
     point::Point,
     writer::img_writer,
-    buffer::Buffer,
 };
 
 pub struct FillStyle<P, FC, C, FR>
@@ -38,6 +39,8 @@ where
 
 pub struct Context<'a, P: Pixel, B: Buffer<P>> {
     pub image: &'a mut B,
+    rasterize: Rasterize,
+    pub flatten: bool,
     pub flatten_tolerance: f64,
     pub antialiasing: bool,
     pub join: Join,
@@ -52,8 +55,11 @@ where
     B: Buffer<P>,
 {
     pub fn from_image(image: &'a mut B) -> Context<'a, P, B> {
+        let (width, height) = image.dimensions();
         Context {
             image,
+            rasterize: Rasterize::new(width, height),
+            flatten: true,
             flatten_tolerance: 1.0,
             antialiasing: true,
             join: Join::Bevel,
@@ -65,6 +71,7 @@ where
 
     pub fn low_quality(self) -> Context<'a, P, B> {
         Context {
+            flatten: true,
             flatten_tolerance: 2.0,
             antialiasing: false,
             join: Join::Bevel,
@@ -75,6 +82,7 @@ where
 
     pub fn high_quality(self) -> Context<'a, P, B> {
         Context {
+            flatten: false,
             flatten_tolerance: 0.1,
             antialiasing: true,
             join: Join::Round,
@@ -86,6 +94,8 @@ where
     pub fn child<'b>(&'b mut self) -> Context<'b, P, B> {
         Context {
             image: self.image,
+            rasterize: self.rasterize.clone(),
+            flatten: self.flatten,
             flatten_tolerance: self.flatten_tolerance,
             antialiasing: self.antialiasing,
             join: self.join.clone(),
@@ -107,12 +117,7 @@ where
         path: &Path,
         fill_style: &FillStyle<P, FC, C, FR>,
     ) {
-        let path = if self.matrix.is_unit() {
-            path_flatten(path, self.flatten_tolerance)
-        } else {
-            let path = path_transform(path, &self.matrix);
-            path_flatten(&path, self.flatten_tolerance)
-        };
+        let path = self.path_transform_and_flatten(path);
         self.fill_(fill_style, &path, self.antialiasing);
     }
 
@@ -122,12 +127,7 @@ where
         fill_style: &FillStyle<P, FC, C, FR>,
         width: f64,
     ) {
-        let path = if self.matrix.is_unit() {
-            path_flatten(path, self.flatten_tolerance)
-        } else {
-            let path = path_transform(path, &self.matrix);
-            path_flatten(&path, self.flatten_tolerance)
-        };
+        let path = self.path_transform_and_flatten(path);
         let path = path_outline(&path, width / 2.0, &self.join, &self.cap);
         self.fill_(fill_style, &path, self.antialiasing);
     }
@@ -140,14 +140,26 @@ where
         join: &Join,
         cap: &Cap,
     ) {
-        let path = if self.matrix.is_unit() {
-            path_flatten(path, self.flatten_tolerance)
-        } else {
-            let path = path_transform(path, &self.matrix);
-            path_flatten(&path, self.flatten_tolerance)
-        };
+        let path = self.path_transform_and_flatten(path);
         let path = path_outline(&path, width / 2.0, join, cap);
         self.fill_(fill_style, &path, self.antialiasing);
+    }
+
+    pub fn path_transform_and_flatten(&self, path: &Path) -> Path {
+        if self.matrix.is_unit() {
+            if self.flatten {
+                path_flatten(path, self.flatten_tolerance)
+            } else {
+                path_flatten_only_cubic(path, self.flatten_tolerance)
+            }
+        } else {
+            let path = path_transform(path, &self.matrix);
+            if self.flatten {
+                path_flatten(&path, self.flatten_tolerance)
+            } else {
+                path_flatten_only_cubic(&path, self.flatten_tolerance)
+            }
+        }
     }
 
     pub fn clear<FC: FillColor<P>>(&mut self, fill_color: &FC) {
@@ -172,7 +184,14 @@ where
         let color = Transform::new(&fill_style.color, self.matrix);
         let mut writer = img_writer(self.image, &color, &fill_style.compositor);
         if antialiasing {
-            draw_fill(width, height, &path, fill_style.fill_rule, &mut writer, !fill_style.compositor.keep_dst_on_transparent_src());
+            let pis = crate::path_flatten::Flatten::new(path.0.iter(), self.flatten_tolerance);
+            self.rasterize.rasterize(
+                pis,
+                fill_style.fill_rule,
+                &mut writer,
+                !fill_style.compositor.keep_dst_on_transparent_src(),
+            );
+        // draw_fill(width, height, &path, fill_style.fill_rule, &mut writer, !fill_style.compositor.keep_dst_on_transparent_src());
         } else {
             draw_fill_no_aa(width, height, &path, fill_style.fill_rule, &mut writer);
         }

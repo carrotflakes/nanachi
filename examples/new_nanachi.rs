@@ -19,6 +19,7 @@ fn main() {
     let (width, height) = (512, 512);
     let mut img = ImageBuffer::new(width, height);
     let mut context = Context::from_image(&mut img).high_quality();
+    context.flatten = true;
     context.clear(&fill_color::LinearGradient::new(
         (0.0, 0.0),
         (0.0, height as f64),
@@ -30,6 +31,8 @@ fn main() {
 
     let t = std::time::Instant::now();
     draw_stars(context.child());
+    println!("elapsed: {:?}", t.elapsed());
+    let t = std::time::Instant::now();
     draw_nanachi(context.child());
     println!("elapsed: {:?}", t.elapsed());
 
