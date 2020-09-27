@@ -1,8 +1,9 @@
 use nanachi::{
+    buffer::GenericBuffer,
     compositor,
     context::{ChildContext, Context, FillStyle},
     fill_color, fill_rule,
-    image::{ImageBuffer, Rgba},
+    image::Rgba,
     image_crate_adapter::buffer_rgba_f32_to_rgba_image,
     k_curve::k_curve,
     matrix::Matrix2d,
@@ -17,8 +18,7 @@ use std::f64::consts::PI;
 
 fn main() {
     let (width, height) = (512, 512);
-    let mut img = ImageBuffer::new(width, height);
-    let mut context = Context::from_image(&mut img).high_quality();
+    let mut context = Context::new(width, height, Rgba([1.0f32, 1.0, 1.0, 1.0])).high_quality();
     context.flatten = true;
     context.clear(&fill_color::LinearGradient::new(
         (0.0, 0.0),
@@ -36,12 +36,12 @@ fn main() {
     draw_nanachi(context.child());
     println!("elapsed: {:?}", t.elapsed());
 
-    let img = buffer_rgba_f32_to_rgba_image(&img);
+    let img = buffer_rgba_f32_to_rgba_image(&context.image);
     let res = img.save("./nanachi.png");
     println!("{:?}", res);
 }
 
-fn draw_stars<'a>(mut context: ChildContext<'a, Rgba<f32>, ImageBuffer<Rgba<f32>, Vec<f32>>>) {
+fn draw_stars<'a>(mut context: ChildContext<'a, Rgba<f32>, GenericBuffer<Rgba<f32>>>) {
     let spoke = (2.0 * PI / 5.0).cos() / (1.0 * PI / 5.0).cos();
     let mut pb = PathBuilder::new();
     for i in 0..10 {
@@ -103,7 +103,7 @@ fn draw_stars<'a>(mut context: ChildContext<'a, Rgba<f32>, ImageBuffer<Rgba<f32>
     }
 }
 
-fn draw_nanachi<'a>(mut context: ChildContext<'a, Rgba<f32>, ImageBuffer<Rgba<f32>, Vec<f32>>>) {
+fn draw_nanachi<'a>(mut context: ChildContext<'a, Rgba<f32>, GenericBuffer<Rgba<f32>>>) {
     let (width, height) = (512.0, 512.0);
     let nanachi_path = path_data_notation::parse(
         "

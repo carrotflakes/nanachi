@@ -1,5 +1,5 @@
 use crate::{
-    buffer::Buffer,
+    buffer::{Buffer, GenericBuffer},
     compositor::Compositor,
     fill_color::{FillColor, Transform},
     fill_rule::FillRule,
@@ -173,6 +173,26 @@ where
                 &mut writer,
                 !fill_style.compositor.keep_dst_on_transparent_src(),
             );
+        }
+    }
+}
+
+impl<'a, P> Context<P, GenericBuffer<P>, GenericBuffer<P>, Rasterizer>
+where
+    P: Pixel,
+{
+    pub fn new(width: u32, height: u32, pixel: P) -> Self {
+        Context {
+            image: GenericBuffer::new(width, height, pixel),
+            rasterizer: Rasterizer::new(width, height),
+            flatten: true,
+            flatten_tolerance: 1.0,
+            antialiasing: true,
+            join: Join::Bevel,
+            cap: Cap::Butt,
+            matrix: Matrix2d::default(),
+            pixel: Default::default(),
+            b: Default::default(),
         }
     }
 }
