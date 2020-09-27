@@ -93,7 +93,7 @@ where
         fill_style: &FillStyle<P, FC, C, FR>,
     ) {
         let path = self.path_transform_and_flatten(path);
-        self.fill_(fill_style, &path, self.antialiasing);
+        self.fill_(fill_style, &path);
     }
 
     pub fn stroke<FC: FillColor<P>, C: Compositor<P>, FR: FillRule>(
@@ -104,7 +104,7 @@ where
     ) {
         let path = self.path_transform_and_flatten(path);
         let path = path_outline(&path, width / 2.0, &self.join, &self.cap);
-        self.fill_(fill_style, &path, self.antialiasing);
+        self.fill_(fill_style, &path);
     }
 
     pub fn stroke_with_style<FC: FillColor<P>, C: Compositor<P>, FR: FillRule>(
@@ -117,7 +117,7 @@ where
     ) {
         let path = self.path_transform_and_flatten(path);
         let path = path_outline(&path, width / 2.0, join, cap);
-        self.fill_(fill_style, &path, self.antialiasing);
+        self.fill_(fill_style, &path);
     }
 
     pub fn path_transform_and_flatten(&self, path: &Path) -> Path {
@@ -154,12 +154,11 @@ where
         &mut self,
         fill_style: &FillStyle<P, FC, C, FR>,
         path: &Path,
-        antialiasing: bool,
     ) {
         let color = Transform::new(&fill_style.color, self.matrix);
         let mut writer = img_writer(self.image.borrow_mut(), &color, &fill_style.compositor);
         let pis = crate::path_flatten::Flatten::new(path.0.iter(), self.flatten_tolerance);
-        if antialiasing {
+        if self.antialiasing {
             self.rasterizer.borrow_mut().rasterize(
                 pis,
                 fill_style.fill_rule,
