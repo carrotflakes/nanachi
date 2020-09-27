@@ -13,7 +13,9 @@ use crate::{
     rasterizer::Rasterizer,
     writer::img_writer,
 };
-use std::borrow::Cow;
+use std::borrow::BorrowMut;
+
+pub type ChildContext<'a, P, B> = Context<P, B, &'a mut B, &'a mut Rasterizer>;
 
 pub struct FillStyle<P, FC, C, FR>
 where
@@ -37,39 +39,33 @@ where
 {
 }
 
-pub struct Context<'a, P: Pixel, B: Buffer<P>> {
-    pub image: &'a mut B,
-    rasterizer: Cow<'a, Rasterizer>,
+pub struct Context<P, B, I, R>
+where
+    P: Pixel,
+    B: Buffer<P>,
+    I: BorrowMut<B>,
+    R: BorrowMut<Rasterizer>,
+{
+    pub image: I,
     pub flatten: bool,
     pub flatten_tolerance: f64,
     pub antialiasing: bool,
     pub join: Join,
     pub cap: Cap,
     pub matrix: Matrix2d,
-    pub pixel: std::marker::PhantomData<P>,
+    rasterizer: R,
+    pixel: std::marker::PhantomData<P>,
+    b: std::marker::PhantomData<B>,
 }
 
-impl<'a, P, B> Context<'a, P, B>
+impl<P, B, I, R> Context<P, B, I, R>
 where
     P: Pixel,
     B: Buffer<P>,
+    I: BorrowMut<B>,
+    R: BorrowMut<Rasterizer>,
 {
-    pub fn from_image(image: &'a mut B) -> Context<'a, P, B> {
-        let (width, height) = image.dimensions();
-        Context {
-            image,
-            rasterizer: Cow::Owned(Rasterizer::new(width, height)),
-            flatten: true,
-            flatten_tolerance: 1.0,
-            antialiasing: true,
-            join: Join::Bevel,
-            cap: Cap::Butt,
-            matrix: Matrix2d::default(),
-            pixel: Default::default(),
-        }
-    }
-
-    pub fn low_quality(self) -> Context<'a, P, B> {
+    pub fn low_quality(self) -> Context<P, B, I, R> {
         Context {
             flatten: true,
             flatten_tolerance: 2.0,
@@ -80,7 +76,7 @@ where
         }
     }
 
-    pub fn high_quality(self) -> Context<'a, P, B> {
+    pub fn high_quality(self) -> Context<P, B, I, R> {
         Context {
             flatten: false,
             flatten_tolerance: 0.1,
@@ -88,27 +84,6 @@ where
             join: Join::Round,
             cap: Cap::Round,
             ..self
-        }
-    }
-
-    pub fn child<'b>(&'b mut self) -> Context<'b, P, B> {
-        Context {
-            image: self.image,
-            rasterizer: Cow::Borrowed(self.rasterizer.to_mut()),
-            flatten: self.flatten,
-            flatten_tolerance: self.flatten_tolerance,
-            antialiasing: self.antialiasing,
-            join: self.join.clone(),
-            cap: self.cap.clone(),
-            matrix: self.matrix,
-            pixel: self.pixel,
-        }
-    }
-
-    pub fn transformed_context<'b>(&'b mut self, matrix: &Matrix2d) -> Context<'b, P, B> {
-        Context {
-            matrix: self.matrix.then(&matrix),
-            ..self.child()
         }
     }
 
@@ -163,12 +138,13 @@ where
     }
 
     pub fn clear<FC: FillColor<P>>(&mut self, fill_color: &FC) {
-        let (w, h) = self.image.dimensions();
+        let image = self.image.borrow_mut();
+        let (w, h) = image.dimensions();
         let inverted_matrix = self.matrix.inverse();
         for y in 0..h {
             for x in 0..w {
                 let p = inverted_matrix.apply(Point(x as f64, y as f64));
-                self.image.put_pixel(x, y, fill_color.fill_color(p.0, p.1));
+                image.put_pixel(x, y, fill_color.fill_color(p.0, p.1));
             }
         }
     }
@@ -181,22 +157,74 @@ where
         antialiasing: bool,
     ) {
         let color = Transform::new(&fill_style.color, self.matrix);
-        let mut writer = img_writer(self.image, &color, &fill_style.compositor);
+        let mut writer = img_writer(self.image.borrow_mut(), &color, &fill_style.compositor);
         let pis = crate::path_flatten::Flatten::new(path.0.iter(), self.flatten_tolerance);
         if antialiasing {
-            self.rasterizer.to_mut().rasterize(
+            self.rasterizer.borrow_mut().rasterize(
                 pis,
                 fill_style.fill_rule,
                 &mut writer,
                 !fill_style.compositor.keep_dst_on_transparent_src(),
             );
         } else {
-            self.rasterizer.to_mut().rasterize_no_aa(
+            self.rasterizer.borrow_mut().rasterize_no_aa(
                 pis,
                 fill_style.fill_rule,
                 &mut writer,
                 !fill_style.compositor.keep_dst_on_transparent_src(),
             );
+        }
+    }
+}
+
+impl<'a, P, B> Context<P, B, &'a mut B, Rasterizer>
+where
+    P: Pixel,
+    B: Buffer<P>,
+{
+    pub fn from_image(image: &'a mut B) -> Self {
+        let (width, height) = image.dimensions();
+        Context {
+            image,
+            rasterizer: Rasterizer::new(width, height),
+            flatten: true,
+            flatten_tolerance: 1.0,
+            antialiasing: true,
+            join: Join::Bevel,
+            cap: Cap::Butt,
+            matrix: Matrix2d::default(),
+            pixel: Default::default(),
+            b: Default::default(),
+        }
+    }
+}
+
+impl<'a, P, B, I, R> Context<P, B, I, R>
+where
+    P: Pixel,
+    B: Buffer<P>,
+    I: BorrowMut<B>,
+    R: BorrowMut<Rasterizer>,
+{
+    pub fn child<'b>(&'b mut self) -> ChildContext<'b, P, B> {
+        Context {
+            image: self.image.borrow_mut(),
+            rasterizer: self.rasterizer.borrow_mut(),
+            flatten: self.flatten,
+            flatten_tolerance: self.flatten_tolerance,
+            antialiasing: self.antialiasing,
+            join: self.join.clone(),
+            cap: self.cap.clone(),
+            matrix: self.matrix,
+            pixel: self.pixel,
+            b: Default::default(),
+        }
+    }
+
+    pub fn transformed_context<'b>(&'b mut self, matrix: &Matrix2d) -> ChildContext<'b, P, B> {
+        Context {
+            matrix: self.matrix.then(&matrix),
+            ..self.child()
         }
     }
 }

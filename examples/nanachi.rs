@@ -1,6 +1,6 @@
 use nanachi::{
     compositor,
-    context::{Context, FillStyle},
+    context::{ChildContext, Context, FillStyle},
     fill_color, fill_rule,
     image::{ImageBuffer, Rgba},
     image_crate_adapter::buffer_rgba_f32_to_rgba_image,
@@ -41,7 +41,7 @@ fn main() {
     println!("{:?}", res);
 }
 
-fn draw_stars<'a>(mut context: Context<'a, Rgba<f32>, ImageBuffer<Rgba<f32>, Vec<f32>>>) {
+fn draw_stars<'a>(mut context: ChildContext<'a, Rgba<f32>, ImageBuffer<Rgba<f32>, Vec<f32>>>) {
     let spoke = (2.0 * PI / 5.0).cos() / (1.0 * PI / 5.0).cos();
     let mut pb = PathBuilder::new();
     for i in 0..10 {
@@ -103,7 +103,7 @@ fn draw_stars<'a>(mut context: Context<'a, Rgba<f32>, ImageBuffer<Rgba<f32>, Vec
     }
 }
 
-fn draw_nanachi<'a>(mut context: Context<'a, Rgba<f32>, ImageBuffer<Rgba<f32>, Vec<f32>>>) {
+fn draw_nanachi<'a>(mut context: ChildContext<'a, Rgba<f32>, ImageBuffer<Rgba<f32>, Vec<f32>>>) {
     let (width, height) = (512.0, 512.0);
     let nanachi_path = path_data_notation::parse(
         "
@@ -163,10 +163,7 @@ fn draw_nanachi<'a>(mut context: Context<'a, Rgba<f32>, ImageBuffer<Rgba<f32>, V
     ",
     )
     .unwrap();
-    let nanachi_path = path_transform(
-        &nanachi_path,
-        &Matrix2d::new().scale(width, height),
-    );
+    let nanachi_path = path_transform(&nanachi_path, &Matrix2d::new().scale(width, height));
 
     let moji_path = path_data_notation::parse(
         "
@@ -195,10 +192,7 @@ fn draw_nanachi<'a>(mut context: Context<'a, Rgba<f32>, ImageBuffer<Rgba<f32>, V
     ",
     )
     .unwrap();
-    let moji_path = path_transform(
-        &moji_path,
-        &Matrix2d::new().scale(width, height),
-    );
+    let moji_path = path_transform(&moji_path, &Matrix2d::new().scale(width, height));
 
     let shape = path_data_notation::parse(
         "
