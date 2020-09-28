@@ -185,9 +185,9 @@ impl<'a, P> Context<P, GenericBuffer<P>, GenericBuffer<P>, Rasterizer>
 where
     P: Pixel,
 {
-    pub fn new(width: u32, height: u32, pixel: P) -> Self {
+    pub fn from_pixel(width: u32, height: u32, pixel: P) -> Self {
         Context {
-            image: GenericBuffer::new(width, height, pixel),
+            image: GenericBuffer::from_pixel(width, height, pixel),
             rasterizer: Rasterizer::new(width, height),
             flatten: true,
             flatten_tolerance: 1.0,

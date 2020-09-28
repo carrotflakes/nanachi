@@ -12,7 +12,7 @@ use nanachi::{
 
 fn main() {
     let (width, height) = (320, 320);
-    let mut img = GenericBuffer::new(width, height, rgba(250, 250, 250, 0));
+    let mut img = GenericBuffer::from_pixel(width, height, rgba(250, 250, 250, 0));
 
     #[allow(arithmetic_overflow)]
     let mut i = 0 - 1;
@@ -73,7 +73,7 @@ fn f<C: compositor::Compositor<Rgba> + 'static>(img: &mut GenericBuffer<Rgba>, i
             (0.9, rgba(0, 255, 255, 255)),
         ]);
 
-    let mut img2 = GenericBuffer::new(60, 60, rgba(250, 250, 250, 0));
+    let mut img2 = GenericBuffer::from_pixel(60, 60, rgba(250, 250, 250, 0));
     draw_fill(
         &mut img2,
         &path,

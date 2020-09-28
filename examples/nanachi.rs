@@ -18,7 +18,7 @@ use std::f64::consts::PI;
 
 fn main() {
     let (width, height) = (512, 512);
-    let mut context = Context::new(width, height, Rgba([1.0f32, 1.0, 1.0, 1.0])).high_quality();
+    let mut context = Context::from_pixel(width, height, Rgba([1.0f32, 1.0, 1.0, 1.0])).high_quality();
     context.flatten = true;
     context.clear(&fill_color::LinearGradient::new(
         (0.0, 0.0),

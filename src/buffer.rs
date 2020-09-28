@@ -35,7 +35,7 @@ impl<P: Pixel> Buffer<P> for GenericBuffer<P> {
 }
 
 impl<P: Pixel> GenericBuffer<P> {
-    pub fn new(width: u32, height: u32, pixel: P) -> Self {
+    pub fn from_pixel(width: u32, height: u32, pixel: P) -> Self {
         GenericBuffer {
             width,
             height,
