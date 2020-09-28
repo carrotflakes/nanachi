@@ -3,14 +3,14 @@ use nanachi::{
     compositor,
     context::{ChildContext, Context, FillStyle},
     fill_color, fill_rule,
-    image::Rgba,
-    image_crate_adapter::buffer_rgba_f32_to_rgba_image,
+    image_crate_adapter::buffer_rgba_to_rgba_image,
     k_curve::k_curve,
     matrix::Matrix2d,
     path::Path,
     path_builder::PathBuilder,
     path_data_notation,
     path_transform::path_transform,
+    pixel::Rgba,
 };
 use rand_core::RngCore;
 use rand_pcg::Pcg32;
@@ -36,12 +36,12 @@ fn main() {
     draw_nanachi(context.child());
     println!("elapsed: {:?}", t.elapsed());
 
-    let img = buffer_rgba_f32_to_rgba_image(&context.image);
+    let img = buffer_rgba_to_rgba_image(&context.image);
     let res = img.save("./nanachi.png");
     println!("{:?}", res);
 }
 
-fn draw_stars<'a>(mut context: ChildContext<'a, Rgba<f32>, GenericBuffer<Rgba<f32>>>) {
+fn draw_stars<'a>(mut context: ChildContext<'a, Rgba, GenericBuffer<Rgba>>) {
     let spoke = (2.0 * PI / 5.0).cos() / (1.0 * PI / 5.0).cos();
     let mut pb = PathBuilder::new();
     for i in 0..10 {
@@ -103,7 +103,7 @@ fn draw_stars<'a>(mut context: ChildContext<'a, Rgba<f32>, GenericBuffer<Rgba<f3
     }
 }
 
-fn draw_nanachi<'a>(mut context: ChildContext<'a, Rgba<f32>, GenericBuffer<Rgba<f32>>>) {
+fn draw_nanachi<'a>(mut context: ChildContext<'a, Rgba, GenericBuffer<Rgba>>) {
     let (width, height) = (512.0, 512.0);
     let nanachi_path = path_data_notation::parse(
         "
@@ -269,7 +269,7 @@ fn draw_nanachi<'a>(mut context: ChildContext<'a, Rgba<f32>, GenericBuffer<Rgba<
     context.stroke(&path, &fill_style, 4.0);
 }
 
-fn rgba(r: u8, g: u8, b: u8, a: u8) -> Rgba<f32> {
+fn rgba(r: u8, g: u8, b: u8, a: u8) -> Rgba {
     Rgba([
         r as f32 / 255.0,
         g as f32 / 255.0,

@@ -1,4 +1,3 @@
-#[cfg(feature = "image-crate")]
 pub mod basic_f32;
 #[cfg(feature = "image-crate")]
 pub mod image_rgb_rgba;
@@ -120,10 +119,9 @@ impl CompositorAttr for Basic {
     }
 }
 
-#[cfg(feature = "image-crate")]
 pub mod perf {
+    use crate::pixel::Rgba;
     use super::*;
-    use image::{Rgb, Rgba};
 
     pub struct Perf;
 
@@ -133,23 +131,25 @@ pub mod perf {
         }
     }
 
-    impl Compositor<Rgba<u8>> for Perf {
+    #[cfg(feature = "image-crate")]
+    impl Compositor<image::Rgba<u8>> for Perf {
         #[allow(unused_variables)]
-        fn composite(&self, a: &Rgba<u8>, b: &Rgba<u8>, alpha: f64) -> Rgba<u8> {
-            Rgba([a.0[0], b.0[0], alpha as u8, 255])
+        fn composite(&self, a: &image::Rgba<u8>, b: &image::Rgba<u8>, alpha: f64) -> image::Rgba<u8> {
+            image::Rgba([a.0[0], b.0[0], alpha as u8, 255])
         }
     }
 
-    impl Compositor<Rgb<u8>> for Perf {
+    #[cfg(feature = "image-crate")]
+    impl Compositor<image::Rgb<u8>> for Perf {
         #[allow(unused_variables)]
-        fn composite(&self, a: &Rgb<u8>, b: &Rgb<u8>, alpha: f64) -> Rgb<u8> {
-            Rgb([a.0[0], b.0[0], alpha as u8])
+        fn composite(&self, a: &image::Rgb<u8>, b: &image::Rgb<u8>, alpha: f64) -> image::Rgb<u8> {
+            image::Rgb([a.0[0], b.0[0], alpha as u8])
         }
     }
 
-    impl Compositor<Rgba<f32>> for Perf {
+    impl Compositor<Rgba> for Perf {
         #[allow(unused_variables)]
-        fn composite(&self, a: &Rgba<f32>, b: &Rgba<f32>, alpha: f64) -> Rgba<f32> {
+        fn composite(&self, a: &Rgba, b: &Rgba, alpha: f64) -> Rgba {
             Rgba([a.0[0], b.0[0], alpha as f32, 1.0])
         }
     }

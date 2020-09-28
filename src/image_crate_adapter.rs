@@ -17,14 +17,6 @@ impl Pixel for image::Rgba<u8> {
         })
     }
 }
-impl Pixel for image::Rgba<f32> {
-    fn lerp(&self, rhs: &Self, rate: f64) -> Self {
-        use image::Pixel;
-        self.clone().map2(&rhs, |a, b| {
-            a * (1.0 - rate as f32) + b * rate as f32
-        })
-    }
-}
 
 impl<S: image::Primitive + 'static, P: Pixel + image::Pixel<Subpixel = S> + 'static> Buffer<P>
     for image::ImageBuffer<P, Vec<S>>
@@ -46,7 +38,7 @@ impl<S: image::Primitive + 'static, P: Pixel + image::Pixel<Subpixel = S> + 'sta
     }
 }
 
-pub fn buffer_rgba_f32_to_rgba_image(buffer: &impl Buffer<image::Rgba<f32>>) -> image::RgbaImage {
+pub fn buffer_rgba_to_rgba_image(buffer: &impl Buffer<crate::pixel::Rgba>) -> image::RgbaImage {
     image::RgbaImage::from_fn(buffer.dimensions().0, buffer.dimensions().1, |x, y| {
         let p = buffer.get_pixel(x, y);
         image::Rgba([

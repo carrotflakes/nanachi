@@ -1,14 +1,14 @@
 use super::*;
-use image::Rgba;
+use crate::pixel::Rgba;
 
 macro_rules! def_linear_compositor {
     (
         $name:ident ($aa:ident, $ba:ident => $ca:ident, $ax:ident, $bx:ident)
         {$($rest1:tt)+} {$($rest2:tt)+}
     ) => {
-        impl Compositor<Rgba<f32>> for $name {
+        impl Compositor<Rgba> for $name {
             #[allow(unused_variables)]
-            fn composite(&self, a: &Rgba<f32>, b: &Rgba<f32>, alpha: f64) -> Rgba<f32> {
+            fn composite(&self, a: &Rgba, b: &Rgba, alpha: f64) -> Rgba {
                 let $aa = a.0[3];
                 let $ba = b.0[3] * alpha as f32;
                 $($rest1)+
@@ -186,9 +186,9 @@ macro_rules! def_compositor {
         $name:ident ($a:ident, $b:ident, $aa:ident, $ba:ident, $ca:ident)
         {$($rest1:tt)+} [$($rest2:expr,)+]
     ) => {
-        impl Compositor<Rgba<f32>> for $name {
+        impl Compositor<Rgba> for $name {
             #[allow(unused_variables)]
-            fn composite(&self, $a: &Rgba<f32>, $b: &Rgba<f32>, alpha: f64) -> Rgba<f32> {
+            fn composite(&self, $a: &Rgba, $b: &Rgba, alpha: f64) -> Rgba {
                 let $aa = $a.0[3];
                 let $ba = $b.0[3] * alpha as f32;
                 $($rest1)+

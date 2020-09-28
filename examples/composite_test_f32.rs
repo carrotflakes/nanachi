@@ -1,17 +1,18 @@
 use nanachi::{
-    image::{ImageBuffer, Rgb, Rgba},
+    buffer::{Buffer, GenericBuffer},
+    pixel::Rgba,
     path::Path,
     path_builder::PathBuilder,
     fill_color,
     path_transform::path_transform,
     matrix::Matrix2d,
     compositor,
-    image_crate_adapter::buffer_rgba_f32_to_rgba_image,
+    image_crate_adapter::buffer_rgba_to_rgba_image,
 };
 
 fn main() {
     let (width, height) = (320, 320);
-    let mut img = ImageBuffer::from_pixel(width, height, rgba(250, 250, 250, 0));
+    let mut img = GenericBuffer::new(width, height, rgba(250, 250, 250, 0));
 
     #[allow(arithmetic_overflow)]
     let mut i = 0 - 1;
@@ -40,12 +41,12 @@ fn main() {
     f(&mut img, {i += 1; i}, compositor::Difference);
     f(&mut img, {i += 1; i}, compositor::Exclusion);
 
-    let img = buffer_rgba_f32_to_rgba_image(&img);
+    let img = buffer_rgba_to_rgba_image(&img);
     let res = img.save("./composite_test_f32.png");
     println!("save: {:?}", res);
 }
 
-fn f<C: compositor::Compositor<Rgba<f32>> + 'static>(img: &mut ImageBuffer<Rgba<f32>, Vec<f32>>, i: usize, c: C) {
+fn f<C: compositor::Compositor<Rgba> + 'static>(img: &mut GenericBuffer<Rgba>, i: usize, c: C) {
     let mut pb = PathBuilder::new();
     pb.move_to(-10.0, -20.0);
     pb.line_to(10.0, -20.0);
@@ -72,7 +73,7 @@ fn f<C: compositor::Compositor<Rgba<f32>> + 'static>(img: &mut ImageBuffer<Rgba<
             (0.9, rgba(0, 255, 255, 255)),
         ]);
 
-    let mut img2 = ImageBuffer::from_pixel(60, 60, rgba(250, 250, 250, 0));
+    let mut img2 = GenericBuffer::new(60, 60, rgba(250, 250, 250, 0));
     draw_fill(
         &mut img2,
         &path,
@@ -96,8 +97,8 @@ fn f<C: compositor::Compositor<Rgba<f32>> + 'static>(img: &mut ImageBuffer<Rgba<
     }
 }
 
-fn draw_fill<C: fill_color::FillColor<Rgba<f32>> + Clone, M: compositor::Compositor<Rgba<f32>> + 'static>(
-    img: &mut ImageBuffer<Rgba<f32>, Vec<f32>>,
+fn draw_fill<C: fill_color::FillColor<Rgba> + Clone, M: compositor::Compositor<Rgba> + 'static>(
+    img: &mut GenericBuffer<Rgba>,
     path: &Path,
     compositor: &M,
     fill_color: &C,
@@ -106,8 +107,8 @@ fn draw_fill<C: fill_color::FillColor<Rgba<f32>> + Clone, M: compositor::Composi
     let path = path_transform(path, &matrix);
     let fill_color = nanachi::fill_color::Transform::new(fill_color, matrix);
     nanachi::fill_path::draw_fill(
-        img.width() as u32,
-        img.height() as u32,
+        img.dimensions().0,
+        img.dimensions().1,
         &path,
         nanachi::fill_rule::NonZero,
         &mut nanachi::writer::img_writer(img, &fill_color, compositor),
@@ -115,6 +116,6 @@ fn draw_fill<C: fill_color::FillColor<Rgba<f32>> + Clone, M: compositor::Composi
     );
 }
 
-fn rgba(r: u8, g: u8, b: u8, a: u8) -> Rgba<f32> {
+fn rgba(r: u8, g: u8, b: u8, a: u8) -> Rgba {
     Rgba([r as f32 / 255.0, g as f32 / 255.0, b as f32 / 255.0, a as f32 / 255.0])
 }
