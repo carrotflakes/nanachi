@@ -17,6 +17,7 @@ use std::borrow::BorrowMut;
 
 pub type ChildContext<'a, P, B> = Context<P, B, &'a mut B, &'a mut Rasterizer>;
 
+#[derive(Clone)]
 pub struct FillStyle<P, FC, C, FR>
 where
     P: Pixel,
