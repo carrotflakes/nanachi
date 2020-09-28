@@ -399,3 +399,35 @@ def_compositor! {
         a2 * ax + b2 * bx + (a2 + b2 - 2.0 * a2 * b2) * cx,
     ]
 }
+
+impl Compositor<Rgba> for Basic {
+    fn composite(&self, a: &Rgba, b: &Rgba, alpha: f64) -> Rgba {
+        use Basic::*;
+        match self {
+            Clear => Clear.composite(a, b, alpha),
+            Src => Src.composite(a, b, alpha),
+            Dst => Dst.composite(a, b, alpha),
+            SrcOver => SrcOver.composite(a, b, alpha),
+            SrcIn => SrcIn.composite(a, b, alpha),
+            SrcOut => SrcOut.composite(a, b, alpha),
+            SrcAtop => SrcAtop.composite(a, b, alpha),
+            DstOver => DstOver.composite(a, b, alpha),
+            DstIn => DstIn.composite(a, b, alpha),
+            DstOut => DstOut.composite(a, b, alpha),
+            DstAtop => DstAtop.composite(a, b, alpha),
+            Xor => Xor.composite(a, b, alpha),
+            Add => Add.composite(a, b, alpha),
+            Darken => Darken.composite(a, b, alpha),
+            Lighten => Lighten.composite(a, b, alpha),
+            Multiply => Multiply.composite(a, b, alpha),
+            Screen => Screen.composite(a, b, alpha),
+            Overlay => Overlay.composite(a, b, alpha),
+            HardLight => HardLight.composite(a, b, alpha),
+            Dodge => Dodge.composite(a, b, alpha),
+            Burn => Burn.composite(a, b, alpha),
+            SoftLight => SoftLight.composite(a, b, alpha),
+            Difference => Difference.composite(a, b, alpha),
+            Exclusion => Exclusion.composite(a, b, alpha),
+        }
+    }
+}
