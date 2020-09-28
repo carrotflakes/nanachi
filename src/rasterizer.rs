@@ -17,11 +17,11 @@ impl Rasterizer {
         }
     }
 
-    pub fn rasterize<I: Iterator<Item = (Point, Point)>, F: FnMut(u32, u32, f64), FR: FillRule>(
+    pub fn rasterize(
         &mut self,
-        segments: I,
-        fill_rule: FR,
-        writer: &mut F,
+        segments: impl Iterator<Item = (Point, Point)>,
+        fill_rule: impl FillRule,
+        writer: &mut impl FnMut(u32, u32, f64),
         write_transparent_src: bool,
     ) {
         let mut bound = [self.width as f64, 0.0f64, self.height as f64, 0.0f64];
@@ -119,11 +119,11 @@ impl Rasterizer {
         self.transfer(fill_rule, writer, write_transparent_src, bound);
     }
 
-    pub fn rasterize_no_aa<I: Iterator<Item = (Point, Point)>, F: FnMut(u32, u32, f64), FR: FillRule>(
+    pub fn rasterize_no_aa(
         &mut self,
-        segments: I,
-        fill_rule: FR,
-        writer: &mut F,
+        segments: impl Iterator<Item = (Point, Point)>,
+        fill_rule: impl FillRule,
+        writer: &mut impl FnMut(u32, u32, f64),
         write_transparent_src: bool,
     ) {
         let mut bound = [self.width as f64, 0.0f64, self.height as f64, 0.0f64];
@@ -150,17 +150,17 @@ impl Rasterizer {
                 if width <= x {
                     continue;
                 }
-                self.buffer[(y * width as usize + x.max(0) as usize) as usize] += signum;
+                self.buffer[y * width as usize + x.max(0) as usize] += signum;
             }
         }
         self.transfer(fill_rule, writer, write_transparent_src, bound);
     }
 
     #[inline]
-    fn transfer<F: FnMut(u32, u32, f64), FR: FillRule>(
+    fn transfer(
         &mut self,
-        fill_rule: FR,
-        writer: &mut F,
+        fill_rule: impl FillRule,
+        writer: &mut impl FnMut(u32, u32, f64),
         write_transparent_src: bool,
         bound: [f64; 4],
     ) {
