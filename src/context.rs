@@ -4,7 +4,7 @@ use crate::{
     fill_color::{FillColor, Transform},
     fill_rule::FillRule,
     matrix::Matrix2d,
-    path::Path,
+    path::{Path, PathItem},
     path_flatten::{path_flatten, path_flatten_only_cubic},
     path_outline::{path_outline, Cap, Join},
     path_transform::path_transform,
@@ -158,16 +158,21 @@ where
         let color = Transform::new(&fill_style.color, self.matrix);
         let mut writer = img_writer(self.image.borrow_mut(), &color, &fill_style.compositor);
         let pis = crate::path_flatten::Flatten::new(path.0.iter(), self.flatten_tolerance);
+        let segments = pis.filter_map(|pi| match pi {
+            PathItem::Line(l) => Some((l.0, l.1)),
+            PathItem::CloseAndJump | PathItem::Jump => None,
+            _ => panic!(),
+        });
         if self.antialiasing {
             self.rasterizer.borrow_mut().rasterize(
-                pis,
+                segments,
                 fill_style.fill_rule,
                 &mut writer,
                 !fill_style.compositor.keep_dst_on_transparent_src(),
             );
         } else {
             self.rasterizer.borrow_mut().rasterize_no_aa(
-                pis,
+                segments,
                 fill_style.fill_rule,
                 &mut writer,
                 !fill_style.compositor.keep_dst_on_transparent_src(),

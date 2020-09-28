@@ -1,6 +1,4 @@
 use crate::fill_rule::FillRule;
-use crate::models::Line;
-use crate::path::PathItem;
 use crate::point::Point;
 
 #[derive(Clone)]
@@ -19,20 +17,15 @@ impl Rasterizer {
         }
     }
 
-    pub fn rasterize<I: Iterator<Item = PathItem>, F: FnMut(u32, u32, f64), FR: FillRule>(
+    pub fn rasterize<I: Iterator<Item = (Point, Point)>, F: FnMut(u32, u32, f64), FR: FillRule>(
         &mut self,
-        pis: I,
+        segments: I,
         fill_rule: FR,
         writer: &mut F,
         write_transparent_src: bool,
     ) {
         let mut bound = [self.width as f64, 0.0f64, self.height as f64, 0.0f64];
-        for pi in pis {
-            let Line(a, b) = match pi {
-                PathItem::Line(l) => l,
-                PathItem::CloseAndJump | PathItem::Jump => continue,
-                _ => panic!("Un-line passed to draw_fill_only_lines"),
-            };
+        for (a, b) in segments {
             if a.1 == b.1 {
                 continue;
             }
@@ -126,20 +119,15 @@ impl Rasterizer {
         self.transfer(fill_rule, writer, write_transparent_src, bound);
     }
 
-    pub fn rasterize_no_aa<I: Iterator<Item = PathItem>, F: FnMut(u32, u32, f64), FR: FillRule>(
+    pub fn rasterize_no_aa<I: Iterator<Item = (Point, Point)>, F: FnMut(u32, u32, f64), FR: FillRule>(
         &mut self,
-        pis: I,
+        segments: I,
         fill_rule: FR,
         writer: &mut F,
         write_transparent_src: bool,
     ) {
         let mut bound = [self.width as f64, 0.0f64, self.height as f64, 0.0f64];
-        for pi in pis {
-            let Line(a, b) = match pi {
-                PathItem::Line(l) => l,
-                PathItem::CloseAndJump | PathItem::Jump => continue,
-                _ => panic!("Un-line passed to draw_fill_only_lines"),
-            };
+        for (a, b) in segments {
             if a.1 == b.1 {
                 continue;
             }
