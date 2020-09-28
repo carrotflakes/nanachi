@@ -1,4 +1,4 @@
-use crate::buffer::Buffer;
+use crate::buffer::{Buffer, GenericBuffer};
 use crate::pixel::Pixel;
 
 impl Pixel for image::Rgb<u8> {
@@ -38,14 +38,16 @@ impl<S: image::Primitive + 'static, P: Pixel + image::Pixel<Subpixel = S> + 'sta
     }
 }
 
-pub fn buffer_rgba_to_rgba_image(buffer: &impl Buffer<crate::pixel::Rgba>) -> image::RgbaImage {
-    image::RgbaImage::from_fn(buffer.dimensions().0, buffer.dimensions().1, |x, y| {
-        let p = buffer.get_pixel(x, y);
-        image::Rgba([
-            (p.0[0].min(1.0).max(0.0) * 255.0).round() as u8,
-            (p.0[1].min(1.0).max(0.0) * 255.0).round() as u8,
-            (p.0[2].min(1.0).max(0.0) * 255.0).round() as u8,
-            (p.0[3].min(1.0).max(0.0) * 255.0).round() as u8,
-        ])
-    })
+impl Into<image::RgbaImage> for &GenericBuffer<crate::pixel::Rgba> {
+    fn into(self) -> image::RgbaImage {
+        image::RgbaImage::from_fn(self.dimensions().0, self.dimensions().1, |x, y| {
+            let p = self.get_pixel(x, y);
+            image::Rgba([
+                (p.0[0].min(1.0).max(0.0) * 255.0).round() as u8,
+                (p.0[1].min(1.0).max(0.0) * 255.0).round() as u8,
+                (p.0[2].min(1.0).max(0.0) * 255.0).round() as u8,
+                (p.0[3].min(1.0).max(0.0) * 255.0).round() as u8,
+            ])
+        })
+    }
 }

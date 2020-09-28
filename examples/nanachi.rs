@@ -3,7 +3,7 @@ use nanachi::{
     compositor,
     context::{ChildContext, Context, FillStyle},
     fill_color, fill_rule,
-    image_crate_adapter::buffer_rgba_to_rgba_image,
+    image::RgbaImage,
     k_curve::k_curve,
     matrix::Matrix2d,
     path::Path,
@@ -36,7 +36,7 @@ fn main() {
     draw_nanachi(context.child());
     println!("elapsed: {:?}", t.elapsed());
 
-    let img = buffer_rgba_to_rgba_image(&context.image);
+    let img: RgbaImage = (&context.image).into();
     let res = img.save("./nanachi.png");
     println!("{:?}", res);
 }

@@ -7,7 +7,7 @@ use nanachi::{
     path_transform::path_transform,
     matrix::Matrix2d,
     compositor,
-    image_crate_adapter::buffer_rgba_to_rgba_image,
+    image::RgbaImage,
 };
 
 fn main() {
@@ -41,7 +41,7 @@ fn main() {
     f(&mut img, {i += 1; i}, compositor::Difference);
     f(&mut img, {i += 1; i}, compositor::Exclusion);
 
-    let img = buffer_rgba_to_rgba_image(&img);
+    let img: RgbaImage = (&img).into();
     let res = img.save("./composite_test_f32.png");
     println!("save: {:?}", res);
 }
