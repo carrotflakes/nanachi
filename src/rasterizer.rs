@@ -258,8 +258,6 @@ struct Intersection(f64, f64, f64, f64);
 impl Intersection {
     #[inline]
     fn new(a: Point, b: Point) -> Intersection {
-        debug_assert_ne!(a.0, b.0);
-        debug_assert_ne!(a.1, b.1);
         Intersection(
             a.1,
             (b.0 - a.0) / (b.1 - a.1),
