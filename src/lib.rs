@@ -12,6 +12,7 @@ pub mod fill_rule;
 pub(crate) mod geometry;
 #[cfg(feature = "image-crate")]
 pub mod image_crate_adapter;
+pub mod interpolation;
 pub mod k_curve;
 #[cfg(feature = "image-crate")]
 pub mod legacy_draw;
