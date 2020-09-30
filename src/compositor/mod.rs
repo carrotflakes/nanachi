@@ -1,11 +1,16 @@
+//! Collection of composition types.
+
 pub mod basic_f32;
 #[cfg(feature = "image-crate")]
 pub mod image_rgb_rgba;
 
+/// Compositor attributes
 pub trait CompositorAttr {
+    /// If true, the compositor requires updating destinations even alpha is zero.
     fn keep_dst_on_transparent_src(&self) -> bool;
 }
 
+/// Compositor composites two pixels with alpha value.
 pub trait Compositor<T>: CompositorAttr {
     fn composite(&self, dst: &T, src: &T, alpha: f64) -> T;
 }
@@ -35,6 +40,7 @@ pub struct SoftLight;
 pub struct Difference;
 pub struct Exclusion;
 
+/// Dynamically composition type.
 pub enum Basic {
     Clear,
     Src,
@@ -119,6 +125,7 @@ impl CompositorAttr for Basic {
     }
 }
 
+/// For Measuring performance.
 pub mod perf {
     use crate::pixel::Rgba;
     use super::*;

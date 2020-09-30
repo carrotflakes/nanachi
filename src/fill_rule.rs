@@ -1,4 +1,5 @@
-/// FillRule controls the area of path filling.
+//! FillRule controls the area of path filling.
+
 pub trait FillRule: Copy {
     fn apply(&self, value: f64) -> f64;
 }

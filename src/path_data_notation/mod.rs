@@ -12,6 +12,7 @@ enum LastControlPoint {
     None
 }
 
+/// Parse [SVG path notation](https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths).
 pub fn parse(str: &str) -> Result<Path, String> {
     let mut chars = str.chars();
     let mut tokens = Tokenize::new(&mut chars).peekable();

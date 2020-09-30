@@ -1,3 +1,8 @@
+//! Collection of interpolation types.
+//!
+//! - NearestNeighbor
+//! - Bilinear
+
 use crate::buffer::Buffer;
 use crate::pixel::Pixel;
 

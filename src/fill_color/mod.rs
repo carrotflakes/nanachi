@@ -1,3 +1,11 @@
+//! Collection of colorization types.
+//!
+//! - Solid
+//! - LinearGradient
+//! - RadialGradient
+//! - Pattern
+//! - Transform
+
 pub mod gradient;
 pub mod pattern;
 pub mod transform;
@@ -6,6 +14,8 @@ pub use gradient::{LinearGradient, RadialGradient};
 pub use pattern::Pattern;
 pub use transform::Transform;
 
+/// A trait for Colorization.
+/// Generates `Pixel` from (x, y).
 pub trait FillColor<C> {
     fn fill_color(&self, x: f64, y: f64) -> C;
 }
