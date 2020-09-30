@@ -117,7 +117,7 @@ impl PathBuilder {
         x: f64,
         y: f64,
     ) {
-        let start = self.last_pos.unwrap_or_else(|| panic!("PathBuilder::start() is required"));
+        let start = self.last_pos.unwrap_or_else(|| panic!("PathBuilder::move_to() is required before ellipse_from_endpoint"));
         let end = Point(x, y);
         if radius_x == 0.0 || radius_y == 0.0 {
             self.set_pos(end);
@@ -178,7 +178,7 @@ impl PathBuilder {
             self.set_pos(quad.right_point());
             self.push(quad);
         } else {
-            panic!("PathBuilder::start() is required");
+            panic!("PathBuilder::move_to() is required before quad");
         }
     }
 
@@ -206,7 +206,7 @@ impl PathBuilder {
             self.set_pos(cubic.right_point());
             self.push(cubic);
         } else {
-            panic!("PathBuilder::start() is required");
+            panic!("PathBuilder::move_to() is required before cubic");
         }
     }
 
