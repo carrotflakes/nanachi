@@ -12,7 +12,6 @@
 #[cfg(feature = "image-crate")]
 pub extern crate image;
 
-pub(crate) mod bezier_area;
 pub mod buffer;
 pub mod compositor;
 pub mod context;

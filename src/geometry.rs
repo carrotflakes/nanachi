@@ -1,10 +1,5 @@
 use crate::point::Point;
 
-pub fn intersect_line_and_horizon(a: Point, b: Point, hy: f64) -> f64 {
-    debug_assert_ne!(a.1, b.1);
-    a.0 - (a.0 - b.0) / (b.1 - a.1) * (hy - a.1)
-}
-
 pub fn intersect_segment_and_horizon(ax: f64, ay: f64, bx: f64, by: f64, hy: f64) -> Option<f64> {
     if ay != by && ((hy < ay) ^ (hy < by)) {
         let r = (hy - ay) / (by - ay);
@@ -47,90 +42,4 @@ pub fn intersect_line_and_line(p1: Point, p2: Point, p3: Point, p4: Point) -> Po
 
 pub fn point_is_right_side_of_line(p1: Point, p2: Point) -> bool {
     p1.0 * p2.1 < p1.1 * p2.0
-}
-
-// pub fn intersect_circle_and_segment(p1: Point, p2: Point) -> Point {
-//     let a = (p2.1 - p1.1) / (p2.0 - p1.0);
-//     let b = p2.1 - p2.0 * a;
-//     let c = (a * b) / (1.0 + a.powi(2)).sqrt();
-//     let x = (1.0 - b.powi(2) + c.powi(2) - c) / (1.0 + a.powi(2)).sqrt();
-//     let y = (1.0 - x.powi(2)).sqrt();
-//     Point(x, y)
-// }
-
-pub fn intersect_circle_and_segment(p1: Point, p2: Point) -> Point {
-    let det = p1.0 * p2.1 - p2.0 * p1.1;
-    if det == 0.0 {
-        return p2 / (p2.0 - p1.0).hypot(p2.1 - p1.1);
-    }
-    let a = (p2.1 - p1.1) / det;
-    let b = (p1.0 - p2.0) / det;
-    let c = a.powi(2) + b.powi(2);
-    let sign = det.signum();
-    let x = (a - b * sign * (c - 1.0).sqrt()) / c;
-    let y = (b + a * sign * (c - 1.0).sqrt()) / c;
-    Point(x, y)
-}
-
-pub fn circle_2segment_area(p: Point, p1: Point, p2: Point) -> f64 { // p1 < p2
-    let p1 = intersect_circle_and_segment(p, p1);
-    let p2 = intersect_circle_and_segment(p, p2);
-    let a1 = p1.1.atan2(p1.0);
-    let a2 = p2.1.atan2(p2.0);
-    let a3 = (a2 - a1).rem_euclid(std::f64::consts::PI * 2.0) / 2.0;
-    match (point_is_right_side_of_line(p1, p), point_is_right_side_of_line(p2, p)) {
-        (false, true) => a3 - tri_area(p, p2) - tri_area(p1, p), // inner
-        (true, false) => a3 + tri_area(p2, p) + tri_area(p, p1), // outer
-        (true, true) => { // right
-            let p3 = intersect_line_and_line(Point(0.0, 0.0), p1, p, p2);
-            a3 - tri_area(p3, p2) + tri_area2(p, p1, p3)
-        },
-        (false, false) => { // left
-            let p3 = intersect_line_and_line(Point(0.0, 0.0), p2, p, p1);
-            a3 - tri_area(p1, p3) + tri_area2(p, p3, p2)
-        },
-    }
-}
-
-pub fn circle_2segment_area_(p: Point, p1: Point, p2: Point) -> f64 {
-    if p.norm() < 1.0 {
-        circle_2segment_area(p, p1, p2)
-    } else {
-        fn f(d: f64) -> f64 {
-            if d <= -1.0 {
-                std::f64::consts::PI
-            } else if 1.0 <= d {
-                0.0
-            } else {
-                d.acos() - (1.0 - d * d).sqrt() * d
-            }
-        }
-        let d1 = (p.0 * p1.1 - p.1 * p1.0) / (p.1 - p1.1).hypot(p.0 - p1.0);
-        let d2 = (p.0 * p2.1 - p.1 * p2.0) / (p.1 - p2.1).hypot(p.0 - p2.0);
-        f(d1) - f(d2)
-    }
-}
-
-pub fn tri_area2(p: Point, p1: Point, p2: Point) -> f64 {
-    tri_area(p1 - p, p2 - p)
-}
-
-pub fn tri_area(p1: Point, p2: Point) -> f64 {
-    (p1.0 * p2.1 - p1.1 * p2.0) / 2.0
-}
-
-#[test]
-fn test() {
-    //assert_eq!(intersect_circle_and_segment(Point(0.1, 0.1), Point(4.0, 3.0)), Point(0.0, 0.0));
-    //assert!((0.0..3.14 / 4.0).contains(&circle_2segment_area(Point(0.1, 0.1), Point(4.0, 3.0), Point(-3.0, 4.0))));
-    //assert_eq!(circle_2segment_area(Point(-0.1, 0.1), Point(5.0, 3.0), Point(3.0, 5.0)), 0.0);
-    //assert_eq!(circle_2segment_area(Point(-0.1, -0.1), Point(-3.0, -5.0), Point(-5.0, -3.0)), 0.0);
-    // assert_eq!([circle_2segment_area(Point(0.1, 0.1), Point(4.0, 3.0), Point(-3.0, 4.0)),
-    // circle_2segment_area(Point(0.1, 0.1), Point(-3.0, 4.0), Point(-4.0, -3.0)),
-    // circle_2segment_area(Point(0.1, 0.1), Point(-4.0, -3.0), Point(3.0, -4.0)),
-    // circle_2segment_area(Point(0.1, 0.1), Point(3.0, -4.0), Point(4.0, 3.0))], [0.0f64; 4]);
-    assert_eq!((circle_2segment_area(Point(0.1, 0.1), Point(4.0, 3.0), Point(-3.0, 4.0)) +
-    circle_2segment_area(Point(0.1, 0.1), Point(-3.0, 4.0), Point(-4.0, -3.0)) +
-    circle_2segment_area(Point(0.1, 0.1), Point(-4.0, -3.0), Point(3.0, -4.0)) +
-    circle_2segment_area(Point(0.1, 0.1), Point(3.0, -4.0), Point(4.0, 3.0)) - std::f64::consts::PI).abs(), 0.00001);
 }
