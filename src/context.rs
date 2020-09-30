@@ -38,6 +38,14 @@ where
     C: Compositor<P> + 'static,
     FR: FillRule,
 {
+    pub fn new(color: FC, compositor: C, fill_rule: FR) -> Self {
+        FillStyle {
+            color,
+            compositor,
+            fill_rule,
+            pixel: Default::default(),
+        }
+    }
 }
 
 pub struct Context<P, B, I, R>
@@ -248,7 +256,7 @@ where
 
     pub fn transformed_context<'b>(&'b mut self, matrix: &Matrix2d) -> ChildContext<'b, P, B> {
         Context {
-            matrix: self.matrix.then(&matrix),
+            matrix: matrix.then(&self.matrix),
             ..self.child()
         }
     }
