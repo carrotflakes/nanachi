@@ -1,18 +1,18 @@
 [package]
 name = "nanachi"
-version = "0.0.1"
+version = "0.0.2"
 authors = ["carrotflakes <carrotflakes@gmail.com>"]
 edition = "2018"
 repository = "https://github.com/carrotflakes/nanachi"
 keywords = ["graphics"]
 license = "MIT"
 readme = "README.md"
-description = "2D graphics library (under development)"
+description = "2D graphics library"
 exclude = [
-    "my_image.png",
+    "*.png",
+    "gui",
 ]
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+categories = ["graphics"]
 
 [features]
 default = ["image-crate", "path-data-notation"]
