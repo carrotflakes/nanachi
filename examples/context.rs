@@ -5,6 +5,7 @@ use nanachi::{
     image::{ImageBuffer, Rgba},
     matrix::Matrix2d,
     path_builder::PathBuilder,
+    primitives,
 };
 use std::f64::consts::PI;
 
@@ -29,6 +30,20 @@ fn main() {
     builder.close();
     let path = builder.end();
 
+    let t = std::time::Instant::now();
+    context.transformed_context(
+        &Matrix2d::new()
+            .translate(50.0, 50.0)
+    ).fill(
+        &primitives::ngon(5, 40.0),
+        &FillStyle {
+            color: fill_color::Solid::new(Rgba([200, 200, 0, 255])),
+            fill_rule: fill_rule::NonZero,
+            compositor: compositor::SrcOver,
+            pixel: Default::default(),
+        },
+    );
+
     let mut context = context.transformed_context(
         &Matrix2d::new()
             .translate(-250.0, -250.0)
@@ -37,8 +52,6 @@ fn main() {
             .skew_x(-0.1)
             .translate(250.0, 280.0),
     );
-
-    let t = std::time::Instant::now();
     {
         let color = fill_color::LinearGradient::new(
             (200.0, 200.0),

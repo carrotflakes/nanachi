@@ -23,10 +23,6 @@ pub(crate) mod geometry;
 pub mod image_crate_adapter;
 pub mod interpolation;
 pub mod k_curve;
-#[cfg(feature = "image-crate")]
-pub mod legacy_draw;
-pub mod legacy_path;
-pub mod legacy_primitives;
 pub mod matrix;
 pub(crate) mod models;
 pub mod path;
@@ -38,5 +34,6 @@ pub mod path_outline;
 pub mod path_transform;
 pub mod pixel;
 pub mod point;
+pub mod primitives;
 pub mod rasterizer;
 pub mod writer;
