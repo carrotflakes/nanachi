@@ -6,6 +6,9 @@ use nanachi::{
     path_transform::path_transform,
     matrix::Matrix2d,
     compositor,
+    interpolation,
+    context::{Context, FillStyle},
+    fill_rule,
 };
 use std::f64::consts::PI;
 
@@ -13,15 +16,19 @@ fn main() {
     let (width, height) = (512, 512);
 
     let bg_image = {
-        let mut img = ImageBuffer::from_pixel(10, 10, Rgba([0u8, 0, 0, 255]));
+        let mut ctx = Context::from_pixel(10, 10, Rgba([0u8, 0, 0, 255])).high_quality();
         let mut pb = PathBuilder::new();
         pb.arc(5.0, 5.0, 4.0, 0.0, PI * 2.0);
         let path = pb.end();
-        let pc = fill_color::Solid::new(Rgba([80, 200, 255, 50]));
-        draw_fill(&mut img, &path, compositor::SrcOver, &pc);
-        img
+        ctx.fill(&path, &FillStyle {
+            color: fill_color::Solid::new(Rgba([80, 200, 255, 50])),
+            compositor: compositor::SrcOver,
+            fill_rule: fill_rule::NonZero,
+            pixel: Default::default(),
+        });
+        ctx.image
     };
-    let pattern = fill_color::Pattern::new(&bg_image);
+    let pattern = fill_color::Pattern::new(&bg_image, interpolation::Bilinear);
     let bg_fill_color = fill_color::Transform::new(
         &pattern,
         Matrix2d::new().rotate(PI * 0.25).scale(2.0, 2.0));
@@ -29,6 +36,7 @@ fn main() {
         use nanachi::fill_color::FillColor;
         bg_fill_color.fill_color(x as f64, y as f64)
     });
+    let mut context = Context::from_image(&mut img).high_quality();
 
     let mut pb = PathBuilder::new();
     pb.move_to(10.0, 40.0);
@@ -54,6 +62,7 @@ fn main() {
 
     let am = Matrix2d::new()
         .translate(-250.0, -250.0)
+        // .scale(-1.0, -1.0)
         .rotate(0.9)
         .scale(1.0, 0.6)
         .skew_x(-0.1)
@@ -67,7 +76,12 @@ fn main() {
             (0.0, Rgba([255, 100, 100, 100])),
             (1.0, Rgba([200, 255, 10, 255])),
         ]);
-        draw_fill(&mut img, &path, compositor::SrcOver, &pc);
+        context.fill(&path, &FillStyle {
+            color: pc,
+            compositor: compositor::SrcOver,
+            fill_rule: fill_rule::NonZero,
+            pixel: Default::default(),
+        });
     }
     {
         use nanachi::path_outline::{path_outline, Join, Cap};
@@ -77,26 +91,15 @@ fn main() {
             (0.9, Rgba([200, 10, 10, 255])),
             (1.0, Rgba([10, 10, 255, 100])),
         ]);
-        draw_fill(&mut img, &path, compositor::SrcOver, &pc);
+        context.fill(&path, &FillStyle {
+            color: pc,
+            compositor: compositor::SrcOver,
+            fill_rule: fill_rule::NonZero,
+            pixel: Default::default(),
+        });
     }
     dbg!(t.elapsed());
 
     let res = img.save("./path3.png");
     println!("save: {:?}", res);
-}
-
-fn draw_fill<C: fill_color::FillColor<Rgba<u8>>, M: compositor::Compositor<Rgba<u8>> + 'static>(
-    img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>,
-    path: &Path,
-    compositor: M,
-    fill_color: &C,
-) {
-    nanachi::fill_path::draw_fill(
-        img.width() as u32,
-        img.height() as u32,
-        path,
-        nanachi::fill_rule::NonZero,
-        &mut nanachi::writer::img_writer(img, fill_color, &compositor),
-        !compositor.keep_dst_on_transparent_src(),
-    );
 }

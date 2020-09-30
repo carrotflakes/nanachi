@@ -1,11 +1,12 @@
 use nanachi::{
     image::{ImageBuffer, Rgb, Rgba},
-    path::Path,
     path_builder::PathBuilder,
     fill_color,
-    path_transform::path_transform,
     matrix::Matrix2d,
     compositor,
+    context::{Context, FillStyle},
+    fill_rule,
+    draw_image::draw_image_pixel_perfect,
 };
 
 fn main() {
@@ -70,45 +71,23 @@ fn f<C: compositor::Compositor<Rgba<u8>> + 'static>(img: &mut ImageBuffer<Rgba<u
             (0.9, Rgba([0, 255, 255, 255])),
         ]);
 
-    let mut img2 = ImageBuffer::from_pixel(60, 60, Rgba([250u8, 250, 250, 0]));
-    draw_fill(
-        &mut img2,
-        &path,
-        &compositor::SrcOver,
-        &fc1,
-        Matrix2d::new().translate(20.0, 20.0),
-    );
-    draw_fill(
-        &mut img2,
-        &path,
-        &c,
-        &fc2,
-        Matrix2d::new().rotate(std::f64::consts::FRAC_PI_2).translate(20.0, 20.0),
-    );
+    let mut context = Context::from_pixel(60, 60, Rgba([250, 250, 250, 0]));
+
+    context.transformed_context(&Matrix2d::new().translate(20.0, 20.0))
+    .fill(&path, &FillStyle{
+        color: fc1,
+        compositor: compositor::SrcOver,
+        fill_rule: fill_rule::EvenOdd,
+        pixel: Default::default(),
+    });
+    context.transformed_context(&Matrix2d::new().rotate(90f64.to_radians()).translate(20.0, 20.0))
+    .fill(&path, &FillStyle{
+        color: fc2,
+        compositor: c,
+        fill_rule: fill_rule::EvenOdd,
+        pixel: Default::default(),
+    });
     let x = (60 * (i % 5) + 10) as u32;
     let y = (60 * (i / 5) + 10) as u32;
-    for dy in 0..60 {
-        for dx in 0..60 {
-            img.put_pixel(x+dx, y+dy, *img2.get_pixel(dx, dy));
-        }
-    }
-}
-
-fn draw_fill<C: fill_color::FillColor<Rgba<u8>> + Clone, M: compositor::Compositor<Rgba<u8>> + 'static>(
-    img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>,
-    path: &Path,
-    compositor: &M,
-    fill_color: &C,
-    matrix: Matrix2d,
-) {
-    let path = path_transform(path, &matrix);
-    let fill_color = nanachi::fill_color::Transform::new(fill_color, matrix);
-    nanachi::fill_path::draw_fill(
-        img.width() as u32,
-        img.height() as u32,
-        &path,
-        nanachi::fill_rule::NonZero,
-        &mut nanachi::writer::img_writer(img, &fill_color, compositor),
-        !compositor.keep_dst_on_transparent_src(),
-    );
+    draw_image_pixel_perfect(img, &context.image, (x, y), (0, 0), (60, 60), &compositor::Src);
 }

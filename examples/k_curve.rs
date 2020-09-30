@@ -1,16 +1,21 @@
 use nanachi::{
-    image::{ImageBuffer, Rgb},
-    path::Path,
-    point::Point,
+    compositor,
+    context::{Context, FillStyle},
     fill_color,
-    path_transform::path_transform,
-    matrix::Matrix2d,
+    fill_rule,
+    image::RgbaImage,
     k_curve::k_curve,
+    matrix::Matrix2d,
+    path::Path,
+    path_transform::path_transform,
+    pixel::Rgba,
+    point::Point,
 };
 
 fn main() {
     let (width, height) = (512, 512);
-    let mut img = ImageBuffer::from_pixel(width, height, Rgb([250u8, 250, 250]));
+    let mut context = Context::from_pixel(width, height, Rgba([1.0, 1.0, 1.0, 1.0])).high_quality();
+    context.flatten_tolerance = 0.1;
 
     let ps = vec![
         Point(0.2, 0.2),
@@ -21,24 +26,18 @@ fn main() {
     ];
     let path = Path::from_bezier2_points(&k_curve(ps, true, 3));
     let path = path_transform(&path, &Matrix2d::new().scale(512.0, 512.0));
-    let pc = fill_color::Solid::new(Rgb([100, 100, 250]));
-    draw_fill(&mut img, &path, &pc);
+    let pc = fill_color::Solid::new(Rgba([0.4, 0.4, 1.0, 1.0]));
+    context.fill(
+        &path,
+        &FillStyle {
+            color: pc,
+            compositor: compositor::SrcOver,
+            fill_rule: fill_rule::NonZero,
+            pixel: Default::default(),
+        },
+    );
 
+    let img: RgbaImage = (&context.image).into();
     let res = img.save("./k_curve.png");
     println!("save: {:?}", res);
-}
-
-fn draw_fill<C: fill_color::FillColor<Rgb<u8>>>(
-    img: &mut ImageBuffer<Rgb<u8>, Vec<u8>>,
-    path: &Path,
-    fill_color: &C,
-) {
-    nanachi::fill_path::draw_fill(
-        img.width() as u32,
-        img.height() as u32,
-        path,
-        nanachi::fill_rule::NonZero,
-        &mut nanachi::writer::img_writer(img, fill_color, &nanachi::compositor::SrcOver),
-        false,
-    );
 }
