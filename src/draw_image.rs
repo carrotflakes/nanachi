@@ -2,6 +2,7 @@ use crate::buffer::Buffer;
 use crate::compositor::Compositor;
 use crate::pixel::Pixel;
 
+/// Draw `src` image to `dst` image.
 pub fn draw_image_pixel_perfect<P, B, C>(
     dst: &mut B,
     src: &B,

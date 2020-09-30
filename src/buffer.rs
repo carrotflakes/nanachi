@@ -1,5 +1,6 @@
 use crate::pixel::Pixel;
 
+/// A trait for represents an image.
 pub trait Buffer<P: Pixel> {
     fn dimensions(&self) -> (u32, u32);
 
@@ -10,6 +11,7 @@ pub trait Buffer<P: Pixel> {
     fn put_pixel(&mut self, x: u32, y: u32, pixel: P);
 }
 
+/// 2D image buffer for manipulation.
 pub struct GenericBuffer<P: Pixel> {
     width: u32,
     height: u32,

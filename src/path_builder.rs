@@ -5,6 +5,7 @@ use crate::{
 };
 use std::f64::consts::PI;
 
+/// Path builder.
 #[derive(Debug, Clone)]
 pub struct PathBuilder {
     items: Vec<PathItem>,
@@ -34,6 +35,7 @@ impl PathBuilder {
         self.last_pos = Some(p);
     }
 
+    /// Set current position.
     pub fn move_to(&mut self, x: f64, y: f64) {
         match self.items.last() {
             Some(PathItem::CloseAndJump) | Some(PathItem::Jump) | None => {}
@@ -44,6 +46,7 @@ impl PathBuilder {
         self.set_pos(Point(x, y));
     }
 
+    /// Add a segment that from current position to specified position. And then set the end position to current position.
     pub fn line_to(&mut self, x: f64, y: f64) {
         let p = Point(x, y);
         if let Some(last_pos) = self.last_pos {
@@ -52,6 +55,7 @@ impl PathBuilder {
         self.set_pos(p);
     }
 
+    /// Add an arc.
     pub fn arc(&mut self, x: f64, y: f64, radius: f64, angle1: f64, angle2: f64) {
         let center = Point(x, y);
         let arc = PathItem::Arc(Arc {
@@ -70,6 +74,7 @@ impl PathBuilder {
         self.push(arc);
     }
 
+    /// Add an ellipse.
     pub fn ellipse(
         &mut self,
         x: f64,
@@ -101,6 +106,7 @@ impl PathBuilder {
         self.push(ellipse);
     }
 
+    /// Add an endpoint-parameterized ellipse.
     pub fn ellipse_from_endpoint(
         &mut self,
         radius_x: f64,
@@ -157,6 +163,7 @@ impl PathBuilder {
         self.push(ellipse);
     }
 
+    /// Add a quadratic bezier curve.
     pub fn quad(&mut self, control_x: f64, control_y: f64, x: f64, y: f64) {
         if let Some(last_pos) = self.last_pos {
             let quad = PathItem::Quad(Quad {
@@ -175,6 +182,7 @@ impl PathBuilder {
         }
     }
 
+    /// Add a cubic bezier curve.
     pub fn cubic(
         &mut self,
         control_x1: f64,
@@ -202,6 +210,7 @@ impl PathBuilder {
         }
     }
 
+    /// Close the path.
     pub fn close(&mut self) {
         if let Some(p) = self.path_start {
             self.line_to(p.0, p.1);
@@ -211,12 +220,14 @@ impl PathBuilder {
         }
     }
 
+    /// Return the built Path.
     pub fn end(&mut self) -> Path {
         let mut items = Vec::new();
         std::mem::swap(&mut items, &mut self.items);
         Path(items)
     }
 
+    /// Return current position.
     pub fn current_pos(&self) -> Option<(f64, f64)> {
         self.last_pos.map(|p| p.into())
     }

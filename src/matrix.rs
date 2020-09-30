@@ -1,23 +1,28 @@
 use crate::point::Point;
 
+/// Matrix for affine transformation.
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Matrix2d(pub [f64; 6]);
 
 impl Matrix2d {
+    /// Create a Matrix2d that no transform.
     pub fn new() -> Matrix2d {
         Matrix2d([1.0, 0.0, 0.0, 0.0, 1.0, 0.0])
     }
 
+    /// Create new Matrix2d translated with specified position from myself.
     pub fn translate(&self, x: f64, y: f64) -> Matrix2d {
         let s = &self.0;
         Matrix2d([s[0], s[1], s[2] + x, s[3], s[4], s[5] + y])
     }
 
+    /// Create new Matrix2d scaled with specified size from myself.
     pub fn scale(&self, x: f64, y: f64) -> Matrix2d {
         let s = &self.0;
         Matrix2d([s[0] * x, s[1] * x, s[2] * x, s[3] * y, s[4] * y, s[5] * y])
     }
 
+    /// Create new Matrix2d rotated with specified angle from myself.
     pub fn rotate(&self, rad: f64) -> Matrix2d {
         let s = &self.0;
         let (sin, cos) = rad.sin_cos();
@@ -31,6 +36,7 @@ impl Matrix2d {
         ])
     }
 
+    /// Create new Matrix2d skewed with specified y-axis amount from myself.
     pub fn skew_y(&self, dy: f64) -> Matrix2d {
         let s = &self.0;
         Matrix2d([
@@ -43,6 +49,7 @@ impl Matrix2d {
         ])
     }
 
+    /// Create new Matrix2d skewed with specified x-axis amount from myself.
     pub fn skew_x(&self, dx: f64) -> Matrix2d {
         let s = &self.0;
         Matrix2d([
@@ -55,6 +62,7 @@ impl Matrix2d {
         ])
     }
 
+    /// Transform the [`Point`]
     pub fn apply<P: From<Point> + Into<Point>>(&self, p: P) -> P {
         let p: Point = p.into();
         let s = &self.0;
@@ -65,6 +73,8 @@ impl Matrix2d {
         .into()
     }
 
+    /// Inverse the matrix
+    /// Ideally, `matrix2d.inverse().inverse() == matrix2d`.
     pub fn inverse(&self) -> Matrix2d {
         let s = &self.0;
         let a = 1.0 / (s[0] * s[4] - s[1] * s[3]);
@@ -78,6 +88,7 @@ impl Matrix2d {
         ])
     }
 
+    /// Return the multiplication of the two matrices.
     pub fn then(&self, rhs: &Matrix2d) -> Matrix2d {
         let s = &self.0;
         let t = &rhs.0;
@@ -91,10 +102,13 @@ impl Matrix2d {
         ])
     }
 
+    /// Return whether it is unit matrix.
     pub fn is_unit(&self) -> bool {
         self == &Default::default()
     }
 
+    /// Return whether it is directly or indirectly.
+    /// An indirect matrix makes path flip.
     pub fn is_direct(&self) -> bool {
         self.0[1] * self.0[3] <= self.0[0] * self.0[4]
     }

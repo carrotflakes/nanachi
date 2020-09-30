@@ -3,6 +3,7 @@ use crate::compositor::Compositor;
 use crate::fill_color::FillColor;
 use crate::pixel::Pixel;
 
+/// Create a writer that writes the pixel to the buffer.
 pub fn img_writer<'a, P, B, F, C>(
     buffer: &'a mut B,
     fill_color: &'a F,

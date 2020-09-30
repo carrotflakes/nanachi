@@ -3,6 +3,7 @@ use crate::models::{Arc, Ellipse, Line, Quad};
 use crate::path::{Path, PathItem};
 use crate::point::Point;
 
+/// Join types for [`path_outline`]
 #[derive(Debug, Clone)]
 pub enum Join {
     Round,
@@ -10,6 +11,7 @@ pub enum Join {
     Miter(f32),
 }
 
+/// Cap types for [`path_outline`]
 #[derive(Debug, Clone)]
 pub enum Cap {
     Round,
@@ -17,6 +19,7 @@ pub enum Cap {
     Square,
 }
 
+/// Create a path that is outline of given path.
 pub fn path_outline(path: &Path, width: f64, join: &Join, cap: &Cap) -> Path {
     assert_ne!(width, 0.0);
     let mut res = Vec::with_capacity(path.0.len() * 4);

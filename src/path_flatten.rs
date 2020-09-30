@@ -12,6 +12,7 @@ enum FlattenState {
     End,
 }
 
+/// An iterator of flattened path.
 pub struct Flatten<'a, I: Iterator<Item = &'a PathItem>> {
     tolerance: f64,
     last: Point,

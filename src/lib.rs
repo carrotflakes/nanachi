@@ -1,3 +1,14 @@
+//! # Nanachi
+//! Nanachi is a 2D graphics library for Rust.
+//!
+//! ## Features
+//! - path filling and stroking
+//! - linear gradients, radial gradients and tiled images coloring
+//! - 24 color-composition modes
+//! - anti-aliasing (or not use)
+//! - affine transformation
+//! - κ-curve implementation
+
 #[cfg(feature = "image-crate")]
 pub extern crate image;
 

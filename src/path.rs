@@ -111,6 +111,10 @@ impl PathItem {
     }
 }
 
+/// Path for filling and stroking.
+///
+/// A path can contains lines, ellipse arcs, quadratic bezier curves and cubic bezier curves.
+/// You should use PathBuilder for creating a path.
 #[derive(Debug, Clone)]
 pub struct Path(pub Vec<PathItem>);
 

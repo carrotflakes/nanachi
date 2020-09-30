@@ -4,6 +4,7 @@ use crate::matrix::Matrix2d;
 use crate::path::{Path, PathItem};
 use std::f64::consts::PI;
 
+/// Transform a path with the [`Matrix2d`].
 pub fn path_transform(path: &Path, matrix: &Matrix2d) -> Path {
     let mut pis = Vec::with_capacity(path.0.len());
     for pi in path.0.iter() {
