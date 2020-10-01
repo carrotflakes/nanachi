@@ -134,10 +134,13 @@ impl Path {
         self.0.extend_from_slice(rhs.0.as_slice());
     }
 
-    pub fn from_points(points: &Vec<Point>) -> Path {
+    pub fn from_points(points: &Vec<Point>, close: bool) -> Path {
         let mut pis = Vec::new();
         for i in 0..points.len() - 1 {
             pis.push(PathItem::Line(Line(points[i], points[i + 1])));
+        }
+        if close && &points[0] == points.last().unwrap() {
+            pis.push(PathItem::CloseAndJump);
         }
         Path(pis)
     }
