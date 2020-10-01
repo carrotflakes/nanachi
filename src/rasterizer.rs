@@ -201,39 +201,34 @@ fn f1(buf: &mut Vec<f64>, width: u32, int: &Intersection, signum: f64, upper: f6
     let mut acc = 0.0;
     let mut v = 0.0;
     let mut write = |x: i32, a: f64| {
-        buf[offset + x.max(0) as usize] += (a - acc - v) * signum;
+        buf[offset + x as usize] += (a - acc - v) * signum;
         v = a - acc;
         acc = a;
     };
     let upper_x = int.intersect_h(upper);
     let lower_x = int.intersect_h(lower);
-    if upper_x < lower_x {
+    let xi = if upper_x < lower_x {
         for xi in (upper_x.floor() as i32).max(0)..(lower_x.floor() as i32).min(width as i32) {
             let x = (xi + 1) as f64;
             let y = int.intersect_v(x);
             write(xi, (x - upper_x) * (y - upper) * 0.5);
         }
-        let xi = lower_x.floor() as i32;
-        if xi < width as i32 {
-            let a = ((xi + 1) as f64 - (upper_x + lower_x) * 0.5) * (lower - upper);
-            write(xi, a);
-            if xi + 1 < width as i32 {
-                write(xi + 1, a + (lower - upper));
-            }
-        }
+        lower_x.floor() as i32
     } else {
         for xi in (lower_x.floor() as i32).max(0)..(upper_x.floor() as i32).min(width as i32) {
             let x = (xi + 1) as f64;
             let y = int.intersect_v(x);
             write(xi, (x - lower_x) * (lower - y) * 0.5);
         }
-        let xi = upper_x.floor() as i32;
-        if xi < width as i32 {
-            let a = ((xi + 1) as f64 - (upper_x + lower_x) * 0.5) * (lower - upper);
-            write(xi, a);
-            if xi + 1 < width as i32 {
-                write(xi + 1, a + (lower - upper));
-            }
+        upper_x.floor() as i32
+    };
+    if xi < 0 {
+        write(0, lower - upper);
+    } else if xi < width as i32 {
+        let a = ((xi + 1) as f64 - (upper_x + lower_x) * 0.5) * (lower - upper);
+        write(xi, a);
+        if xi + 1 < width as i32 {
+            write(xi + 1, a + (lower - upper));
         }
     }
 }
@@ -241,14 +236,14 @@ fn f1(buf: &mut Vec<f64>, width: u32, int: &Intersection, signum: f64, upper: f6
 #[inline]
 fn f2(buf: &mut Vec<f64>, width: u32, signum: f64, upper: f64, lower: f64, x: f64) {
     let offset = upper.floor() as usize * width as usize;
-    let a = (1.0 - x.fract()) * (lower - upper);
-    let x = x.floor() as i32;
-    if x < 0 {
-        buf[offset] += signum;
-    } else if x < width as i32 {
-        buf[offset + x as usize] += a * signum;
-        if x + 1 < width as i32 {
-            buf[offset + x as usize + 1] += (lower - upper - a) * signum;
+    if x < 0.0 {
+        buf[offset] += (lower - upper) * signum;
+    } else if x < width as f64 {
+        let a = (1.0 - x.fract()) * (lower - upper);
+        let x = x.floor() as usize;
+        buf[offset + x] += a * signum;
+        if x + 1 < width as usize {
+            buf[offset + x + 1] += (lower - upper - a) * signum;
         }
     }
 }
