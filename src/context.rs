@@ -5,7 +5,7 @@ use crate::{
     fill_rule::FillRule,
     matrix::Matrix2d,
     path::{Path, PathItem},
-    path_flatten::{path_flatten, path_flatten_only_cubic},
+    path_flatten::Flatten,
     path_outline::{path_outline, Cap, Join},
     path_transform::path_transform,
     pixel::Pixel,
@@ -56,7 +56,6 @@ where
     R: BorrowMut<Rasterizer>,
 {
     pub image: I,
-    pub flatten: bool,
     pub flatten_tolerance: f64,
     pub antialiasing: bool,
     pub join: Join,
@@ -76,7 +75,6 @@ where
 {
     pub fn low_quality(self) -> Context<P, B, I, R> {
         Context {
-            flatten: true,
             flatten_tolerance: 2.0,
             antialiasing: false,
             join: Join::Bevel,
@@ -87,7 +85,6 @@ where
 
     pub fn high_quality(self) -> Context<P, B, I, R> {
         Context {
-            flatten: false,
             flatten_tolerance: 0.1,
             antialiasing: true,
             join: Join::Round,
@@ -131,18 +128,10 @@ where
 
     pub fn path_transform_and_flatten(&self, path: &Path) -> Path {
         if self.matrix.is_unit() {
-            if self.flatten {
-                path_flatten(path, self.flatten_tolerance)
-            } else {
-                path_flatten_only_cubic(path, self.flatten_tolerance)
-            }
+            Path::new(Flatten::new(path.0.iter(), self.flatten_tolerance).collect())
         } else {
             let path = path_transform(path, &self.matrix);
-            if self.flatten {
-                path_flatten(&path, self.flatten_tolerance)
-            } else {
-                path_flatten_only_cubic(&path, self.flatten_tolerance)
-            }
+            Path::new(Flatten::new(path.0.iter(), self.flatten_tolerance).collect())
         }
     }
 
@@ -166,7 +155,7 @@ where
     ) {
         let color = Transform::new(&fill_style.color, self.matrix);
         let mut writer = img_writer(self.image.borrow_mut(), &color, &fill_style.compositor);
-        let pis = crate::path_flatten::Flatten::new(path.0.iter(), self.flatten_tolerance);
+        let pis = Flatten::new(path.0.iter(), self.flatten_tolerance);
         let segments = pis.filter_map(|pi| match pi {
             PathItem::Line(l) => Some((l.0, l.1)),
             PathItem::CloseAndJump | PathItem::Jump => None,
@@ -198,7 +187,6 @@ where
         Context {
             image: GenericBuffer::from_pixel(width, height, pixel),
             rasterizer: Rasterizer::new(width, height),
-            flatten: true,
             flatten_tolerance: 1.0,
             antialiasing: true,
             join: Join::Bevel,
@@ -220,7 +208,6 @@ where
         Context {
             image,
             rasterizer: Rasterizer::new(width, height),
-            flatten: true,
             flatten_tolerance: 1.0,
             antialiasing: true,
             join: Join::Bevel,
@@ -243,7 +230,6 @@ where
         Context {
             image: self.image.borrow_mut(),
             rasterizer: self.rasterizer.borrow_mut(),
-            flatten: self.flatten,
             flatten_tolerance: self.flatten_tolerance,
             antialiasing: self.antialiasing,
             join: self.join.clone(),
