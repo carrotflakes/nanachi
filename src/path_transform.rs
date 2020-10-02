@@ -43,7 +43,7 @@ pub fn path_transform(path: &Path, matrix: &Matrix2d) -> Path {
     }
 }
 
-pub fn transform_ellipse(ellipse: &Ellipse, matrix: &Matrix2d) -> Ellipse {
+fn transform_ellipse(ellipse: &Ellipse, matrix: &Matrix2d) -> Ellipse {
     let matrix = Matrix2d::new()
         .scale(ellipse.radius_x, ellipse.radius_y)
         .rotate(ellipse.rotation)
