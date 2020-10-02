@@ -1,4 +1,3 @@
-use crate::geometry;
 use crate::models::{Arc, Ellipse, Line, Quad};
 use crate::path::{Path, PathItem};
 use crate::point::Point;
@@ -89,7 +88,7 @@ fn add_join(pis: &mut Vec<PathItem>, join: &Join, center: Point, start: Point, e
     };
     match join {
         Join::Round => {
-            if geometry::point_is_right_side_of_line(start - center, end - center) {
+            if point_is_right_side_of_line(start - center, end - center) {
                 bevel();
             } else {
                 pis.push(PathItem::Arc(Arc::from_points(center, start, end)));
@@ -99,10 +98,10 @@ fn add_join(pis: &mut Vec<PathItem>, join: &Join, center: Point, start: Point, e
             bevel();
         }
         Join::Miter(limit) => {
-            if geometry::point_is_right_side_of_line(start - center, end - center) {
+            if point_is_right_side_of_line(start - center, end - center) {
                 bevel();
             } else {
-                let p = geometry::intersect_line_and_line(
+                let p = intersect_line_and_line(
                     start,
                     start + Point(start.1 - center.1, center.0 - start.0),
                     end,
@@ -190,7 +189,7 @@ pub fn path_item_offset(pis: &mut Vec<PathItem>, path_item: &PathItem, width: f6
                 pis.push(PathItem::Quad(Quad {
                     start: q1.start + start_d,
                     end: q1.end + middle_d,
-                    control1: geometry::intersect_line_and_line(
+                    control1: intersect_line_and_line(
                         q1.start + start_d,
                         q1.control1 + start_d,
                         q1.end + middle_d,
@@ -200,15 +199,18 @@ pub fn path_item_offset(pis: &mut Vec<PathItem>, path_item: &PathItem, width: f6
                 pis.push(PathItem::Quad(Quad {
                     start: q2.start + middle_d,
                     end: q2.end + end_d,
-                    control1: geometry::intersect_line_and_line(
-                        q2.start + middle_d, q2.control1 + middle_d,
-                        q2.end + end_d, q2.control1 + end_d),
+                    control1: intersect_line_and_line(
+                        q2.start + middle_d,
+                        q2.control1 + middle_d,
+                        q2.end + end_d,
+                        q2.control1 + end_d,
+                    ),
                 }));
             } else {
                 pis.push(PathItem::Quad(Quad {
                     start: quad.start + start_d,
                     end: quad.end + end_d,
-                    control1: geometry::intersect_line_and_line(
+                    control1: intersect_line_and_line(
                         quad.start + start_d,
                         quad.control1 + start_d,
                         quad.end + end_d,
@@ -220,4 +222,16 @@ pub fn path_item_offset(pis: &mut Vec<PathItem>, path_item: &PathItem, width: f6
         PathItem::Cubic(_) => panic!("path_outline not support cubic curve."),
         _ => unreachable!(),
     }
+}
+
+fn intersect_line_and_line(p1: Point, p2: Point, p3: Point, p4: Point) -> Point {
+    let det = (p1.0 - p2.0) * (p4.1 - p3.1) - (p4.0 - p3.0) * (p1.1 - p2.1);
+    let t = ((p4.1 - p3.1) * (p4.0 - p2.0) + (p3.0 - p4.0) * (p4.1 - p2.1)) / det;
+    let x = t * p1.0 + (1.0 - t) * p2.0;
+    let y = t * p1.1 + (1.0 - t) * p2.1;
+    Point(x, y)
+}
+
+fn point_is_right_side_of_line(p1: Point, p2: Point) -> bool {
+    p1.0 * p2.1 < p1.1 * p2.0
 }
