@@ -7,8 +7,8 @@ use lyon_geom::{
 };
 
 enum FlattenState {
-    Line(Point),
     Lines(Vec<Point>, usize),
+    PathItem(PathItem),
     End,
 }
 
@@ -35,10 +35,6 @@ impl<'a, I: Iterator<Item = &'a PathItem>> Flatten<'a, I> {
     fn next_state(&mut self) {
         if let Some(pi) = self.path_items.next() {
             match pi {
-                PathItem::Line(l) => {
-                    self.last = l.0;
-                    self.state = FlattenState::Line(l.1);
-                }
                 PathItem::Arc(arc) => {
                     let arc = Arc {
                         center: point_to_point2d(&arc.center),
@@ -114,8 +110,8 @@ impl<'a, I: Iterator<Item = &'a PathItem>> Flatten<'a, I> {
                     self.last = cubic.start;
                     self.state = FlattenState::Lines(it.collect(), 0);
                 }
-                PathItem::CloseAndJump | PathItem::Jump => {
-                    self.next_state();
+                pi => {
+                    self.state = FlattenState::PathItem(pi.clone());
                 }
             }
         } else {
@@ -131,11 +127,6 @@ impl<'a, I: Iterator<Item = &'a PathItem>> Iterator for Flatten<'a, I> {
         let mut state = FlattenState::End;
         std::mem::swap(&mut state, &mut self.state);
         match state {
-            FlattenState::Line(p) => {
-                let line = PathItem::Line(Line(self.last, p));
-                self.next_state();
-                Some(line)
-            }
             FlattenState::Lines(ps, i) => {
                 if ps.len() == i {
                     self.next_state();
@@ -146,6 +137,10 @@ impl<'a, I: Iterator<Item = &'a PathItem>> Iterator for Flatten<'a, I> {
                     self.state = FlattenState::Lines(ps, i + 1);
                     Some(line)
                 }
+            }
+            FlattenState::PathItem(pi) => {
+                self.next_state();
+                Some(pi)
             }
             FlattenState::End => {
                 None
