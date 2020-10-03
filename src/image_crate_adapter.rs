@@ -51,3 +51,17 @@ impl Into<image::RgbaImage> for &GenericBuffer<crate::pixel::Rgba> {
         })
     }
 }
+
+impl Into<image::RgbaImage> for &GenericBuffer<crate::pixel::PremultipliedRgba> {
+    fn into(self) -> image::RgbaImage {
+        image::RgbaImage::from_fn(self.dimensions().0, self.dimensions().1, |x, y| {
+            let p = self.get_pixel(x, y);
+            image::Rgba([
+                ((p.0[0] / p.0[3]).min(1.0).max(0.0) * 255.0).round() as u8,
+                ((p.0[1] / p.0[3]).min(1.0).max(0.0) * 255.0).round() as u8,
+                ((p.0[2] / p.0[3]).min(1.0).max(0.0) * 255.0).round() as u8,
+                (p.0[3].min(1.0).max(0.0) * 255.0).round() as u8,
+            ])
+        })
+    }
+}

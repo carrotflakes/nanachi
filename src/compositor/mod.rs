@@ -1,6 +1,7 @@
 //! Collection of composition types.
 
 pub mod basic_f32;
+pub mod basic_premultiplied_f32;
 #[cfg(feature = "image-crate")]
 pub mod image_rgb_rgba;
 

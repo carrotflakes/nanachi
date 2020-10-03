@@ -3,6 +3,7 @@ set -e
 cargo run --release --example basic
 cargo run --release --example composite_test
 cargo run --release --example composite_test_f32
+cargo run --release --example composite_test_premultiplied_f32
 cargo run --release --example path3
 cargo run --release --example k_curve
 cargo run --release --example context

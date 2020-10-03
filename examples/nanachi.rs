@@ -10,15 +10,18 @@ use nanachi::{
     path_builder::PathBuilder,
     path_data_notation,
     path_transform::path_transform,
-    pixel::Rgba,
+    pixel::{Rgba, PremultipliedRgba},
 };
 use rand_core::RngCore;
 use rand_pcg::Pcg32;
 use std::f64::consts::PI;
 
+type Pixel = Rgba;
+// type Pixel = PremultipliedRgba;
+
 fn main() {
     let (width, height) = (512, 512);
-    let mut context = Context::from_pixel(width, height, Rgba([1.0f32, 1.0, 1.0, 1.0])).high_quality();
+    let mut context = Context::from_pixel(width, height, rgba(255, 255, 255, 255)).high_quality();
     context.clear(&fill_color::LinearGradient::new(
         (0.0, 0.0),
         (0.0, height as f64),
@@ -40,7 +43,7 @@ fn main() {
     println!("{:?}", res);
 }
 
-fn draw_stars<'a>(mut context: ChildContext<'a, Rgba, GenericBuffer<Rgba>>) {
+fn draw_stars<'a>(mut context: ChildContext<'a, Pixel, GenericBuffer<Pixel>>) {
     let spoke = (2.0 * PI / 5.0).cos() / (1.0 * PI / 5.0).cos();
     let mut pb = PathBuilder::new();
     for i in 0..10 {
@@ -102,7 +105,7 @@ fn draw_stars<'a>(mut context: ChildContext<'a, Rgba, GenericBuffer<Rgba>>) {
     }
 }
 
-fn draw_nanachi<'a>(mut context: ChildContext<'a, Rgba, GenericBuffer<Rgba>>) {
+fn draw_nanachi<'a>(mut context: ChildContext<'a, Pixel, GenericBuffer<Pixel>>) {
     let (width, height) = (512.0, 512.0);
     let nanachi_path = path_data_notation::parse(
         "
@@ -268,11 +271,11 @@ fn draw_nanachi<'a>(mut context: ChildContext<'a, Rgba, GenericBuffer<Rgba>>) {
     context.stroke(&path, &fill_style, 4.0);
 }
 
-fn rgba(r: u8, g: u8, b: u8, a: u8) -> Rgba {
+fn rgba(r: u8, g: u8, b: u8, a: u8) -> Pixel {
     Rgba([
         r as f32 / 255.0,
         g as f32 / 255.0,
         b as f32 / 255.0,
         a as f32 / 255.0,
-    ])
+    ]).into()
 }

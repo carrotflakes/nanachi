@@ -331,9 +331,9 @@ def_compositor! {
         let cx = aa * ba / ca;
         let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f32, a.0[1] as f32, a.0[2] as f32, b.0[0] as f32, b.0[1] as f32, b.0[2] as f32);
     } [
-        a0 * ax + b0 * bx + if 0.0 < b0 {1.0 - ((1.0 - a0) / b0).min(1.0) * 1.0} else {0.0} * cx,
-        a1 * ax + b1 * bx + if 0.0 < b1 {1.0 - ((1.0 - a1) / b1).min(1.0) * 1.0} else {0.0} * cx,
-        a2 * ax + b2 * bx + if 0.0 < b2 {1.0 - ((1.0 - a2) / b2).min(1.0) * 1.0} else {0.0} * cx,
+        a0 * ax + b0 * bx + if 0.0 < b0 {1.0 - ((1.0 - a0) / b0).min(1.0)} else {0.0} * cx,
+        a1 * ax + b1 * bx + if 0.0 < b1 {1.0 - ((1.0 - a1) / b1).min(1.0)} else {0.0} * cx,
+        a2 * ax + b2 * bx + if 0.0 < b2 {1.0 - ((1.0 - a2) / b2).min(1.0)} else {0.0} * cx,
     ]
 }
 
