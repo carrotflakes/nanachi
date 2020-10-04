@@ -8,22 +8,27 @@ use nanachi::{
     path_builder::PathBuilder,
     matrix::Matrix2d,
 };
-use std::thread;
+use std::{thread, time::Instant};
 use std::time::Duration;
 
 fn main() {
+    let fill_style = FillStyle {
+        color: fill_color::Solid::new(Rgba([0.0f32, 0.0, 0.0, 1.0])),
+        compositor: compositor::SrcOver,
+        fill_rule: fill_rule::NonZero,
+        pixel: Default::default(),
+    };
+
     gui::mount_gui(&|render, event_pump| {
         let (width, height) = (640usize, 480usize);
         let mut context =
             Context::from_pixel(width as u32, height as u32, Rgba([1.0f32, 1.0, 1.0, 1.0])).high_quality();
 
-        let color1 = nanachi::fill_color::Solid::new(Rgba([0.1f32, 0.1, 0.1, 1.0]));
-        let color2 = nanachi::fill_color::Solid::new(Rgba([0.9f32, 0.0, 0.0, 1.0]));
+        let color1 = fill_color::Solid::new(Rgba([0.1f32, 0.1, 0.1, 1.0]));
+        let color2 = fill_color::Solid::new(Rgba([0.9f32, 0.0, 0.0, 1.0]));
         let fill_style1 = FillStyle {
             color: color1,
-            compositor: compositor::SrcOver,
-            fill_rule: fill_rule::NonZero,
-            pixel: Default::default(),
+            ..fill_style.clone()
         };
         let fill_style2 = FillStyle {
             color: color2,
@@ -40,13 +45,14 @@ fn main() {
             pb.end()
         };
         let circle_style = FillStyle {
-            color: nanachi::fill_color::Solid::new(Rgba([1.0f32, 0.0, 0.0, 0.7])),
+            color: fill_color::Solid::new(Rgba([1.0f32, 0.0, 0.0, 0.7])),
             compositor: compositor::SrcOver,
             fill_rule: fill_rule::NonZero,
             pixel: Default::default(),
         };
 
         let mut count = 0;
+        let mut tk = TimeKeeper::new();
 
         'running: loop {
             context.clear(&fill_color::Solid::new(Rgba([1.0, 1.0, 1.0, 1.0])));
@@ -58,6 +64,7 @@ fn main() {
             if 2 <= points.len() {
                 let path = nanachi::path::Path::from_points(
                     &points.iter().map(|x| (*x).into()).collect(),
+                    false,
                 );
                 context.stroke(&path, &fill_style1, 2.0);
             }
@@ -84,7 +91,37 @@ fn main() {
                     _ => {}
                 }
             }
-            thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
+            tk.sleep();
         }
     });
+}
+
+struct TimeKeeper {
+    last: Instant,
+    fps: u32,
+    history: Vec<Instant>,
+}
+
+impl TimeKeeper {
+    pub fn new() -> TimeKeeper {
+        TimeKeeper {
+            last: Instant::now(),
+            fps: 30,
+            history: vec![Instant::now()],
+        }
+    }
+
+    pub fn sleep(&mut self) {
+        self.last += Duration::new(0, 1_000_000_000u32 / self.fps);
+        let now = Instant::now();
+        thread::sleep(self.last.saturating_duration_since(now));
+        self.history.push(now);
+        if 30 < self.history.len() {
+            self.history.remove(0);
+        }
+    }
+
+    pub fn actual_fps(&self) -> f64 {
+        ((*self.history.last().unwrap() - self.history[0]).as_secs_f64() / self.history.len() as f64).recip()
+    }
 }
