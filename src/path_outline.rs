@@ -26,10 +26,15 @@ pub fn path_outline(path: &Path, width: f64, join: &Join, cap: &Cap) -> Path {
     for (pis, closed) in path.continuations() {
         if closed {
             // outer
+            let mut it = pis.iter().filter(|pi| !pi.is_zero());
             let m = res.len();
-            path_item_offset(&mut res, &pis[0], width);
+            if let Some(pi) = it.next() {
+                path_item_offset(&mut res, pi, width);
+            } else {
+                continue;
+            }
             let first = res[m].left_point();
-            for pi in pis.iter().skip(1) {
+            for pi in it {
                 path_item_offset(&mut tmp, pi, width);
                 let s = res.last().unwrap().right_point();
                 add_join(&mut res, join, pi.left_point(), s, tmp[0].left_point());
@@ -40,12 +45,12 @@ pub fn path_outline(path: &Path, width: f64, join: &Join, cap: &Cap) -> Path {
             res.push(PathItem::CloseAndJump);
 
             // inner
+            let mut it = pis.iter().rev().filter(|pi| !pi.is_zero()).map(|pi| pi.flip());
             let m = res.len();
-            path_item_offset(&mut res, &pis.last().unwrap().flip(), width);
+            path_item_offset(&mut res, &it.next().unwrap(), width);
             let first = res[m].left_point();
-            for pi in pis.iter().rev().skip(1) {
-                let pi = &pi.flip();
-                path_item_offset(&mut tmp, pi, width);
+            for pi in it {
+                path_item_offset(&mut tmp, &pi, width);
                 let s = res.last().unwrap().right_point();
                 add_join(&mut res, join, pi.left_point(), s, tmp[0].left_point());
                 res.extend(tmp.drain(..));
@@ -54,22 +59,27 @@ pub fn path_outline(path: &Path, width: f64, join: &Join, cap: &Cap) -> Path {
             add_join(&mut res, join, pis[0].left_point(), s, first);
             res.push(PathItem::CloseAndJump);
         } else {
+            let mut it = pis.iter().filter(|pi| !pi.is_zero());
             let m = res.len();
-            path_item_offset(&mut res, &pis[0], width);
+            if let Some(pi) = it.next() {
+                path_item_offset(&mut res, pi, width);
+            } else {
+                continue;
+            }
             let first = res[m].left_point();
-            for pi in pis.iter().skip(1) {
+            for pi in it {
                 path_item_offset(&mut tmp, pi, width);
                 let s = res.last().unwrap().right_point();
                 add_join(&mut res, join, pi.left_point(), s, tmp[0].left_point());
                 res.extend(tmp.drain(..));
             }
-            path_item_offset(&mut tmp, &pis.last().unwrap().flip(), width);
+            let mut it = pis.iter().rev().filter(|pi| !pi.is_zero()).map(|pi| pi.flip());
+            path_item_offset(&mut tmp, &it.next().unwrap(), width);
             let s = res.last().unwrap().right_point();
             add_cap(&mut res, cap, s, tmp[0].left_point());
             res.extend(tmp.drain(..));
-            for pi in pis.iter().rev().skip(1) {
-                let pi = &pi.flip();
-                path_item_offset(&mut tmp, pi, width);
+            for pi in it {
+                path_item_offset(&mut tmp, &pi, width);
                 let s = res.last().unwrap().right_point();
                 add_join(&mut res, join, pi.left_point(), s, tmp[0].left_point());
                 res.extend(tmp.drain(..));
@@ -83,6 +93,9 @@ pub fn path_outline(path: &Path, width: f64, join: &Join, cap: &Cap) -> Path {
 }
 
 fn add_join(pis: &mut Vec<PathItem>, join: &Join, center: Point, start: Point, end: Point) {
+    if start == end {
+        return;
+    }
     let mut bevel = || {
         pis.push(PathItem::Line(Line(start, end)));
     };
