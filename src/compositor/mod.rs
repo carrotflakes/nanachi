@@ -16,32 +16,57 @@ pub trait Compositor<T>: CompositorAttr {
     fn composite(&self, dst: &T, src: &T, alpha: f64) -> T;
 }
 
+#[derive(Clone)]
 pub struct Clear;
+#[derive(Clone)]
 pub struct Src;
+#[derive(Clone)]
 pub struct Dst;
+#[derive(Clone)]
 pub struct SrcOver;
+#[derive(Clone)]
 pub struct SrcIn;
+#[derive(Clone)]
 pub struct SrcOut;
+#[derive(Clone)]
 pub struct SrcAtop;
+#[derive(Clone)]
 pub struct DstOver;
+#[derive(Clone)]
 pub struct DstIn;
+#[derive(Clone)]
 pub struct DstOut;
+#[derive(Clone)]
 pub struct DstAtop;
+#[derive(Clone)]
 pub struct Xor;
+#[derive(Clone)]
 pub struct Add;
+#[derive(Clone)]
 pub struct Darken;
+#[derive(Clone)]
 pub struct Lighten;
+#[derive(Clone)]
 pub struct Multiply;
+#[derive(Clone)]
 pub struct Screen;
+#[derive(Clone)]
 pub struct Overlay;
+#[derive(Clone)]
 pub struct HardLight;
+#[derive(Clone)]
 pub struct Dodge;
+#[derive(Clone)]
 pub struct Burn;
+#[derive(Clone)]
 pub struct SoftLight;
+#[derive(Clone)]
 pub struct Difference;
+#[derive(Clone)]
 pub struct Exclusion;
 
 /// Dynamically composition type.
+#[derive(Clone)]
 pub enum Basic {
     Clear,
     Src,
@@ -131,6 +156,7 @@ pub mod perf {
     use crate::pixel::Rgba;
     use super::*;
 
+    #[derive(Clone)]
     pub struct Perf;
 
     impl CompositorAttr for Perf {
