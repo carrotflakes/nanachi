@@ -35,17 +35,22 @@ fn main() {
         let start = point(0.0, v_metrics.ascent);
         let glyphs: Vec<_> = font.layout(text, scale, start).collect();
 
-        let glyphs_height = (v_metrics.ascent - v_metrics.descent).ceil() as u32;
-        let glyphs_width = glyphs.last().unwrap().pixel_bounding_box().unwrap().max.x
-            - glyphs.first().unwrap().pixel_bounding_box().unwrap().min.x;
+        // get bounding box
+        let (left, top, right, bottom) = glyphs.iter().fold((500, 100, 0, 0), |b, g| {
+            if let Some(bb) = g.pixel_bounding_box() {
+                (b.0.min(bb.min.x), b.1.min(bb.min.y), b.2.max(bb.max.x), b.3.max(bb.max.y))
+            } else {
+                b
+            }
+        });
 
         // show rectangle
         context.fill(
             &rect(
-                glyphs[0].pixel_bounding_box().unwrap().min.x as f64,
-                v_metrics.descent as f64,
-                glyphs_width as f64,
-                glyphs_height as f64,
+                left as f64,
+                top as f64,
+                (right - left) as f64,
+                (bottom - top) as f64,
             ),
             &rect_fill_style,
         );
