@@ -1,3 +1,5 @@
+//! `Context` provides high level API.
+
 use crate::{
     buffer::{Buffer, GenericBuffer},
     compositor::Compositor,
@@ -73,6 +75,7 @@ where
     I: BorrowMut<B>,
     R: BorrowMut<Rasterizer>,
 {
+    /// Set to low quality.
     pub fn low_quality(self) -> Context<P, B, I, R> {
         Context {
             flatten_tolerance: 2.0,
@@ -83,6 +86,7 @@ where
         }
     }
 
+    /// Set to high quality.
     pub fn high_quality(self) -> Context<P, B, I, R> {
         Context {
             flatten_tolerance: 0.1,
@@ -93,6 +97,7 @@ where
         }
     }
 
+    /// Fill the path with specified [`FillStyle`].
     pub fn fill<FC: FillColor<P>, C: Compositor<P>, FR: FillRule>(
         &mut self,
         path: &Path,
@@ -102,6 +107,7 @@ where
         self.fill_(fill_style, &path);
     }
 
+    /// Draw stroke of the path with specified [`FillStyle`].
     pub fn stroke<FC: FillColor<P>, C: Compositor<P>, FR: FillRule>(
         &mut self,
         path: &Path,
@@ -113,6 +119,7 @@ where
         self.fill_(fill_style, &path);
     }
 
+    /// Draw stroke of the path with specified [`FillStyle`], [`Join`] and [`Cap`].
     pub fn stroke_with_style<FC: FillColor<P>, C: Compositor<P>, FR: FillRule>(
         &mut self,
         path: &Path,
@@ -126,7 +133,7 @@ where
         self.fill_(fill_style, &path);
     }
 
-    pub fn path_transform_and_flatten(&self, path: &Path) -> Path {
+    fn path_transform_and_flatten(&self, path: &Path) -> Path {
         if self.matrix.is_unit() {
             Path::new(Flatten::new(path.0.iter(), self.flatten_tolerance).collect())
         } else {
@@ -135,6 +142,7 @@ where
         }
     }
 
+    /// Clear buffer entirely with specified [`FillColor`]
     pub fn clear<FC: FillColor<P>>(&mut self, fill_color: &FC) {
         let image = self.image.borrow_mut();
         let (w, h) = image.dimensions();
@@ -183,6 +191,7 @@ impl<'a, P> Context<P, GenericBuffer<P>, GenericBuffer<P>, Rasterizer>
 where
     P: Pixel,
 {
+    /// Create [`Context`] with a [`GenericBuffer`].
     pub fn from_pixel(width: u32, height: u32, pixel: P) -> Self {
         Context {
             image: GenericBuffer::from_pixel(width, height, pixel),
@@ -203,6 +212,7 @@ where
     P: Pixel,
     B: Buffer<P>,
 {
+    /// Create [`Context`] from the [`Buffer`].
     pub fn from_image(image: &'a mut B) -> Self {
         let (width, height) = image.dimensions();
         Context {
@@ -226,6 +236,7 @@ where
     I: BorrowMut<B>,
     R: BorrowMut<Rasterizer>,
 {
+    /// Create child [`Context`].
     pub fn child<'b>(&'b mut self) -> ChildContext<'b, P, B> {
         Context {
             image: self.image.borrow_mut(),
@@ -240,6 +251,7 @@ where
         }
     }
 
+    /// Create child [`Context`] and transform.
     pub fn transformed_context<'b>(&'b mut self, matrix: &Matrix2d) -> ChildContext<'b, P, B> {
         Context {
             matrix: matrix.then(&self.matrix),

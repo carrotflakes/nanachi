@@ -62,7 +62,7 @@ impl Matrix2d {
         ])
     }
 
-    /// Transform the [`Point`]
+    /// Transform the [`Point`].
     pub fn apply<P: From<Point> + Into<Point>>(&self, p: P) -> P {
         let p: Point = p.into();
         let s = &self.0;

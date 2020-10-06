@@ -12,7 +12,15 @@ enum FlattenState {
     End,
 }
 
-/// An iterator of flattened path.
+/// Iterator of flattened path.
+///
+/// # Examples
+///
+/// ```
+/// use nanachi::{primitives::circle, path::Path, path_flatten::Flatten};
+/// let path = circle(0.0, 0.0, 10.0);
+/// let flatten_path = Path::new(Flatten::new(path.0.iter(), 1.0).collect());
+/// ```
 pub struct Flatten<'a, I: Iterator<Item = &'a PathItem>> {
     tolerance: f64,
     last: Point,
@@ -21,6 +29,9 @@ pub struct Flatten<'a, I: Iterator<Item = &'a PathItem>> {
 }
 
 impl<'a, I: Iterator<Item = &'a PathItem>> Flatten<'a, I> {
+    /// Create [`Flatten`].
+    ///
+    /// `tolerance` is the tolerance for flattening error. Smaller `tolerance` makes generated curve smooth.
     pub fn new(it: I, tolerance: f64) -> Self {
         let mut flatten = Flatten {
             tolerance,

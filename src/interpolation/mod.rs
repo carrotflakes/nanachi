@@ -1,5 +1,6 @@
 //! Collection of interpolation types.
 //!
+//! Currently, 2 types of interpolation are available.
 //! - NearestNeighbor
 //! - Bilinear
 

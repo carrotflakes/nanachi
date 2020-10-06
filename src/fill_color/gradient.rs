@@ -17,6 +17,7 @@ fn gradient<P: Pixel>(points: &Vec<GradientPoint<P>>, p: f64) -> P {
     points.last().unwrap().1.clone()
 }
 
+/// Linear gradient.
 #[derive(Debug, Clone)]
 pub struct LinearGradient<P: Pixel> {
     start: (f64, f64),
@@ -51,6 +52,7 @@ impl<P: Pixel> FillColor<P> for LinearGradient<P> {
     }
 }
 
+/// Radial gradient.
 #[derive(Debug, Clone)]
 pub struct RadialGradient<P: Pixel> {
     start: (f64, f64),

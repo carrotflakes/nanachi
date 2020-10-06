@@ -20,6 +20,7 @@ pub trait FillColor<C> {
     fn fill_color(&self, x: f64, y: f64) -> C;
 }
 
+/// Solid color.
 #[derive(Debug, Clone)]
 pub struct Solid<C: Clone>(C);
 
@@ -35,6 +36,7 @@ impl<C: Clone> FillColor<C> for Solid<C> {
     }
 }
 
+/// Block check pattern.
 #[derive(Debug, Clone)]
 pub struct BlockCheck<C: Clone>(C, C, f64);
 

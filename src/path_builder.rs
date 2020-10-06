@@ -14,6 +14,7 @@ pub struct PathBuilder {
 }
 
 impl PathBuilder {
+    /// Create [`PathBuilder`].
     pub fn new() -> PathBuilder {
         PathBuilder {
             items: vec![],
