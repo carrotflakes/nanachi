@@ -1,3 +1,5 @@
+//! Primitive shape generators.
+
 use crate::{
     models::Arc,
     path::{Path, PathItem},
@@ -5,6 +7,7 @@ use crate::{
 };
 use std::f64::consts::PI;
 
+/// Create a circle.
 pub fn circle(x: f64, y: f64, radius: f64) -> Path {
     Path::new(vec![
         PathItem::Arc(Arc {
@@ -17,6 +20,7 @@ pub fn circle(x: f64, y: f64, radius: f64) -> Path {
     ])
 }
 
+/// Create a rectangle.
 pub fn rect(x: f64, y: f64, width: f64, height: f64) -> Path {
     Path::from_points(
         &vec![
@@ -30,10 +34,12 @@ pub fn rect(x: f64, y: f64, width: f64, height: f64) -> Path {
     )
 }
 
+/// Create a triangle.
 pub fn triangle(size: f64) -> Path {
     ngon(3, size)
 }
 
+/// Create a regular n-gon.
 pub fn ngon(n: usize, size: f64) -> Path {
     assert!(3 <= n);
     let p = Point(0.0, -size);

@@ -11,6 +11,7 @@ pub trait Interpolation<P: Pixel, B: Buffer<P>> {
     fn interpolate(&self, buffer: &B, x: f64, y: f64) -> P;
 }
 
+/// Nearest neighbor interpolation.
 #[derive(Clone)]
 pub struct NearestNeighbor;
 
@@ -26,6 +27,7 @@ impl<P: Pixel, B: Buffer<P>> Interpolation<P, B> for NearestNeighbor {
     }
 }
 
+/// Bi-linear interpolation.
 #[derive(Clone)]
 pub struct Bilinear;
 

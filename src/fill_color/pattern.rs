@@ -3,6 +3,7 @@ use crate::fill_color::FillColor;
 use crate::interpolation::Interpolation;
 use crate::pixel::Pixel;
 
+/// Tiling an image.
 #[derive(Debug, Clone)]
 pub struct Pattern<'a, P: Pixel, B: Buffer<P>, I: Interpolation<P, B>> {
     width: f64,

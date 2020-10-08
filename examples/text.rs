@@ -5,7 +5,7 @@ use nanachi::{
     fill_color, fill_rule,
     pixel::Rgba,
     primitives::rect,
-    writer::img_writer,
+    writer::image_writer,
 };
 use rusttype::*;
 
@@ -56,7 +56,7 @@ fn main() {
         );
 
         // render text
-        let mut write = img_writer(&mut context.image, &color, &compositor);
+        let mut write = image_writer(&mut context.image, &color, &compositor);
         for glyph in glyphs {
             if let Some(bounding_box) = glyph.pixel_bounding_box() {
                 glyph.draw(|x, y, v| {

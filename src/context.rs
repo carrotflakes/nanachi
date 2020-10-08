@@ -13,7 +13,7 @@ use crate::{
     pixel::Pixel,
     point::Point,
     rasterizer::Rasterizer,
-    writer::img_writer,
+    writer::image_writer,
 };
 use std::borrow::BorrowMut;
 
@@ -162,7 +162,7 @@ where
         path: &Path,
     ) {
         let color = Transform::new(&fill_style.color, self.matrix);
-        let mut writer = img_writer(self.image.borrow_mut(), &color, &fill_style.compositor);
+        let mut writer = image_writer(self.image.borrow_mut(), &color, &fill_style.compositor);
         let pis = Flatten::new(path.0.iter(), self.flatten_tolerance);
         let segments = pis.filter_map(|pi| match pi {
             PathItem::Line(l) => Some((l.0, l.1)),

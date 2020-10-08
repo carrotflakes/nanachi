@@ -18,6 +18,17 @@ fn gradient<P: Pixel>(points: &Vec<GradientPoint<P>>, p: f64) -> P {
 }
 
 /// Linear gradient.
+///
+/// # Examples
+///
+/// ```
+/// use nanachi::pixel::Rgba;
+/// let color = nanachi::fill_color::LinearGradient::new((0.0, 0.0), (100.0, 0.0), vec![
+///     (0.0, Rgba([1.0, 0.0, 0.0, 1.0])),
+///     (0.5, Rgba([0.0, 1.0, 0.0, 1.0])),
+///     (1.0, Rgba([0.0, 0.0, 1.0, 1.0])),
+/// ]);
+/// ```
 #[derive(Debug, Clone)]
 pub struct LinearGradient<P: Pixel> {
     start: (f64, f64),
@@ -53,6 +64,17 @@ impl<P: Pixel> FillColor<P> for LinearGradient<P> {
 }
 
 /// Radial gradient.
+///
+/// # Examples
+///
+/// ```
+/// use nanachi::pixel::Rgba;
+/// let color = nanachi::fill_color::RadialGradient::new((50.0, 50.0), 50.0, vec![
+///     (0.0, Rgba([1.0, 0.0, 0.0, 1.0])),
+///     (0.5, Rgba([0.0, 1.0, 0.0, 1.0])),
+///     (1.0, Rgba([0.0, 0.0, 1.0, 1.0])),
+/// ]);
+/// ```
 #[derive(Debug, Clone)]
 pub struct RadialGradient<P: Pixel> {
     start: (f64, f64),

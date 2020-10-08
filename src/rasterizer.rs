@@ -1,6 +1,7 @@
 use crate::fill_rule::FillRule;
 use crate::point::Point;
 
+/// Rasterizer is a buffer for drawing path.
 #[derive(Clone)]
 pub struct Rasterizer {
     width: u32,

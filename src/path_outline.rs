@@ -152,7 +152,7 @@ fn add_cap(pis: &mut Vec<PathItem>, cap: &Cap, start: Point, end: Point) {
     }
 }
 
-pub fn path_item_offset(pis: &mut Vec<PathItem>, path_item: &PathItem, width: f64) {
+fn path_item_offset(pis: &mut Vec<PathItem>, path_item: &PathItem, width: f64) {
     match path_item {
         PathItem::Line(Line(p1, p2)) => {
             let n = (*p2 - *p1).unit();
