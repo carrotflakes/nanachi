@@ -1,5 +1,6 @@
 # Nanachi - pure Rust 2D graphics library
 
+[![Build Status](https://github.com/carrotflakes/nanachi/workflows/Rust/badge.svg)](https://github.com/carrotflakes/nanachi/actions)
 [![Crates.io](https://img.shields.io/crates/v/nanachi.svg)](https://crates.io/crates/nanachi)
 [![Documentation](https://docs.rs/nanachi/badge.svg)](https://docs.rs/nanachi)
 
