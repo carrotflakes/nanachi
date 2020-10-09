@@ -169,19 +169,21 @@ where
             PathItem::CloseAndJump | PathItem::Jump => None,
             _ => panic!(),
         });
+        let write_transparent_src = !fill_style.compositor.keep_dst_on_transparent_src()
+            || fill_style.fill_rule.is_inverse();
         if self.antialiasing {
             self.rasterizer.borrow_mut().rasterize(
                 segments,
                 fill_style.fill_rule,
                 &mut writer,
-                !fill_style.compositor.keep_dst_on_transparent_src(),
+                write_transparent_src,
             );
         } else {
             self.rasterizer.borrow_mut().rasterize_no_aa(
                 segments,
                 fill_style.fill_rule,
                 &mut writer,
-                !fill_style.compositor.keep_dst_on_transparent_src(),
+                write_transparent_src,
             );
         }
     }
