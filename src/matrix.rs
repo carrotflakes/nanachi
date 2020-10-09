@@ -140,16 +140,26 @@ fn test() {
         am.rotate(0.1).then(&Matrix2d::new().rotate(0.3)),
         am.rotate(0.1).rotate(0.3)
     );
-    assert_eq!(
-        am.rotate(0.1).then(
-            &Matrix2d::new()
-                .scale(0.5, 0.6)
-                .translate(-0.5, -0.6)
-                .rotate(0.3)
-        ),
+    assert!(
         am.rotate(0.1)
-            .scale(0.5, 0.6)
-            .translate(-0.5, -0.6)
-            .rotate(0.3)
+            .then(
+                &Matrix2d::new()
+                    .scale(0.5, 0.6)
+                    .translate(-0.5, -0.6)
+                    .rotate(0.3)
+            )
+            .0
+            .iter()
+            .zip(
+                am.rotate(0.1)
+                    .scale(0.5, 0.6)
+                    .translate(-0.5, -0.6)
+                    .rotate(0.3)
+                    .0
+                    .iter()
+            )
+            .map(|(a, b)| (a - b).abs())
+            .sum::<f64>()
+            < 0.0001
     );
 }
