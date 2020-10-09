@@ -58,3 +58,34 @@ impl FillRule for Raw {
         value
     }
 }
+
+#[test]
+fn test() {
+    assert!((NonZero.apply(0.0) - 0.0).abs() < 0.000001);
+    assert!((NonZero.apply(0.6) - 0.6).abs() < 0.000001);
+    assert!((NonZero.apply(1.0) - 1.0).abs() < 0.000001);
+    assert!((NonZero.apply(1.2) - 1.0).abs() < 0.000001);
+    assert!((NonZero.apply(-1.0) - 1.0).abs() < 0.000001);
+    assert!((NonZero.apply(-1.2) - 1.0).abs() < 0.000001);
+
+    assert!((EvenOdd.apply(0.0) - 0.0).abs() < 0.000001);
+    assert!((EvenOdd.apply(0.6) - 0.6).abs() < 0.000001);
+    assert!((EvenOdd.apply(1.0) - 1.0).abs() < 0.000001);
+    assert!((EvenOdd.apply(1.2) - 0.8).abs() < 0.000001);
+    assert!((EvenOdd.apply(-1.0) - 1.0).abs() < 0.000001);
+    assert!((EvenOdd.apply(-1.2) - 0.8).abs() < 0.000001);
+
+    assert!((InverseNonZero.apply(0.0) - 1.0).abs() < 0.000001);
+    assert!((InverseNonZero.apply(0.6) - 0.4).abs() < 0.000001);
+    assert!((InverseNonZero.apply(1.0) - 0.0).abs() < 0.000001);
+    assert!((InverseNonZero.apply(1.2) - 0.0).abs() < 0.000001);
+    assert!((InverseNonZero.apply(-1.0) - 0.0).abs() < 0.000001);
+    assert!((InverseNonZero.apply(-1.2) - 0.0).abs() < 0.000001);
+
+    assert!((InverseEvenOdd.apply(0.0) - 1.0).abs() < 0.000001);
+    assert!((InverseEvenOdd.apply(0.6) - 0.4).abs() < 0.000001);
+    assert!((InverseEvenOdd.apply(1.0) - 0.0).abs() < 0.000001);
+    assert!((InverseEvenOdd.apply(1.2) - 0.2).abs() < 0.000001);
+    assert!((InverseEvenOdd.apply(-1.0) - 0.0).abs() < 0.000001);
+    assert!((InverseEvenOdd.apply(-1.2) - 0.2).abs() < 0.000001);
+}
