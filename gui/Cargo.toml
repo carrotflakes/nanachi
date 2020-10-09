@@ -7,3 +7,4 @@ edition = "2018"
 [dependencies]
 nanachi = { path = ".." }
 sdl2 = "0.32"
+rusttype = "0.9"
