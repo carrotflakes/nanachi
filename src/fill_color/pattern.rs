@@ -5,16 +5,28 @@ use crate::pixel::Pixel;
 
 /// Tiling an image.
 #[derive(Debug, Clone)]
-pub struct Pattern<'a, P: Pixel, B: Buffer<P>, I: Interpolation<P, B>> {
+pub struct Pattern<P, B, DB, I>
+where
+    P: Pixel,
+    B: Buffer<P>,
+    DB: std::ops::Deref<Target = B>,
+    I: Interpolation<P, B>,
+{
     width: f64,
     height: f64,
-    image: &'a B,
+    image: DB,
     interpolation: I,
     pixel: std::marker::PhantomData<P>,
 }
 
-impl<'a, P: Pixel, B: Buffer<P>, I: Interpolation<P, B>> Pattern<'a, P, B, I> {
-    pub fn new(image: &'a B, interpolation: I) -> Self {
+impl<P, B, DB, I> Pattern<P, B, DB, I>
+where
+    P: Pixel,
+    B: Buffer<P>,
+    DB: std::ops::Deref<Target = B>,
+    I: Interpolation<P, B>,
+{
+    pub fn new(image: DB, interpolation: I) -> Self {
         let (width, height) = image.dimensions();
         Pattern {
             width: width as f64,
@@ -26,7 +38,13 @@ impl<'a, P: Pixel, B: Buffer<P>, I: Interpolation<P, B>> Pattern<'a, P, B, I> {
     }
 }
 
-impl<'a, P: Pixel, B: Buffer<P>, I: Interpolation<P, B>> FillColor<P> for Pattern<'a, P, B, I> {
+impl<P, B, DB, I> FillColor<P> for Pattern<P, B, DB, I>
+where
+    P: Pixel,
+    B: Buffer<P>,
+    DB: std::ops::Deref<Target = B>,
+    I: Interpolation<P, B>,
+{
     fn fill_color(&self, x: f64, y: f64) -> P {
         self.interpolation.interpolate(&self.image, x, y)
     }
