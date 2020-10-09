@@ -10,7 +10,7 @@ use nanachi::{
     path_builder::PathBuilder,
     path_data_notation,
     path_transform::path_transform,
-    pixel::{Rgba, PremultipliedRgba},
+    pixel::{PremultipliedRgba, Rgba},
 };
 use rand_core::RngCore;
 use rand_pcg::Pcg32;
@@ -37,6 +37,7 @@ fn main() {
     let t = std::time::Instant::now();
     draw_nanachi(context.child());
     println!("elapsed: {:?}", t.elapsed());
+    draw_frame(context.child());
 
     let img: RgbaImage = (&context.image).into();
     let res = img.save("./nanachi.png");
@@ -256,19 +257,62 @@ fn draw_nanachi<'a>(mut context: ChildContext<'a, Pixel, GenericBuffer<Pixel>>) 
     };
     let mut path = nanachi_path;
     path.merge(&moji_path);
-    // let path = path
-    //     .as_points_list()
-    //     .unwrap()
-    //     .into_iter()
-    //     .map(|points| {
-    //         let close = points[0] == *points.last().unwrap();
-    //         Path::from_bezier2_points(&k_curve(points, close, 3))
-    //     })
-    //     .fold(Path::new(vec![]), |mut a, p| {
-    //         a.merge(&p);
-    //         a
-    //     });
     context.stroke(&path, &fill_style, 4.0);
+}
+
+fn draw_frame<'a>(mut context: ChildContext<'a, Pixel, GenericBuffer<Pixel>>) {
+    let mut rnd = Pcg32::new(0xcafef00dd15ea5e5, 0xa02bdbf7bb3c0a7);
+    let size = 8.0;
+    let mut rnd = || (1.0 - rnd.next_u32() as f64 / std::u32::MAX as f64 * 2.0) * size;
+    let mut builder = PathBuilder::new();
+    for i in 0..10 {
+        let (dx, dy) = (rnd(), rnd());
+        let i = i as f64 / 10.0;
+        builder.line_to(10.0 + i * (512.0 - 20.0) + dx, 10.0 + dy);
+    }
+    for i in 0..10 {
+        let (dx, dy) = (rnd(), rnd());
+        let i = i as f64 / 10.0;
+        builder.line_to(512.0 - 10.0 + dx, 10.0 + i * (512.0 - 20.0) + dy);
+    }
+    for i in 0..10 {
+        let (dx, dy) = (rnd(), rnd());
+        let i = i as f64 / 10.0;
+        builder.line_to(512.0 - 10.0 - i * (512.0 - 20.0) + dx, 512.0 - 10.0 + dy);
+    }
+    for i in 0..10 {
+        let (dx, dy) = (rnd(), rnd());
+        let i = i as f64 / 10.0;
+        builder.line_to(10.0 + dx, 512.0 - 10.0 - i * (512.0 - 20.0) + dy);
+    }
+    builder.close();
+    let path = builder.end();
+    // let path = smooth(&path);
+    context.fill(
+        &path,
+        &FillStyle::new(
+            fill_color::Solid::new(rgba(0, 0, 0, 255)),
+            compositor::DstIn,
+            fill_rule::EvenOdd,
+        ),
+    );
+}
+
+fn smooth(path: &Path) -> Path {
+    path.as_points_list()
+        .unwrap()
+        .into_iter()
+        .map(|mut points| {
+            let close = points[0] == *points.last().unwrap();
+            if close {
+                points.pop();
+            }
+            Path::from_bezier2_points(&k_curve(points, close, 3))
+        })
+        .fold(Path::new(vec![]), |mut a, p| {
+            a.merge(&p);
+            a
+        })
 }
 
 fn rgba(r: u8, g: u8, b: u8, a: u8) -> Pixel {
@@ -277,5 +321,6 @@ fn rgba(r: u8, g: u8, b: u8, a: u8) -> Pixel {
         g as f32 / 255.0,
         b as f32 / 255.0,
         a as f32 / 255.0,
-    ]).into()
+    ])
+    .into()
 }
