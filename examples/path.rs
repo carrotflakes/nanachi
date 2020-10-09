@@ -100,6 +100,6 @@ fn main() {
     }
     dbg!(t.elapsed());
 
-    let res = img.save("./path3.png");
+    let res = img.save("./path.png");
     println!("save: {:?}", res);
 }
