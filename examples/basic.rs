@@ -23,23 +23,21 @@ fn main() {
     let path = builder.end();
 
     // Make a FillStyle for filling
-    let fill_style = FillStyle {
-        color: fill_color::Solid::new(Rgba([1.0, 0.0, 0.0, 0.7])),
-        fill_rule: fill_rule::NonZero,
-        compositor: compositor::SrcOver,
-        pixel: Default::default(),
-    };
+    let fill_style = FillStyle::new(
+        fill_color::Solid::new(Rgba([1.0, 0.0, 0.0, 0.7])),
+        compositor::SrcOver,
+        fill_rule::NonZero,
+    );
 
     // Fill the path
     context.fill(&path, &fill_style);
 
     // Make a FillStyle for stroking
-    let fill_style = FillStyle {
-        color: fill_color::Solid::new(Rgba([0.0, 0.0, 1.0, 1.0])),
-        fill_rule: fill_rule::NonZero,
-        compositor: compositor::SrcOver,
-        pixel: Default::default(),
-    };
+    let fill_style = FillStyle::new(
+        fill_color::Solid::new(Rgba([0.0, 0.0, 1.0, 1.0])),
+        compositor::SrcOver,
+        fill_rule::NonZero,
+    );
 
     // Stroke the path
     context.stroke(&path, &fill_style, 8.0);
