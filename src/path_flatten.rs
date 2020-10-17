@@ -1,3 +1,5 @@
+//! Make path flatten.
+
 use crate::models::Line;
 use crate::path::{Path, PathItem};
 use crate::point::Point;

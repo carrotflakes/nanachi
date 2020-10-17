@@ -1,3 +1,5 @@
+//! [`Pixel`] trait represents a pixel.
+
 /// A trait for represents a pixel.
 pub trait Pixel: Clone + 'static {
     fn lerp(&self, rhs: &Self, rate: f64) -> Self;

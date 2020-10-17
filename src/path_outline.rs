@@ -1,3 +1,5 @@
+//! Generate path outline.
+
 use crate::models::{Arc, Ellipse, Line, Quad};
 use crate::path::{Path, PathItem};
 use crate::point::Point;

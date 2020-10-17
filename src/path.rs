@@ -1,3 +1,5 @@
+//! [`Path`] for filling and stroking.
+
 use crate::models::{Arc, Cubic, Ellipse, Line, Quad};
 use crate::point::Point;
 
@@ -114,19 +116,17 @@ impl PathItem {
 /// Path for filling and stroking.
 ///
 /// A path can contains lines, ellipse arcs, quadratic bezier curves and cubic bezier curves.
-/// You should use PathBuilder for creating a path.
+/// You should use [`PathBuilder`] for creating a path.
 #[derive(Debug, Clone)]
 pub struct Path(pub Vec<PathItem>);
 
 impl Path {
+    /// Create [`Path`].
     pub fn new(items: Vec<PathItem>) -> Path {
         Path(items)
     }
 
-    pub fn is_closed(&self) -> bool {
-        self.0[0].left_point() == self.0[self.0.len() - 1].right_point()
-    }
-
+    /// Merge 2 paths.
     pub fn merge(&mut self, rhs: &Path) {
         if !self.0.is_empty() && !self.0.last().unwrap().is_jump() {
             self.0.push(PathItem::Jump);
@@ -134,6 +134,7 @@ impl Path {
         self.0.extend_from_slice(rhs.0.as_slice());
     }
 
+    /// Create [`Path`] from `Vec<Point>`.
     pub fn from_points(points: &Vec<Point>, close: bool) -> Path {
         let mut pis = Vec::new();
         for i in 0..points.len() - 1 {
@@ -145,6 +146,7 @@ impl Path {
         Path(pis)
     }
 
+    /// Create [`Path`] as a bezire curves from `Vec<Point>`.
     pub fn from_bezier2_points(points: &Vec<Point>) -> Path {
         let mut pis = Vec::new();
         for i in 0..points.len() / 2 {
@@ -157,6 +159,7 @@ impl Path {
         Path(pis)
     }
 
+    /// Get [`Point`]s lists from a [`Path`] composed only lines.
     pub fn as_points_list(&self) -> Option<Vec<Vec<Point>>> {
         let mut vec = Vec::new();
         let mut points = Vec::new();
@@ -189,6 +192,7 @@ impl Path {
         Some(vec)
     }
 
+    /// Get continuous [`PathItem`]s in the path.
     pub fn continuations<'a>(&'a self) -> Vec<(&'a [PathItem], bool)> {
         let mut pis = self.0.as_slice();
         let mut i = 0;
@@ -218,6 +222,7 @@ impl Path {
         res
     }
 
+    /// Flip path direction.
     pub fn flip(&self) -> Path {
         Path(self.continuations().into_iter().flat_map(|(pis, closed)| {
             pis.iter().rev().map(|pi| pi.flip()).chain(vec![if closed {

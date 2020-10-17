@@ -1,5 +1,4 @@
 //! [`FillRule`] controls the area of path filling.
-//! Major [`FillRule`] is [`NonZero`] and [`EvenOdd`].
 
 /// FillRule Trait
 pub trait FillRule: Copy {
@@ -7,6 +6,7 @@ pub trait FillRule: Copy {
     fn is_inverse(&self) -> bool;
 }
 
+/// NonZero fills the overlapping part of the path
 #[derive(Clone, Copy, Default)]
 pub struct NonZero;
 
@@ -20,6 +20,7 @@ impl FillRule for NonZero {
     }
 }
 
+/// EvenOdd fills only the odd overlap of the path
 #[derive(Clone, Copy, Default)]
 pub struct EvenOdd;
 
@@ -33,6 +34,7 @@ impl FillRule for EvenOdd {
     }
 }
 
+/// Negative of [`NonZero`]
 #[derive(Clone, Copy, Default)]
 pub struct InverseNonZero;
 
@@ -46,6 +48,7 @@ impl FillRule for InverseNonZero {
     }
 }
 
+/// Negative of [`EvenOdd`]
 #[derive(Clone, Copy, Default)]
 pub struct InverseEvenOdd;
 

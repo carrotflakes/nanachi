@@ -1,3 +1,5 @@
+//! Κ-curves implementation
+
 use crate::point::Point;
 
 struct K {

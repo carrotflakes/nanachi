@@ -1,3 +1,5 @@
+//! Affine transformation
+
 use crate::point::Point;
 
 /// Matrix for affine transformation.

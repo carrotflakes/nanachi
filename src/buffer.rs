@@ -1,13 +1,19 @@
+//! [`Buffer`] trait represents an image.
+
 use crate::pixel::Pixel;
 
 /// A trait for represents an image.
 pub trait Buffer<P: Pixel> {
+    /// Get `(width, height)`.
     fn dimensions(&self) -> (u32, u32);
 
+    /// Get pixel by `x` and `y`.
     fn get_pixel(&self, x: u32, y: u32) -> &P;
 
+    /// Get mut pixel by `x` and `y`.
     fn get_pixel_mut(&mut self, x: u32, y: u32) -> &mut P;
 
+    /// Put a pixel.
     fn put_pixel(&mut self, x: u32, y: u32, pixel: P);
 }
 

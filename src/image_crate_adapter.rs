@@ -1,3 +1,5 @@
+//! Interfaces for [image crate](https://github.com/image-rs/image).
+
 use crate::buffer::{Buffer, GenericBuffer};
 use crate::pixel::Pixel;
 

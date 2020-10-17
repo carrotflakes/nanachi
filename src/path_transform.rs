@@ -1,3 +1,5 @@
+//! Path transformation.
+
 use crate::point::Point;
 use crate::models::{Line, Ellipse, Quad, Cubic};
 use crate::matrix::Matrix2d;

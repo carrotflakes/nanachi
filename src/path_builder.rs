@@ -1,3 +1,5 @@
+//! PathBuilder
+
 use crate::{
     models::{Arc, Cubic, Ellipse, Line, Quad},
     path::{Path, PathItem},

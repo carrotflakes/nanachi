@@ -1,10 +1,10 @@
 //! Collection of colorization types.
 //!
-//! - Solid
-//! - LinearGradient
-//! - RadialGradient
-//! - Pattern
-//! - Transform
+//! - [`Solid`]
+//! - [`LinearGradient`]
+//! - [`RadialGradient`]
+//! - [`Pattern`]
+//! - [`Transform`]
 
 pub mod gradient;
 pub mod pattern;

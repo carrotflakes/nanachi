@@ -1,3 +1,5 @@
+//! [`Point`] represents x, y coordinates.
+
 /// Auxiliary struct representing 2D coordinates.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Point(pub f64, pub f64);

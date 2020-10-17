@@ -1,3 +1,5 @@
+//! [`Rasterizer`] draws the path to the [`Buffer`]
+
 use crate::fill_rule::FillRule;
 use crate::point::Point;
 
