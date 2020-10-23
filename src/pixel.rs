@@ -57,3 +57,9 @@ impl Into<PremultipliedRgba> for Rgba {
         PremultipliedRgba([r * a, g * a, b * a, a])
     }
 }
+
+impl Pixel for f64 {
+    fn lerp(&self, rhs: &Self, rate: f64) -> Self {
+        self * (1.0 - rate) + rhs * rate
+    }
+}

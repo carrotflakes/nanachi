@@ -12,12 +12,12 @@ use crate::{
     path_transform::path_transform,
     pixel::Pixel,
     point::Point,
-    rasterizer::Rasterizer,
+    rasterize::RasterizeBuffer,
     writer::image_writer,
 };
 use std::borrow::BorrowMut;
 
-pub type ChildContext<'a, P, B> = Context<P, B, &'a mut B, &'a mut Rasterizer>;
+pub type ChildContext<'a, P, B> = Context<P, B, &'a mut B, &'a mut RasterizeBuffer>;
 
 #[derive(Clone)]
 pub struct FillStyle<P, FC, C, FR>
@@ -55,7 +55,7 @@ where
     P: Pixel,
     B: Buffer<P>,
     I: BorrowMut<B>,
-    R: BorrowMut<Rasterizer>,
+    R: BorrowMut<RasterizeBuffer>,
 {
     pub image: I,
     pub flatten_tolerance: f64,
@@ -73,7 +73,7 @@ where
     P: Pixel,
     B: Buffer<P>,
     I: BorrowMut<B>,
-    R: BorrowMut<Rasterizer>,
+    R: BorrowMut<RasterizeBuffer>,
 {
     /// Set to low quality.
     pub fn low_quality(self) -> Context<P, B, I, R> {
@@ -189,7 +189,7 @@ where
     }
 }
 
-impl<'a, P> Context<P, GenericBuffer<P>, GenericBuffer<P>, Rasterizer>
+impl<'a, P> Context<P, GenericBuffer<P>, GenericBuffer<P>, RasterizeBuffer>
 where
     P: Pixel,
 {
@@ -197,7 +197,7 @@ where
     pub fn from_pixel(width: u32, height: u32, pixel: P) -> Self {
         Context {
             image: GenericBuffer::from_pixel(width, height, pixel),
-            rasterizer: Rasterizer::new(width, height),
+            rasterizer: RasterizeBuffer::new(width, height),
             flatten_tolerance: 1.0,
             antialiasing: true,
             join: Join::Bevel,
@@ -209,7 +209,7 @@ where
     }
 }
 
-impl<'a, P, B> Context<P, B, &'a mut B, Rasterizer>
+impl<'a, P, B> Context<P, B, &'a mut B, RasterizeBuffer>
 where
     P: Pixel,
     B: Buffer<P>,
@@ -219,7 +219,7 @@ where
         let (width, height) = image.dimensions();
         Context {
             image,
-            rasterizer: Rasterizer::new(width, height),
+            rasterizer: RasterizeBuffer::new(width, height),
             flatten_tolerance: 1.0,
             antialiasing: true,
             join: Join::Bevel,
@@ -236,7 +236,7 @@ where
     P: Pixel,
     B: Buffer<P>,
     I: BorrowMut<B>,
-    R: BorrowMut<Rasterizer>,
+    R: BorrowMut<RasterizeBuffer>,
 {
     /// Create child [`Context`].
     pub fn child<'b>(&'b mut self) -> ChildContext<'b, P, B> {

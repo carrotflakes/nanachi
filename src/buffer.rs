@@ -19,9 +19,9 @@ pub trait Buffer<P: Pixel> {
 
 /// 2D image buffer for manipulation.
 pub struct GenericBuffer<P: Pixel> {
-    width: u32,
-    height: u32,
-    buffer: Vec<P>,
+    pub(crate) width: u32,
+    pub(crate) height: u32,
+    pub(crate) buffer: Vec<P>,
 }
 
 impl<P: Pixel> Buffer<P> for GenericBuffer<P> {

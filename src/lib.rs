@@ -60,7 +60,6 @@
 //! img.save("./basic.png").unwrap();
 //! ```
 
-
 #[cfg(feature = "image-crate")]
 pub extern crate image;
 
@@ -86,5 +85,5 @@ pub mod path_transform;
 pub mod pixel;
 pub mod point;
 pub mod primitives;
-pub mod rasterizer;
+pub mod rasterize;
 pub mod writer;

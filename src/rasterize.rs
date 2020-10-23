@@ -1,25 +1,21 @@
-//! [`Rasterizer`] draws the path to the [`Buffer`]
+//! `rastarize` method draws a path
 
+use crate::buffer::GenericBuffer;
 use crate::fill_rule::FillRule;
 use crate::point::Point;
 
-/// Rasterizer is a buffer for drawing path.
-#[derive(Clone)]
-pub struct Rasterizer {
-    width: u32,
-    height: u32,
-    buffer: Vec<f64>,
-}
+pub type RasterizeBuffer = GenericBuffer<f64>;
 
-impl Rasterizer {
-    pub fn new(width: u32, height: u32) -> Rasterizer {
-        Rasterizer {
+impl RasterizeBuffer {
+    pub fn new(width: u32, height: u32) -> Self {
+        GenericBuffer {
             width,
             height,
             buffer: vec![0.0; (width * height) as usize],
         }
     }
 
+    /// Write the area of the [`Path`].
     pub fn rasterize(
         &mut self,
         segments: impl Iterator<Item = (Point, Point)>,
@@ -122,6 +118,7 @@ impl Rasterizer {
         self.transfer(fill_rule, writer, write_transparent_src, bound);
     }
 
+    /// Write the area of the [`Path`] without anti-aliasing.
     pub fn rasterize_no_aa(
         &mut self,
         segments: impl Iterator<Item = (Point, Point)>,
@@ -160,7 +157,7 @@ impl Rasterizer {
     }
 
     #[inline]
-    fn transfer(
+    pub fn transfer(
         &mut self,
         fill_rule: impl FillRule,
         writer: &mut impl FnMut(u32, u32, f64),
