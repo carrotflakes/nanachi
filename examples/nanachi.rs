@@ -51,7 +51,7 @@ fn draw_stars<'a>(mut context: ChildContext<'a, Pixel, GenericBuffer<Pixel>>) {
         let p = i as f64 / 10.0 * PI * 2.0;
         let (s, c) = p.sin_cos();
         let r = (1.0 - (i % 2) as f64 * (1.0 - spoke)) * 10.0;
-        pb.line_to(s * r, c * r);
+        pb.line_to(-s * r, c * r);
     }
     pb.close();
     let path = pb.end();
