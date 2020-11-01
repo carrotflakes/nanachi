@@ -94,6 +94,34 @@ pub fn path_outline(path: &Path, width: f64, join: &Join, cap: &Cap) -> Path {
     Path(res)
 }
 
+pub fn path_offset(path: &Path, width: f64, join: &Join) -> Path {
+    let mut res = Vec::with_capacity(path.0.len() * 2);
+    let mut tmp = Vec::with_capacity(4);
+    for (pis, closed) in path.continuations() {
+        if !closed {
+            todo!("path_offset not supports unclosed path");
+        }
+        let mut it = pis.iter().filter(|pi| !pi.is_zero());
+        let m = res.len();
+        if let Some(pi) = it.next() {
+            path_item_offset(&mut res, pi, width);
+        } else {
+            continue;
+        }
+        let first = res[m].left_point();
+        for pi in it {
+            path_item_offset(&mut tmp, pi, width);
+            let s = res.last().unwrap().right_point();
+            add_join(&mut res, join, pi.left_point(), s, tmp[0].left_point());
+            res.extend(tmp.drain(..));
+        }
+        let s = res.last().unwrap().right_point();
+        add_join(&mut res, join, pis[0].left_point(), s, first);
+        res.push(PathItem::CloseAndJump);
+    }
+    Path(res)
+}
+
 fn add_join(pis: &mut Vec<PathItem>, join: &Join, center: Point, start: Point, end: Point) {
     if start == end {
         return;
