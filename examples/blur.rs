@@ -42,30 +42,29 @@ pub fn blur<P: Pixel + Arithmetic, B: Buffer<P>>(buffer: &mut B) {
 }
 
 fn main() {
-    use nanachi::{
-        compositor,
-        context::{Context, FillStyle},
-        fill_color, fill_rule,
-        primitives,
-    };
+    let src = image::open("nanachi.png").unwrap().into_rgba();
+    let (width, height) = src.dimensions();
+    let mut img = GenericBuffer::from_pixel(width, height, Rgba::zero());
+    for y in 0..height {
+        for x in 0..width {
+            let p = src.get_pixel(x, y).0;
+            img.put_pixel(
+                x,
+                y,
+                Rgba([
+                    p[0] as f32 / 255.0,
+                    p[1] as f32 / 255.0,
+                    p[2] as f32 / 255.0,
+                    p[3] as f32 / 255.0,
+                ]),
+            );
+        }
+    }
 
-    let (width, height) = (512, 512);
-    let mut context = Context::from_pixel(width, height, Rgba([1.0, 1.0, 1.0, 1.0])).high_quality();
-    let path = primitives::rect(100.0, 100.0, 200.0, 200.0);
-    let fill_style = FillStyle::new(
-        fill_color::Solid::new(Rgba([1.0, 0.0, 0.0, 0.7])),
-        compositor::SrcOver,
-        fill_rule::NonZero,
-    );
-    context.fill(&path, &fill_style);
-    let fill_style = FillStyle::new(
-        fill_color::Solid::new(Rgba([0.0, 0.0, 1.0, 1.0])),
-        compositor::SrcOver,
-        fill_rule::NonZero,
-    );
-    context.stroke(&path, &fill_style, 8.0);
-
-    blur(&mut context.image);
-    let img: image::RgbaImage = (&context.image).into();
-    img.save("blured_nanachi.png");
+    let mut tmp = GenericBuffer::from_pixel(width, height, Rgba::zero());
+    let t = std::time::Instant::now();
+    blur(&mut img);
+    dbg!(t.elapsed());
+    let img: image::RgbaImage = (&img).into();
+    img.save("blur.png").unwrap();
 }
