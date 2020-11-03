@@ -27,6 +27,14 @@ impl Add for PremultipliedRgba {
     }
 }
 
+impl Sub for PremultipliedRgba {
+    type Output = Self;
+
+    fn sub(self, rhs: PremultipliedRgba) -> Self::Output {
+        PremultipliedRgba([self.0[0] - rhs.0[0], self.0[1] - rhs.0[1], self.0[2] - rhs.0[2], self.0[3] - rhs.0[3]])
+    }
+}
+
 impl Mul for PremultipliedRgba {
     type Output = Self;
 
@@ -43,8 +51,9 @@ impl Mul<f32> for PremultipliedRgba {
     }
 }
 
-impl Arithmetic for PremultipliedRgba {
-    fn zero() -> Self {
-        PremultipliedRgba([0.0, 0.0, 0.0, 0.0])
-    }
-}
+// broken?
+// impl Arithmetic for PremultipliedRgba {
+//     fn zero() -> Self {
+//         PremultipliedRgba([0.0, 0.0, 0.0, 0.0])
+//     }
+// }

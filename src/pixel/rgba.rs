@@ -24,6 +24,14 @@ impl Add for Rgba {
     }
 }
 
+impl Sub for Rgba {
+    type Output = Self;
+
+    fn sub(self, rhs: Rgba) -> Self::Output {
+        Rgba([self.0[0] - rhs.0[0], self.0[1] - rhs.0[1], self.0[2] - rhs.0[2], self.0[3] - rhs.0[3]])
+    }
+}
+
 impl Mul for Rgba {
     type Output = Self;
 

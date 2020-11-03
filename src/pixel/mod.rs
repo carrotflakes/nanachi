@@ -3,7 +3,7 @@
 mod premultiplied_rgba;
 mod rgba;
 
-use std::ops::{Add, Mul};
+use std::ops::{Add, Mul, Sub};
 
 pub use premultiplied_rgba::PremultipliedRgba;
 pub use rgba::Rgba;
@@ -13,7 +13,9 @@ pub trait Pixel: Clone + 'static {
     fn lerp(&self, rhs: &Self, rate: f64) -> Self;
 }
 
-pub trait Arithmetic: Sized + Add<Output = Self> + Mul<Output = Self> + Mul<f32, Output = Self> {
+pub trait Arithmetic:
+    Sized + Add<Output = Self> + Sub<Output = Self> + Mul<Output = Self> + Mul<f32, Output = Self>
+{
     fn zero() -> Self;
 }
 
