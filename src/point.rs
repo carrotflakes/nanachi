@@ -69,8 +69,8 @@ impl<T: Into<f64>> From<(T, T)> for Point {
     }
 }
 
-impl<T: From<f64>> Into<(T, T)> for Point {
-    fn into(self) -> (T, T) {
-        (self.0.into(), self.1.into())
+impl From<Point> for (f64, f64) {
+    fn from(point: Point) -> (f64, f64) {
+        (point.0, point.1)
     }
 }

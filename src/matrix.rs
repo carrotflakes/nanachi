@@ -164,4 +164,5 @@ fn test() {
             .sum::<f64>()
             < 0.0001
     );
+    assert_eq!(Matrix2d::new().apply((0.0f64, 0.0f64)), (0.0, 0.0));
 }
