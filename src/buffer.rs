@@ -18,6 +18,7 @@ pub trait Buffer<P: Pixel> {
 }
 
 /// 2D image buffer for manipulation.
+#[derive(Clone)]
 pub struct GenericBuffer<P: Pixel> {
     pub(crate) width: u32,
     pub(crate) height: u32,
