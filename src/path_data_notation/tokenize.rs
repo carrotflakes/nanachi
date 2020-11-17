@@ -48,9 +48,16 @@ impl<'a, T: Iterator<Item = char>> Tokenize<'a, T> {
             ""
         }
         .to_string();
+        let mut dot = false;
         loop {
             match self.chars.peek().copied() {
                 Some(c) if c.is_numeric() || c == '.' => {
+                    if c == '.' {
+                        if dot {
+                            break;
+                        }
+                        dot = true;
+                    }
                     self.chars.next();
                     str.push(c);
                 }
@@ -62,7 +69,10 @@ impl<'a, T: Iterator<Item = char>> Tokenize<'a, T> {
         if str.is_empty() {
             None
         } else {
-            Some(str.parse().map_err(|e: ParseFloatError| e.to_string()))
+            Some(
+                str.parse()
+                    .map_err(|e: ParseFloatError| format!("{}: {:?}", e, str)),
+            )
         }
     }
 }
@@ -191,7 +201,7 @@ impl<'a, T: Iterator<Item = char>> Iterator for Tokenize<'a, T> {
 
 #[test]
 fn test() {
-    let src = "M 10 20 30.0,40.5";
+    let src = "M 10 20 30.0,40.5.123";
     let mut chars = src.chars();
     let tokens = Tokenize::new(&mut chars);
     dbg!(tokens.collect::<Vec<_>>());
