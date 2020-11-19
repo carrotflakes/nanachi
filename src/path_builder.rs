@@ -44,6 +44,7 @@ impl PathBuilder {
             Some(PathItem::CloseAndJump) | Some(PathItem::Jump) | None => {}
             Some(_) => {
                 self.push(PathItem::Jump);
+                self.path_start = None;
             }
         }
         self.set_pos(Point(x, y));
