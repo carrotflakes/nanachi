@@ -6,9 +6,10 @@ use crate::{
     fill_color::{FillColor, Transform},
     fill_rule::FillRule,
     matrix::Matrix2d,
-    path::{Path, PathItem},
+    path::Path,
     path_flatten::Flatten,
     path_outline::{path_outline, Cap, Join},
+    path_segments::Segments,
     path_transform::path_transform,
     pixel::Pixel,
     point::Point,
@@ -164,11 +165,7 @@ where
         let color = Transform::new(&fill_style.color, self.matrix);
         let mut writer = image_writer(self.image.borrow_mut(), &color, &fill_style.compositor);
         let pis = Flatten::new(path.0.iter(), self.flatten_tolerance);
-        let segments = pis.filter_map(|pi| match pi {
-            PathItem::Line(l) => Some((l.0, l.1)),
-            PathItem::CloseAndJump | PathItem::Jump => None,
-            _ => panic!(),
-        });
+        let segments = Segments::new(pis);
         let write_transparent_src = !fill_style.compositor.keep_dst_on_transparent_src()
             || fill_style.fill_rule.is_inverse();
         if self.antialiasing {
