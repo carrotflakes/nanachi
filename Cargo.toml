@@ -1,6 +1,6 @@
 [package]
 name = "nanachi"
-version = "0.0.3"
+version = "0.0.4"
 authors = ["carrotflakes <carrotflakes@gmail.com>"]
 edition = "2018"
 repository = "https://github.com/carrotflakes/nanachi"
