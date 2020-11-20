@@ -4,31 +4,31 @@ use crate::point::Point;
 
 /// Matrix for affine transformation.
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub struct Matrix2d(pub [f64; 6]);
+pub struct Matrix(pub [f64; 6]);
 
-impl Matrix2d {
-    /// Create a Matrix2d that no transform.
-    pub fn new() -> Matrix2d {
-        Matrix2d([1.0, 0.0, 0.0, 0.0, 1.0, 0.0])
+impl Matrix {
+    /// Create a Matrix that no transform.
+    pub fn new() -> Matrix {
+        Matrix([1.0, 0.0, 0.0, 0.0, 1.0, 0.0])
     }
 
-    /// Create new Matrix2d translated with specified position from myself.
-    pub fn translate(&self, x: f64, y: f64) -> Matrix2d {
+    /// Create new Matrix translated with specified position from myself.
+    pub fn translate(&self, x: f64, y: f64) -> Matrix {
         let s = &self.0;
-        Matrix2d([s[0], s[1], s[2] + x, s[3], s[4], s[5] + y])
+        Matrix([s[0], s[1], s[2] + x, s[3], s[4], s[5] + y])
     }
 
-    /// Create new Matrix2d scaled with specified size from myself.
-    pub fn scale(&self, x: f64, y: f64) -> Matrix2d {
+    /// Create new Matrix scaled with specified size from myself.
+    pub fn scale(&self, x: f64, y: f64) -> Matrix {
         let s = &self.0;
-        Matrix2d([s[0] * x, s[1] * x, s[2] * x, s[3] * y, s[4] * y, s[5] * y])
+        Matrix([s[0] * x, s[1] * x, s[2] * x, s[3] * y, s[4] * y, s[5] * y])
     }
 
-    /// Create new Matrix2d rotated with specified angle from myself.
-    pub fn rotate(&self, rad: f64) -> Matrix2d {
+    /// Create new Matrix rotated with specified angle from myself.
+    pub fn rotate(&self, rad: f64) -> Matrix {
         let s = &self.0;
         let (sin, cos) = rad.sin_cos();
-        Matrix2d([
+        Matrix([
             s[0] * cos - s[3] * sin,
             s[1] * cos - s[4] * sin,
             s[2] * cos - s[5] * sin,
@@ -38,10 +38,10 @@ impl Matrix2d {
         ])
     }
 
-    /// Create new Matrix2d skewed with specified y-axis amount from myself.
-    pub fn skew_y(&self, dy: f64) -> Matrix2d {
+    /// Create new Matrix skewed with specified y-axis amount from myself.
+    pub fn skew_y(&self, dy: f64) -> Matrix {
         let s = &self.0;
-        Matrix2d([
+        Matrix([
             s[0],
             s[1],
             s[2],
@@ -51,10 +51,10 @@ impl Matrix2d {
         ])
     }
 
-    /// Create new Matrix2d skewed with specified x-axis amount from myself.
-    pub fn skew_x(&self, dx: f64) -> Matrix2d {
+    /// Create new Matrix skewed with specified x-axis amount from myself.
+    pub fn skew_x(&self, dx: f64) -> Matrix {
         let s = &self.0;
-        Matrix2d([
+        Matrix([
             s[0] + s[3] * dx,
             s[1] + s[4] * dx,
             s[2] + s[5] * dx,
@@ -76,11 +76,11 @@ impl Matrix2d {
     }
 
     /// Inverse the matrix
-    /// Ideally, `matrix2d.inverse().inverse() == matrix2d`.
-    pub fn inverse(&self) -> Matrix2d {
+    /// Ideally, `matrix.inverse().inverse() == matrix`.
+    pub fn inverse(&self) -> Matrix {
         let s = &self.0;
         let a = 1.0 / (s[0] * s[4] - s[1] * s[3]);
-        Matrix2d([
+        Matrix([
             a * s[4],
             -a * s[1],
             a * (s[1] * s[5] - s[2] * s[4]),
@@ -91,10 +91,10 @@ impl Matrix2d {
     }
 
     /// Return the multiplication of the two matrices.
-    pub fn then(&self, rhs: &Matrix2d) -> Matrix2d {
+    pub fn then(&self, rhs: &Matrix) -> Matrix {
         let s = &self.0;
         let t = &rhs.0;
-        Matrix2d([
+        Matrix([
             s[0] * t[0] + s[3] * t[1],
             s[1] * t[0] + s[4] * t[1],
             s[2] * t[0] + s[5] * t[1] + t[2],
@@ -116,36 +116,36 @@ impl Matrix2d {
     }
 }
 
-impl Default for Matrix2d {
+impl Default for Matrix {
     fn default() -> Self {
-        Matrix2d::new()
+        Matrix::new()
     }
 }
 
 #[test]
 fn test() {
-    let am = Matrix2d::new()
+    let am = Matrix::new()
         .translate(1.0, 2.0)
         .rotate(1.0)
         .scale(0.5, 0.6);
     assert!((Point(3.0, 4.0) - am.inverse().apply(am.apply(Point(3.0, 4.0)))).norm() < 0.00001);
 
     assert_eq!(
-        am.rotate(0.1).then(&Matrix2d::new().translate(-0.5, -0.6)),
+        am.rotate(0.1).then(&Matrix::new().translate(-0.5, -0.6)),
         am.rotate(0.1).translate(-0.5, -0.6)
     );
     assert_eq!(
-        am.rotate(0.1).then(&Matrix2d::new().scale(-0.5, -0.6)),
+        am.rotate(0.1).then(&Matrix::new().scale(-0.5, -0.6)),
         am.rotate(0.1).scale(-0.5, -0.6)
     );
     assert_eq!(
-        am.rotate(0.1).then(&Matrix2d::new().rotate(0.3)),
+        am.rotate(0.1).then(&Matrix::new().rotate(0.3)),
         am.rotate(0.1).rotate(0.3)
     );
     assert!(
         am.rotate(0.1)
             .then(
-                &Matrix2d::new()
+                &Matrix::new()
                     .scale(0.5, 0.6)
                     .translate(-0.5, -0.6)
                     .rotate(0.3)
@@ -164,5 +164,5 @@ fn test() {
             .sum::<f64>()
             < 0.0001
     );
-    assert_eq!(Matrix2d::new().apply((0.0f64, 0.0f64)), (0.0, 0.0));
+    assert_eq!(Matrix::new().apply((0.0f64, 0.0f64)), (0.0, 0.0));
 }

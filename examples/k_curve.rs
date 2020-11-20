@@ -5,7 +5,7 @@ use nanachi::{
     fill_rule,
     image::RgbaImage,
     k_curve::k_curve,
-    matrix::Matrix2d,
+    matrix::Matrix,
     path::Path,
     path_transform::path_transform,
     pixel::Rgba,
@@ -25,7 +25,7 @@ fn main() {
         Point(0.2, 0.8),
     ];
     let path = Path::from_bezier2_points(&k_curve(ps, true, 3));
-    let path = path_transform(&path, &Matrix2d::new().scale(512.0, 512.0));
+    let path = path_transform(&path, &Matrix::new().scale(512.0, 512.0));
     let pc = fill_color::Solid::new(Rgba([0.4, 0.4, 1.0, 1.0]));
     context.fill(
         &path,

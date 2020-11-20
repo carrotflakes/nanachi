@@ -4,7 +4,7 @@ use nanachi::{
     path_builder::PathBuilder,
     fill_color,
     path_transform::path_transform,
-    matrix::Matrix2d,
+    matrix::Matrix,
     compositor,
     interpolation,
     context::{Context, FillStyle},
@@ -31,7 +31,7 @@ fn main() {
     let pattern = fill_color::Pattern::new(&bg_image, interpolation::Bilinear);
     let bg_fill_color = fill_color::Transform::new(
         &pattern,
-        Matrix2d::new().rotate(PI * 0.25).scale(2.0, 2.0));
+        Matrix::new().rotate(PI * 0.25).scale(2.0, 2.0));
     let mut img = ImageBuffer::from_fn(width, height, |x, y| {
         use nanachi::fill_color::FillColor;
         bg_fill_color.fill_color(x as f64, y as f64)
@@ -60,7 +60,7 @@ fn main() {
     // pb.close();
     let path = pb.end();
 
-    let am = Matrix2d::new()
+    let am = Matrix::new()
         .translate(-250.0, -250.0)
         // .scale(-1.0, -1.0)
         .rotate(0.9)

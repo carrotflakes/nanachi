@@ -1,16 +1,16 @@
 use std::marker::PhantomData;
 
-use crate::{fill_color::FillColor, matrix::Matrix2d, point::Point};
+use crate::{fill_color::FillColor, matrix::Matrix, point::Point};
 
 #[derive(Debug, Clone)]
 pub struct Transform<'a, C: Clone, FC: FillColor<C>> {
     fill_color: &'a FC,
-    matrix: Matrix2d,
+    matrix: Matrix,
     c: PhantomData<C>,
 }
 
 impl<'a, C: Clone, FC: FillColor<C>> Transform<'a, C, FC> {
-    pub fn new(fill_color: &'a FC, matrix: Matrix2d) -> Self {
+    pub fn new(fill_color: &'a FC, matrix: Matrix) -> Self {
         Transform {
             fill_color,
             matrix: matrix.inverse(),

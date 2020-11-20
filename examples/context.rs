@@ -3,7 +3,7 @@ use nanachi::{
     context::{Context, FillStyle},
     fill_color, fill_rule,
     image::{ImageBuffer, Rgba},
-    matrix::Matrix2d,
+    matrix::Matrix,
     path_builder::PathBuilder,
     primitives,
 };
@@ -32,7 +32,7 @@ fn main() {
 
     let t = std::time::Instant::now();
     context.transformed_context(
-        &Matrix2d::new()
+        &Matrix::new()
             .translate(50.0, 50.0)
     ).fill(
         &primitives::ngon(5, 40.0),
@@ -45,7 +45,7 @@ fn main() {
     );
 
     let mut context = context.transformed_context(
-        &Matrix2d::new()
+        &Matrix::new()
             .translate(-250.0, -250.0)
             .rotate(0.9)
             .scale(1.0, 0.6)

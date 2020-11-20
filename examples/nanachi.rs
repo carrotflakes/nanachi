@@ -5,7 +5,7 @@ use nanachi::{
     fill_color, fill_rule,
     image::RgbaImage,
     k_curve::k_curve,
-    matrix::Matrix2d,
+    matrix::Matrix,
     path::Path,
     path_builder::PathBuilder,
     path_data_notation,
@@ -39,6 +39,9 @@ fn main() {
     println!("elapsed: {:?}", t.elapsed());
     draw_frame(context.child());
 
+    let src = context.image.clone();
+    nanachi::draw_image::draw_image_transformed(&mut context.image, &src, (0.0, 0.0, 512.0, 512.0), nanachi::matrix::Matrix::new().scale(0.8, 0.8).rotate(0.2).translate(70.0, 30.0), &compositor::SrcOver, nanachi::interpolation::Bilinear);
+
     let img: RgbaImage = (&context.image).into();
     let res = img.save("./nanachi.png");
     println!("{:?}", res);
@@ -67,7 +70,7 @@ fn draw_stars<'a>(mut context: ChildContext<'a, Pixel, GenericBuffer<Pixel>>) {
         let s = rnd.next_u32() as f64 / std::u32::MAX as f64 * 4.0 + 5.0;
         let path = path_transform(
             &path,
-            &Matrix2d::new().rotate(r).scale(s, s).translate(t.0, t.1),
+            &Matrix::new().rotate(r).scale(s, s).translate(t.0, t.1),
         );
 
         let color = fill_color::Solid::new(
@@ -166,7 +169,7 @@ fn draw_nanachi<'a>(mut context: ChildContext<'a, Pixel, GenericBuffer<Pixel>>) 
     ",
     )
     .unwrap();
-    let nanachi_path = path_transform(&nanachi_path, &Matrix2d::new().scale(width, height));
+    let nanachi_path = path_transform(&nanachi_path, &Matrix::new().scale(width, height));
 
     let moji_path = path_data_notation::parse(
         "
@@ -195,7 +198,7 @@ fn draw_nanachi<'a>(mut context: ChildContext<'a, Pixel, GenericBuffer<Pixel>>) 
     ",
     )
     .unwrap();
-    let moji_path = path_transform(&moji_path, &Matrix2d::new().scale(width, height));
+    let moji_path = path_transform(&moji_path, &Matrix::new().scale(width, height));
 
     let shape = path_data_notation::parse(
         "

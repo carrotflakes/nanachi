@@ -5,7 +5,7 @@ use crate::{
     compositor::Compositor,
     fill_color::{FillColor, Transform},
     fill_rule::FillRule,
-    matrix::Matrix2d,
+    matrix::Matrix,
     path::Path,
     path_flatten::Flatten,
     path_outline::{path_outline, Cap, Join},
@@ -63,7 +63,7 @@ where
     pub antialiasing: bool,
     pub join: Join,
     pub cap: Cap,
-    pub matrix: Matrix2d,
+    pub matrix: Matrix,
     rasterizer: R,
     pixel: std::marker::PhantomData<P>,
     b: std::marker::PhantomData<B>,
@@ -199,7 +199,7 @@ where
             antialiasing: true,
             join: Join::Bevel,
             cap: Cap::Butt,
-            matrix: Matrix2d::default(),
+            matrix: Matrix::default(),
             pixel: Default::default(),
             b: Default::default(),
         }
@@ -221,7 +221,7 @@ where
             antialiasing: true,
             join: Join::Bevel,
             cap: Cap::Butt,
-            matrix: Matrix2d::default(),
+            matrix: Matrix::default(),
             pixel: Default::default(),
             b: Default::default(),
         }
@@ -251,7 +251,7 @@ where
     }
 
     /// Create child [`Context`] and transform.
-    pub fn transformed_context<'b>(&'b mut self, matrix: &Matrix2d) -> ChildContext<'b, P, B> {
+    pub fn transformed_context<'b>(&'b mut self, matrix: &Matrix) -> ChildContext<'b, P, B> {
         Context {
             matrix: matrix.then(&self.matrix),
             ..self.child()

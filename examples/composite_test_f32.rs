@@ -3,7 +3,7 @@ use nanachi::{
     pixel::Rgba,
     path_builder::PathBuilder,
     fill_color,
-    matrix::Matrix2d,
+    matrix::Matrix,
     compositor,
     context::{Context, FillStyle},
     image::RgbaImage,
@@ -76,14 +76,14 @@ fn f<C: compositor::Compositor<Rgba> + 'static>(img: &mut GenericBuffer<Rgba>, i
 
     let mut context = Context::from_pixel(60, 60, rgba(250, 250, 250, 0));
 
-    context.transformed_context(&Matrix2d::new().translate(20.0, 20.0))
+    context.transformed_context(&Matrix::new().translate(20.0, 20.0))
     .fill(&path, &FillStyle{
         color: fc1,
         compositor: compositor::SrcOver,
         fill_rule: fill_rule::EvenOdd,
         pixel: Default::default(),
     });
-    context.transformed_context(&Matrix2d::new().rotate(90f64.to_radians()).translate(20.0, 20.0))
+    context.transformed_context(&Matrix::new().rotate(90f64.to_radians()).translate(20.0, 20.0))
     .fill(&path, &FillStyle{
         color: fc2,
         compositor: c,

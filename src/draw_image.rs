@@ -1,7 +1,7 @@
 use crate::buffer::Buffer;
 use crate::compositor::Compositor;
 use crate::interpolation::Interpolation;
-use crate::matrix::Matrix2d;
+use crate::matrix::Matrix;
 use crate::pixel::Pixel;
 
 /// Draw `src` image to `dst` image.
@@ -34,7 +34,7 @@ pub fn draw_image_transformed<P, BD, BS, C, I>(
     dst: &mut BD,
     src: &BS,
     src_rect: (f64, f64, f64, f64), // x1, y1, x2, y2
-    matrix: Matrix2d,
+    matrix: Matrix,
     compositor: &C,
     interpolation: I,
 ) where
