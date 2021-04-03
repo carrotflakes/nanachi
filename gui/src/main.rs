@@ -5,7 +5,7 @@ use nanachi::{
     context::{ChildContext, Context, FillStyle},
     fill_color, fill_rule,
     image::RgbaImage,
-    matrix::Matrix2d,
+    matrix::Matrix,
     path_builder::PathBuilder,
     pixel::Pixel,
     pixel::Rgba,
@@ -62,7 +62,7 @@ fn main() {
             context.clear(&fill_color::Solid::new(Rgba([1.0, 1.0, 1.0, 1.0])));
             context
                 .transformed_context(
-                    &Matrix2d::new()
+                    &Matrix::new()
                         .scale(((count as f64) * 10.0).to_radians().sin(), 1.0)
                         .translate(12.0, 12.0),
                 )
