@@ -164,36 +164,42 @@ fn tri_area(p1: Point, p2: Point, p3: Point) -> f64 {
 }
 
 fn solve_cubic_equation(a: f64, b: f64, c: f64, d: f64) -> f64 {
-    let aa = b / a;
-    let bb = c / a;
-    let cc = d / a;
-    let p = (bb - aa * aa / 3.0) / 3.0;
-    let q = (2.0 / 27.0 * aa.powi(3) - aa * bb / 3.0 + cc) / 2.0;
-    let dd = q * q + p.powi(3);
-    let aad3 = aa / 3.0;
+    let b = b / (a * 3.0);
+    let c = c / a;
+    let d = d / a;
+    let p = c / 3.0 -b.powi(2);
+    let q = b.powi(3) - (b * c - d) / 2.0;
+    let dd = q.powi(2) + p.powi(3);
+
     if dd.abs() < 1.0e-12 {
-        return q.cbrt() - aad3;
+        let r = q.cbrt() - b;
+        return 1.0f64.min(if 0.0 <= r {
+            r
+        } else {
+            r * -2.0
+        });
     }
     if dd > 0.0 {
         let sqrtdd = dd.sqrt();
-        return (-q + sqrtdd).cbrt() + (-q - sqrtdd).cbrt() - aad3;
+        let r = (-q + sqrtdd).cbrt() + (-q - sqrtdd).cbrt() - b;
+        return r.clamp(0.0, 1.0);
     }
     let tmp = 2.0 * (-p).sqrt();
     let arg = (-dd).sqrt().atan2(-q) / 3.0;
     let pi2d3 = 2.0 * std::f64::consts::PI / 3.0;
-    let x = tmp * arg.cos() - aad3;
-    if 0.0 <= x && x <= 1.0 {
-        return x;
+    let r1 = tmp * arg.cos() - b;
+    if 0.0 <= r1 && r1 <= 1.0 {
+        return r1;
     }
-    let x = tmp * (arg + pi2d3).cos() - aad3;
-    if 0.0 <= x && x <= 1.0 {
-        return x;
+    let r2 = tmp * (arg + pi2d3).cos() - b;
+    if 0.0 <= r2 && r2 <= 1.0 {
+        return r2;
     }
-    let x = tmp * (arg + pi2d3 * 2.0).cos() - aad3;
-    if 0.0 <= x && x <= 1.0 {
-        return x;
+    let r3 = tmp * (arg - pi2d3 * 2.0).cos() - b;
+    if 0.0 <= r3 && r3 <= 1.0 {
+        return r3;
     }
-    0.0
+    panic!("Invalid solution: {}, {}, {}", r1, r2, r3)
 }
 
 fn solve_cubic_equation_with_check(a: f64, b: f64, c: f64, d: f64) -> f64 {
