@@ -39,9 +39,6 @@ fn main() {
     println!("elapsed: {:?}", t.elapsed());
     draw_frame(context.child());
 
-    let src = context.image.clone();
-    nanachi::draw_image::draw_image_transformed(&mut context.image, &src, (0.0, 0.0, 512.0, 512.0), nanachi::matrix::Matrix::new().scale(0.8, 0.8).rotate(0.2).translate(70.0, 30.0), &compositor::SrcOver, nanachi::interpolation::Bilinear);
-
     let img: RgbaImage = (&context.image).into();
     let res = img.save("./nanachi.png");
     println!("{:?}", res);
