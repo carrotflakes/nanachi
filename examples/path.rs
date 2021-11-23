@@ -28,7 +28,7 @@ fn main() {
         });
         ctx.image
     };
-    let pattern = fill_color::Pattern::new(&bg_image, interpolation::Bilinear);
+    let pattern = fill_color::Pattern::new(&bg_image, interpolation::Bilinear, Default::default());
     let bg_fill_color = fill_color::Transform::new(
         &pattern,
         Matrix::new().rotate(PI * 0.25).scale(2.0, 2.0));

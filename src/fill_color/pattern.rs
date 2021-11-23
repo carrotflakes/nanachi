@@ -1,6 +1,7 @@
 use crate::buffer::Buffer;
 use crate::fill_color::FillColor;
 use crate::interpolation::Interpolation;
+use crate::matrix::Matrix;
 use crate::pixel::Pixel;
 
 /// Tiling an image.
@@ -14,6 +15,8 @@ where
 {
     image: DB,
     interpolation: I,
+    /// Expects inverted matrix.
+    matrix: Matrix,
     _pixel: std::marker::PhantomData<P>,
 }
 
@@ -24,10 +27,11 @@ where
     DB: std::ops::Deref<Target = B>,
     I: Interpolation<P, B>,
 {
-    pub fn new(image: DB, interpolation: I) -> Self {
+    pub fn new(image: DB, interpolation: I, matrix: Matrix) -> Self {
         Pattern {
             image,
             interpolation,
+            matrix,
             _pixel: Default::default(),
         }
     }
@@ -41,6 +45,7 @@ where
     I: Interpolation<P, B>,
 {
     fn fill_color(&self, x: f64, y: f64) -> P {
+        let (x, y) = self.matrix.apply((x, y));
         self.interpolation.interpolate(&self.image, x, y)
     }
 }
