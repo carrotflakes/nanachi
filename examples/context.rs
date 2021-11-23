@@ -35,7 +35,7 @@ fn main() {
         &Matrix::new()
             .translate(50.0, 50.0)
     ).fill(
-        &primitives::ngon(5, 40.0),
+        &primitives::ngon(0.0, 0.0, 5, 40.0),
         &FillStyle {
             color: fill_color::Solid::new(Rgba([200, 200, 0, 255])),
             fill_rule: fill_rule::NonZero,
