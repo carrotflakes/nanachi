@@ -1,4 +1,4 @@
-//! `rastarize` method draws a path
+//! `rasterize` method draws a path
 
 use crate::buffer::GenericBuffer;
 use crate::fill_rule::FillRule;
