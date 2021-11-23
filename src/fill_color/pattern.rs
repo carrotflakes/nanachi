@@ -12,11 +12,9 @@ where
     DB: std::ops::Deref<Target = B>,
     I: Interpolation<P, B>,
 {
-    width: f64,
-    height: f64,
     image: DB,
     interpolation: I,
-    pixel: std::marker::PhantomData<P>,
+    _pixel: std::marker::PhantomData<P>,
 }
 
 impl<P, B, DB, I> Pattern<P, B, DB, I>
@@ -27,13 +25,10 @@ where
     I: Interpolation<P, B>,
 {
     pub fn new(image: DB, interpolation: I) -> Self {
-        let (width, height) = image.dimensions();
         Pattern {
-            width: width as f64,
-            height: height as f64,
             image,
             interpolation,
-            pixel: Default::default(),
+            _pixel: Default::default(),
         }
     }
 }
