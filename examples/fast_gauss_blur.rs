@@ -88,7 +88,11 @@ fn boxes_for_gauss(sigma: f64, n: i32) -> Vec<i32> {
 }
 
 fn main() {
-    let src = image::open("nanachi.png").unwrap().into_rgba();
+    let file = std::env::args()
+        .skip(1)
+        .next()
+        .unwrap_or("nanachi.png".to_string());
+    let src = image::open(file).unwrap().into_rgba();
     let (width, height) = src.dimensions();
     let mut img = GenericBuffer::from_pixel(width, height, Rgba::zero());
     for y in 0..height {
@@ -113,5 +117,5 @@ fn main() {
     // box_blur(&mut img, &mut tmp, 10);
     dbg!(t.elapsed());
     let img: image::RgbaImage = (&img).into();
-    img.save("blur2.png").unwrap();
+    img.save("fast_gauss_blur.png").unwrap();
 }
