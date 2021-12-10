@@ -11,11 +11,12 @@ pub fn gauss_blur<P: Pixel + Arithmetic, B: Buffer<P>, C: Buffer<P>>(
     tmp: &mut C,
     radius: f64,
     extrapolation: &Extrapolation<P>,
+    n: usize,
 ) {
-    let bxs = boxes_for_gauss(radius, 3);
-    box_blur(buf, tmp, (bxs[0] - 1) / 2, extrapolation);
-    box_blur(buf, tmp, (bxs[1] - 1) / 2, extrapolation);
-    box_blur(buf, tmp, (bxs[2] - 1) / 2, extrapolation);
+    let bxs = boxes_for_gauss(radius, n as i32);
+    for i in 0..n {
+        box_blur(buf, tmp, (bxs[i] - 1) / 2, extrapolation);
+    }
 }
 
 fn box_blur<P: Pixel + Arithmetic, B: Buffer<P>, C: Buffer<P>>(
@@ -142,7 +143,7 @@ fn main() {
 
     let mut tmp = GenericBuffer::from_pixel(width, height, Rgba::zero());
     let t = std::time::Instant::now();
-    gauss_blur(&mut img, &mut tmp, 10.0, &Extrapolation::ExtendEdge);
+    gauss_blur(&mut img, &mut tmp, 10.0, &Extrapolation::ExtendEdge, 3);
     // box_blur(&mut img, &mut tmp, 10);
     dbg!(t.elapsed());
     let img: image::RgbaImage = (&img).into();
