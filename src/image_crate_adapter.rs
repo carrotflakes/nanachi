@@ -40,30 +40,34 @@ impl<S: image::Primitive + 'static, P: Pixel + image::Pixel<Subpixel = S> + 'sta
     }
 }
 
-impl Into<image::RgbaImage> for &GenericBuffer<crate::pixel::Rgba> {
-    fn into(self) -> image::RgbaImage {
-        image::RgbaImage::from_fn(self.dimensions().0, self.dimensions().1, |x, y| {
-            let p = self.get_pixel(x, y);
-            image::Rgba([
-                (p.0[0].min(1.0).max(0.0) * 255.0).round() as u8,
-                (p.0[1].min(1.0).max(0.0) * 255.0).round() as u8,
-                (p.0[2].min(1.0).max(0.0) * 255.0).round() as u8,
-                (p.0[3].min(1.0).max(0.0) * 255.0).round() as u8,
-            ])
-        })
+impl Into<image::Rgba<u8>> for crate::pixel::Rgba {
+    #[inline]
+    fn into(self) -> image::Rgba<u8> {
+        image::Rgba([
+            (self.0[0].clamp(0.0, 1.0) * 255.0).round() as u8,
+            (self.0[1].clamp(0.0, 1.0) * 255.0).round() as u8,
+            (self.0[2].clamp(0.0, 1.0) * 255.0).round() as u8,
+            (self.0[3].clamp(0.0, 1.0) * 255.0).round() as u8,
+        ])
     }
 }
 
-impl Into<image::RgbaImage> for &GenericBuffer<crate::pixel::PremultipliedRgba> {
+impl Into<image::Rgba<u8>> for crate::pixel::PremultipliedRgba {
+    #[inline]
+    fn into(self) -> image::Rgba<u8> {
+        image::Rgba([
+            ((self.0[0] / self.0[3]).clamp(0.0, 1.0) * 255.0).round() as u8,
+            ((self.0[1] / self.0[3]).clamp(0.0, 1.0) * 255.0).round() as u8,
+            ((self.0[2] / self.0[3]).clamp(0.0, 1.0) * 255.0).round() as u8,
+            (self.0[3].clamp(0.0, 1.0) * 255.0).round() as u8,
+        ])
+    }
+}
+
+impl<P: Pixel + Into<image::Rgba<u8>>> Into<image::RgbaImage> for &GenericBuffer<P> {
     fn into(self) -> image::RgbaImage {
         image::RgbaImage::from_fn(self.dimensions().0, self.dimensions().1, |x, y| {
-            let p = self.get_pixel(x, y);
-            image::Rgba([
-                ((p.0[0] / p.0[3]).min(1.0).max(0.0) * 255.0).round() as u8,
-                ((p.0[1] / p.0[3]).min(1.0).max(0.0) * 255.0).round() as u8,
-                ((p.0[2] / p.0[3]).min(1.0).max(0.0) * 255.0).round() as u8,
-                (p.0[3].min(1.0).max(0.0) * 255.0).round() as u8,
-            ])
+            self.get_pixel(x, y).clone().into()
         })
     }
 }
