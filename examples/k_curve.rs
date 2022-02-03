@@ -4,7 +4,7 @@ use nanachi::{
     fill_color,
     fill_rule,
     image::RgbaImage,
-    k_curve::k_curve,
+    contrib::k_curve::k_curve,
     matrix::Matrix,
     path::Path,
     path_transform::path_transform,

@@ -66,13 +66,13 @@ pub extern crate image;
 pub mod buffer;
 pub mod compositor;
 pub mod context;
+pub mod contrib;
 pub mod draw_image;
 pub mod fill_color;
 pub mod fill_rule;
 #[cfg(feature = "image-crate")]
 pub mod image_crate_adapter;
 pub mod interpolation;
-pub mod k_curve;
 pub mod matrix;
 pub(crate) mod models;
 pub mod path;

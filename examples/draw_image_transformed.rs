@@ -1,6 +1,6 @@
 use nanachi::{
-    compositor, draw_image::draw_image_transformed, image::ImageBuffer, interpolation,
-    matrix::Matrix,
+    compositor, contrib::draw_image_transformed::draw_image_transformed, image::ImageBuffer,
+    interpolation, matrix::Matrix,
 };
 
 fn main() {

@@ -4,7 +4,7 @@ use nanachi::{
     context::{ChildContext, Context, FillStyle},
     fill_color, fill_rule,
     image::RgbaImage,
-    k_curve::k_curve,
+    contrib::k_curve::k_curve,
     matrix::Matrix,
     path::Path,
     path_builder::PathBuilder,
