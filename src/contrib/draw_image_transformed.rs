@@ -38,9 +38,10 @@ pub fn draw_image_transformed<P, BD, BS, C, I>(
             let sp = inverted_matrix.apply((x as f64, y as f64));
             let (src_x, src_y) = (sp.0.round() as i32, sp.1.round() as i32);
             if 0 <= src_x && src_x < src_size.0 as i32 && 0 <= src_y && src_y < src_size.1 as i32 {
-                let dp = dst.get_pixel_mut(x, y);
+                let dp = dst.get_pixel(x, y);
                 let sp = interpolation.interpolate(src, sp.0, sp.1);
-                *dp = compositor.composite(dp, &sp, 1.0);
+                let p = compositor.composite(dp, &sp, 1.0);
+                dst.put_pixel(x, y, p);
             }
         }
     }

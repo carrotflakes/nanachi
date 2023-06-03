@@ -31,10 +31,6 @@ impl<S: image::Primitive + 'static, P: Pixel + image::Pixel<Subpixel = S> + 'sta
         self.get_pixel(x, y)
     }
 
-    fn get_pixel_mut(&mut self, x: u32, y: u32) -> &mut P {
-        <Self as image::GenericImage>::get_pixel_mut(self, x, y)
-    }
-
     fn put_pixel(&mut self, x: u32, y: u32, pixel: P) {
         <Self as image::GenericImage>::put_pixel(self, x, y, pixel)
     }

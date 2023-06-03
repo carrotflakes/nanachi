@@ -10,9 +10,6 @@ pub trait Buffer<P: Pixel> {
     /// Get pixel by `x` and `y`.
     fn get_pixel(&self, x: u32, y: u32) -> &P;
 
-    /// Get mut pixel by `x` and `y`.
-    fn get_pixel_mut(&mut self, x: u32, y: u32) -> &mut P;
-
     /// Put a pixel.
     fn put_pixel(&mut self, x: u32, y: u32, pixel: P);
 }
@@ -32,10 +29,6 @@ impl<P: Pixel> Buffer<P> for GenericBuffer<P> {
 
     fn get_pixel(&self, x: u32, y: u32) -> &P {
         &self.buffer[(y * self.width + x) as usize]
-    }
-
-    fn get_pixel_mut(&mut self, x: u32, y: u32) -> &mut P {
-        &mut self.buffer[(y * self.width + x) as usize]
     }
 
     fn put_pixel(&mut self, x: u32, y: u32, pixel: P) {

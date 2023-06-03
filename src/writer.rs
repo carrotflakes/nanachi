@@ -16,8 +16,9 @@ where
     C: Compositor<P> + 'static,
 {
     move |x: u32, y: u32, v: f64| {
-        let dst = buffer.get_pixel_mut(x, y);
+        let dst = buffer.get_pixel(x, y);
         let src = fill_color.fill_color(x as f64, y as f64);
-        *dst = compositor.composite(dst, &src, v);
+        let p = compositor.composite(dst, &src, v);
+        buffer.put_pixel(x, y, p);
     }
 }

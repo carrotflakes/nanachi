@@ -22,8 +22,9 @@ pub fn draw_image_pixel_perfect<P, BD, BS, C>(
             let sy = src_pos.1 + dy;
             let dst_x = dst_pos.0 + dx;
             let dst_y = dst_pos.1 + dy;
-            let dp = dst.get_pixel_mut(dst_x, dst_y);
-            *dp = compositor.composite(dp, src.get_pixel(sx, sy), 1.0);
+            let dp = dst.get_pixel(dst_x, dst_y);
+            let p = compositor.composite(dp, src.get_pixel(sx, sy), 1.0);
+            dst.put_pixel(dst_x, dst_y, p);
         }
     }
 }
