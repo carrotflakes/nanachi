@@ -8,7 +8,7 @@ fn main() {
         .skip(1)
         .next()
         .unwrap_or("nanachi.png".to_string());
-    let src = image::open(file).unwrap().into_rgba();
+    let src = image::open(file).unwrap().into_rgba8();
     let (width, height) = src.dimensions();
     let mut img = ImageBuffer::new(width, height);
 

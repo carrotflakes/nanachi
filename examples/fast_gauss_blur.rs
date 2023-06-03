@@ -7,22 +7,13 @@ fn main() {
         .skip(1)
         .next()
         .unwrap_or("nanachi.png".to_string());
-    let src = image::open(file).unwrap().into_rgba();
+    let src = image::open(file).unwrap().into_rgba32f();
     let (width, height) = src.dimensions();
     let mut img = GenericBuffer::from_pixel(width, height, Rgba::zero());
     for y in 0..height {
         for x in 0..width {
             let p = src.get_pixel(x, y).0;
-            img.put_pixel(
-                x,
-                y,
-                Rgba([
-                    p[0] as f32 / 255.0,
-                    p[1] as f32 / 255.0,
-                    p[2] as f32 / 255.0,
-                    p[3] as f32 / 255.0,
-                ]),
-            );
+            img.put_pixel(x, y, Rgba(p));
         }
     }
 
