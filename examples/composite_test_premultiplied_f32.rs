@@ -15,32 +15,35 @@ fn main() {
     let (width, height) = (320, 320);
     let mut img = GenericBuffer::from_pixel(width, height, rgba(250, 250, 250, 0));
 
-    #[allow(arithmetic_overflow)]
-    let mut i = 0 - 1;
-    f(&mut img, {i += 1; i}, compositor::Clear);
-    f(&mut img, {i += 1; i}, compositor::Src);
-    f(&mut img, {i += 1; i}, compositor::Dst);
-    f(&mut img, {i += 1; i}, compositor::SrcOver);
-    f(&mut img, {i += 1; i}, compositor::SrcIn);
-    f(&mut img, {i += 1; i}, compositor::SrcOut);
-    f(&mut img, {i += 1; i}, compositor::SrcAtop);
-    f(&mut img, {i += 1; i}, compositor::DstOver);
-    f(&mut img, {i += 1; i}, compositor::DstIn);
-    f(&mut img, {i += 1; i}, compositor::DstOut);
-    f(&mut img, {i += 1; i}, compositor::DstAtop);
-    f(&mut img, {i += 1; i}, compositor::Xor);
-    f(&mut img, {i += 1; i}, compositor::Add);
-    f(&mut img, {i += 1; i}, compositor::Darken);
-    f(&mut img, {i += 1; i}, compositor::Lighten);
-    f(&mut img, {i += 1; i}, compositor::Multiply);
-    f(&mut img, {i += 1; i}, compositor::Screen);
-    f(&mut img, {i += 1; i}, compositor::Overlay);
-    f(&mut img, {i += 1; i}, compositor::HardLight);
-    f(&mut img, {i += 1; i}, compositor::Dodge);
-    f(&mut img, {i += 1; i}, compositor::Burn);
-    f(&mut img, {i += 1; i}, compositor::SoftLight);
-    f(&mut img, {i += 1; i}, compositor::Difference);
-    f(&mut img, {i += 1; i}, compositor::Exclusion);
+    let mut i = 0;
+    let mut inc = || {
+        i += 1;
+        i - 1
+    };
+    f(&mut img, inc(), compositor::Clear);
+    f(&mut img, inc(), compositor::Src);
+    f(&mut img, inc(), compositor::Dst);
+    f(&mut img, inc(), compositor::SrcOver);
+    f(&mut img, inc(), compositor::SrcIn);
+    f(&mut img, inc(), compositor::SrcOut);
+    f(&mut img, inc(), compositor::SrcAtop);
+    f(&mut img, inc(), compositor::DstOver);
+    f(&mut img, inc(), compositor::DstIn);
+    f(&mut img, inc(), compositor::DstOut);
+    f(&mut img, inc(), compositor::DstAtop);
+    f(&mut img, inc(), compositor::Xor);
+    f(&mut img, inc(), compositor::Add);
+    f(&mut img, inc(), compositor::Darken);
+    f(&mut img, inc(), compositor::Lighten);
+    f(&mut img, inc(), compositor::Multiply);
+    f(&mut img, inc(), compositor::Screen);
+    f(&mut img, inc(), compositor::Overlay);
+    f(&mut img, inc(), compositor::HardLight);
+    f(&mut img, inc(), compositor::Dodge);
+    f(&mut img, inc(), compositor::Burn);
+    f(&mut img, inc(), compositor::SoftLight);
+    f(&mut img, inc(), compositor::Difference);
+    f(&mut img, inc(), compositor::Exclusion);
 
     let img: RgbaImage = (&img).into();
     let res = img.save("./composite_test_premultiplied_f32.png");
