@@ -99,3 +99,35 @@ impl<P: Pixel> FillColor<P> for RadialGradient<P> {
         gradient(&self.points, p)
     }
 }
+
+/// Conic gradient.
+#[derive(Debug, Clone)]
+pub struct ConicGradient<P: Pixel> {
+    origin: (f64, f64),
+    start_angle: f64,
+    points: Vec<GradientPoint<P>>,
+}
+
+impl<P: Pixel> ConicGradient<P> {
+    pub fn new(
+        origin: (f64, f64),
+        start_angle: f64,
+        points: Vec<GradientPoint<P>>,
+    ) -> ConicGradient<P> {
+        assert!(!points.is_empty());
+        ConicGradient {
+            origin,
+            start_angle: (-start_angle).rem_euclid(std::f64::consts::TAU) + std::f64::consts::PI,
+            points,
+        }
+    }
+}
+
+impl<P: Pixel> FillColor<P> for ConicGradient<P> {
+    fn fill_color(&self, x: f64, y: f64) -> P {
+        let p = ((self.origin.1 - y).atan2(self.origin.0 - x) + self.start_angle)
+            / std::f64::consts::TAU
+            % 1.0;
+        gradient(&self.points, p)
+    }
+}

@@ -10,7 +10,7 @@ pub mod gradient;
 pub mod pattern;
 pub mod transform;
 
-pub use gradient::{LinearGradient, RadialGradient};
+pub use gradient::{ConicGradient, LinearGradient, RadialGradient};
 pub use pattern::Pattern;
 pub use transform::Transform;
 
