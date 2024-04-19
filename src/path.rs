@@ -52,13 +52,14 @@ impl PathItem {
         match self {
             PathItem::Line(line) => line.1,
             PathItem::Arc(arc) => {
-                arc.center + Point(arc.angle2.cos() * arc.radius, arc.angle2.sin() * arc.radius)
+                arc.center
+                    + Point::from((arc.angle2.cos() * arc.radius, arc.angle2.sin() * arc.radius))
             }
             PathItem::Ellipse(ellipse) => {
                 let (sin, cos) = ellipse.rotation.sin_cos();
                 let x = ellipse.angle2.cos() * ellipse.radius_x;
                 let y = ellipse.angle2.sin() * ellipse.radius_y;
-                ellipse.center + Point(x * cos - y * sin, x * sin + y * cos)
+                ellipse.center + Point::from((x * cos - y * sin, x * sin + y * cos))
             }
             PathItem::Quad(quad) => quad.end,
             PathItem::Cubic(cubic) => cubic.end,
@@ -71,13 +72,14 @@ impl PathItem {
         match self {
             PathItem::Line(line) => line.0,
             PathItem::Arc(arc) => {
-                arc.center + Point(arc.angle1.cos() * arc.radius, arc.angle1.sin() * arc.radius)
+                arc.center
+                    + Point::from((arc.angle1.cos() * arc.radius, arc.angle1.sin() * arc.radius))
             }
             PathItem::Ellipse(ellipse) => {
                 let (sin, cos) = ellipse.rotation.sin_cos();
                 let x = ellipse.angle1.cos() * ellipse.radius_x;
                 let y = ellipse.angle1.sin() * ellipse.radius_y;
-                ellipse.center + Point(x * cos - y * sin, x * sin + y * cos)
+                ellipse.center + Point::from((x * cos - y * sin, x * sin + y * cos))
             }
             PathItem::Quad(quad) => quad.start,
             PathItem::Cubic(cubic) => cubic.start,
@@ -224,12 +226,17 @@ impl Path {
 
     /// Flip path direction.
     pub fn flip(&self) -> Path {
-        Path(self.continuations().into_iter().flat_map(|(pis, closed)| {
-            pis.iter().rev().map(|pi| pi.flip()).chain(vec![if closed {
-                PathItem::CloseAndJump
-            } else {
-                PathItem::Jump
-            }])
-        }).collect())
+        Path(
+            self.continuations()
+                .into_iter()
+                .flat_map(|(pis, closed)| {
+                    pis.iter().rev().map(|pi| pi.flip()).chain(vec![if closed {
+                        PathItem::CloseAndJump
+                    } else {
+                        PathItem::Jump
+                    }])
+                })
+                .collect(),
+        )
     }
 }

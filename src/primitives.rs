@@ -11,7 +11,7 @@ use std::f64::consts::PI;
 pub fn circle(x: f64, y: f64, radius: f64) -> Path {
     Path::new(vec![
         PathItem::Arc(Arc {
-            center: Point(x, y),
+            center: Point([x, y]),
             radius,
             angle1: 0.0,
             angle2: PI * 2.0,
@@ -24,11 +24,11 @@ pub fn circle(x: f64, y: f64, radius: f64) -> Path {
 pub fn rect(x: f64, y: f64, width: f64, height: f64) -> Path {
     Path::from_points(
         &vec![
-            Point(x, y),
-            Point(x, y + height),
-            Point(x + width, y + height),
-            Point(x + width, y),
-            Point(x, y),
+            Point([x, y]),
+            Point([x, y + height]),
+            Point([x + width, y + height]),
+            Point([x + width, y]),
+            Point([x, y]),
         ],
         true,
     )
@@ -42,8 +42,8 @@ pub fn triangle(x: f64, y: f64, size: f64) -> Path {
 /// Create a regular n-gon.
 pub fn ngon(x: f64, y: f64, n: usize, size: f64) -> Path {
     assert!(3 <= n);
-    let center = Point(x, y);
-    let p = Point(0.0, -size);
+    let center = Point([x, y]);
+    let p = Point([0.0, -size]);
     Path::from_points(
         &(0..=n)
             .map(|i| center + p.rotate(i as f64 / n as f64 * std::f64::consts::PI * 2.0))

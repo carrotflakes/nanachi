@@ -13,7 +13,7 @@ impl<I: Iterator<Item = PathItem>> Segments<I> {
     pub fn new(it: I) -> Self {
         Segments {
             loop_start: None,
-            last: Point(0.0, 0.0),
+            last: Point::from((0.0, 0.0)),
             path_items: it,
         }
     }

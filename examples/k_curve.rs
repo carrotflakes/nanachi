@@ -1,10 +1,9 @@
 use nanachi::{
     compositor,
     context::{Context, FillStyle},
-    fill_color,
-    fill_rule,
-    image::RgbaImage,
     contrib::k_curve::k_curve,
+    fill_color, fill_rule,
+    image::RgbaImage,
     matrix::Matrix,
     path::Path,
     path_transform::path_transform,
@@ -18,11 +17,11 @@ fn main() {
     context.flatten_tolerance = 0.1;
 
     let ps = vec![
-        Point(0.2, 0.2),
-        Point(0.5, 0.4),
-        Point(0.8, 0.2),
-        Point(0.8, 0.8),
-        Point(0.2, 0.8),
+        Point::from((0.2, 0.2)),
+        Point::from((0.5, 0.4)),
+        Point::from((0.8, 0.2)),
+        Point::from((0.8, 0.8)),
+        Point::from((0.2, 0.8)),
     ];
     let path = Path::from_bezier2_points(&k_curve(ps, true, 3));
     let path = path_transform(&path, &Matrix::new().scale(512.0, 512.0));

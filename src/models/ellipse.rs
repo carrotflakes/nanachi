@@ -82,11 +82,18 @@ impl Ellipse {
         let vy = self.radius_y * (self.rotation + FRAC_PI_2).sin();
         let dx = ux.hypot(vx);
         let dy = uy.hypot(vy);
-        (self.center.0 - dx, self.center.0 + dx, self.center.1 - dy, self.center.1 + dy)
+        (
+            self.center.x() - dx,
+            self.center.x() + dx,
+            self.center.y() - dy,
+            self.center.y() + dy,
+        )
     }
 
     pub fn pos(&self, angle: f64) -> Point {
-        self.center + Point(self.radius_x * angle.cos(), self.radius_y * angle.sin()).rotate(self.rotation)
+        self.center
+            + Point::from((self.radius_x * angle.cos(), self.radius_y * angle.sin()))
+                .rotate(self.rotation)
     }
 
     pub fn angle_offset(&self) -> f64 {
@@ -94,7 +101,11 @@ impl Ellipse {
     }
 
     pub fn angle_norm(&self) -> (f64, f64) {
-        let (a1, a2) = if self.angle1 < self.angle2 { (self.angle1, self.angle2) } else { (self.angle2, self.angle1) };
+        let (a1, a2) = if self.angle1 < self.angle2 {
+            (self.angle1, self.angle2)
+        } else {
+            (self.angle2, self.angle1)
+        };
         let a = a1.rem_euclid(PI * 2.0);
         (a, if a2 - a < 0.0 { a2 + PI * 2.0 } else { a2 })
     }

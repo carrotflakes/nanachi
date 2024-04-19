@@ -150,8 +150,8 @@ where
         let inverted_matrix = self.matrix.inverse();
         for y in 0..h {
             for x in 0..w {
-                let p = inverted_matrix.apply(Point(x as f64, y as f64));
-                image.put_pixel(x, y, fill_color.fill_color(p.0, p.1));
+                let p = inverted_matrix.apply(Point::from((x as f64, y as f64)));
+                image.put_pixel(x, y, fill_color.fill_color(p.x(), p.y()));
             }
         }
     }

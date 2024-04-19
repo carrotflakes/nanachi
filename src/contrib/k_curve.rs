@@ -92,7 +92,7 @@ impl K {
             let j = (i + 1) % n;
             let c2 = b[j * 2] - b[i * 2];
             let p = ps[i] - b[i * 2];
-            t[i] = if c2 == Point(0.0, 0.0) && p == Point(0.0, 0.0) {
+            t[i] = if c2 == Point::from((0.0, 0.0)) && p == Point::from((0.0, 0.0)) {
                 0.5
             } else {
                 let a = c2.dot(&c2);
@@ -160,24 +160,20 @@ pub fn k_curve(points: Vec<Point>, close: bool, iteration: usize) -> Vec<Point> 
 }
 
 fn tri_area(p1: Point, p2: Point, p3: Point) -> f64 {
-    ((p1.0 - p3.0) * (p2.1 - p3.1) - (p2.0 - p3.0) * (p1.1 - p3.1)).abs() / 2.0
+    ((p1.x() - p3.x()) * (p2.y() - p3.y()) - (p2.x() - p3.x()) * (p1.y() - p3.y())).abs() / 2.0
 }
 
 fn solve_cubic_equation(a: f64, b: f64, c: f64, d: f64) -> f64 {
     let b = b / (a * 3.0);
     let c = c / a;
     let d = d / a;
-    let p = c / 3.0 -b.powi(2);
+    let p = c / 3.0 - b.powi(2);
     let q = b.powi(3) - (b * c - d) / 2.0;
     let dd = q.powi(2) + p.powi(3);
 
     if dd.abs() < 1.0e-12 {
         let r = q.cbrt() - b;
-        return 1.0f64.min(if 0.0 <= r {
-            r
-        } else {
-            r * -2.0
-        });
+        return 1.0f64.min(if 0.0 <= r { r } else { r * -2.0 });
     }
     if dd > 0.0 {
         let sqrtdd = dd.sqrt();

@@ -1,15 +1,15 @@
 mod tokenize;
 
-use std::{iter::Peekable, str::Chars};
-use tokenize::{Tokenize, Token};
-use crate::point::Point;
 use crate::path::Path;
 use crate::path_builder::PathBuilder;
+use crate::point::Point;
+use std::{iter::Peekable, str::Chars};
+use tokenize::{Token, Tokenize};
 
 enum LastControlPoint {
     Quad(Point),
     Cubic(Point),
-    None
+    None,
 }
 
 /// Parse [SVG path notation](https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths).
@@ -111,27 +111,41 @@ pub fn parse(str: &str) -> Result<Path, String> {
                     ns = parse_n_nums(&mut tokens, 4)?;
                     pb.quad(ns[0], ns[1], ns[2], ns[3]);
                 }
-                last_control_point = LastControlPoint::Quad(Point(ns[0], ns[1]));
+                last_control_point = LastControlPoint::Quad(Point::from((ns[0], ns[1])));
             }
             Token::SmallQ => {
                 let mut ns = parse_n_nums(&mut tokens, 4)?;
                 let mut current = pb.current_pos().unwrap_or((0.0, 0.0));
-                pb.quad(current.0 + ns[0], current.1 + ns[1], current.0 + ns[2], current.1 + ns[3]);
+                pb.quad(
+                    current.0 + ns[0],
+                    current.1 + ns[1],
+                    current.0 + ns[2],
+                    current.1 + ns[3],
+                );
                 while is_num_or_comma(&tokens.peek().unwrap().to_owned()?) {
                     ns = parse_n_nums(&mut tokens, 4)?;
                     current = pb.current_pos().unwrap_or((0.0, 0.0));
-                    pb.quad(current.0 + ns[0], current.1 + ns[1], current.0 + ns[2], current.1 + ns[3]);
+                    pb.quad(
+                        current.0 + ns[0],
+                        current.1 + ns[1],
+                        current.0 + ns[2],
+                        current.1 + ns[3],
+                    );
                 }
-                last_control_point = LastControlPoint::Quad(Point(current.0 + ns[0], current.1 + ns[1]));
+                last_control_point =
+                    LastControlPoint::Quad(Point::from((current.0 + ns[0], current.1 + ns[1])));
             }
             Token::LargeT => {
                 let mut ns = parse_n_nums(&mut tokens, 2)?;
-                let mut cp = quad_reflection_point(&last_control_point, pb.current_pos().unwrap_or((0.0, 0.0)).into());
-                pb.quad(cp.0, cp.1, ns[0], ns[1]);
+                let mut cp = quad_reflection_point(
+                    &last_control_point,
+                    pb.current_pos().unwrap_or((0.0, 0.0)).into(),
+                );
+                pb.quad(cp.x(), cp.y(), ns[0], ns[1]);
                 while is_num_or_comma(&tokens.peek().unwrap().to_owned()?) {
-                    cp = Point(ns[0], ns[1]) * 2.0 - cp;
+                    cp = Point::from((ns[0], ns[1])) * 2.0 - cp;
                     ns = parse_n_nums(&mut tokens, 2)?;
-                    pb.quad(cp.0, cp.1, ns[0], ns[1]);
+                    pb.quad(cp.x(), cp.y(), ns[0], ns[1]);
                 }
                 last_control_point = LastControlPoint::Quad(cp);
             }
@@ -139,12 +153,12 @@ pub fn parse(str: &str) -> Result<Path, String> {
                 let mut ns = parse_n_nums(&mut tokens, 2)?;
                 let mut current = pb.current_pos().unwrap_or((0.0, 0.0)).into();
                 let mut cp = quad_reflection_point(&last_control_point, current);
-                pb.quad(cp.0, cp.1, current.0 + ns[0], current.1 + ns[1]);
+                pb.quad(cp.x(), cp.y(), current.x() + ns[0], current.y() + ns[1]);
                 while is_num_or_comma(&tokens.peek().unwrap().to_owned()?) {
-                    cp = (current + Point(ns[0], ns[1])) * 2.0 - cp;
-                    current = current + Point(ns[0], ns[1]);
+                    cp = (current + Point::from((ns[0], ns[1]))) * 2.0 - cp;
+                    current = current + Point::from((ns[0], ns[1]));
                     ns = parse_n_nums(&mut tokens, 2)?;
-                    pb.quad(cp.0, cp.1, current.0 + ns[0], current.1 + ns[1]);
+                    pb.quad(cp.x(), cp.y(), current.x() + ns[0], current.y() + ns[1]);
                 }
                 last_control_point = LastControlPoint::Quad(cp);
             }
@@ -155,61 +169,126 @@ pub fn parse(str: &str) -> Result<Path, String> {
                     ns = parse_n_nums(&mut tokens, 6)?;
                     pb.cubic(ns[0], ns[1], ns[2], ns[3], ns[4], ns[5]);
                 }
-                last_control_point = LastControlPoint::Cubic(Point(ns[2], ns[3]));
+                last_control_point = LastControlPoint::Cubic(Point::from((ns[2], ns[3])));
             }
             Token::SmallC => {
                 let mut ns = parse_n_nums(&mut tokens, 6)?;
                 let mut current = pb.current_pos().unwrap_or((0.0, 0.0));
-                pb.cubic(current.0 + ns[0], current.1 + ns[1], current.0 + ns[2], current.1 + ns[3], current.0 + ns[4], current.1 + ns[5]);
+                pb.cubic(
+                    current.0 + ns[0],
+                    current.1 + ns[1],
+                    current.0 + ns[2],
+                    current.1 + ns[3],
+                    current.0 + ns[4],
+                    current.1 + ns[5],
+                );
                 while is_num_or_comma(&tokens.peek().unwrap().to_owned()?) {
                     ns = parse_n_nums(&mut tokens, 6)?;
                     current = pb.current_pos().unwrap_or((0.0, 0.0));
-                    pb.cubic(current.0 + ns[0], current.1 + ns[1], current.0 + ns[2], current.1 + ns[3], current.0 + ns[4], current.1 + ns[5]);
+                    pb.cubic(
+                        current.0 + ns[0],
+                        current.1 + ns[1],
+                        current.0 + ns[2],
+                        current.1 + ns[3],
+                        current.0 + ns[4],
+                        current.1 + ns[5],
+                    );
                 }
-                last_control_point = LastControlPoint::Cubic(Point(current.0 + ns[2], current.1 + ns[3]));
+                last_control_point =
+                    LastControlPoint::Cubic(Point::from((current.0 + ns[2], current.1 + ns[3])));
             }
             Token::LargeS => {
                 let mut ns = parse_n_nums(&mut tokens, 4)?;
-                let mut cp = cubic_reflection_point(&last_control_point, pb.current_pos().unwrap_or((0.0, 0.0)).into());
-                pb.cubic(cp.0, cp.1, ns[0], ns[1], ns[2], ns[3]);
+                let mut cp = cubic_reflection_point(
+                    &last_control_point,
+                    pb.current_pos().unwrap_or((0.0, 0.0)).into(),
+                );
+                pb.cubic(cp.x(), cp.y(), ns[0], ns[1], ns[2], ns[3]);
                 while is_num_or_comma(&tokens.peek().unwrap().to_owned()?) {
-                    cp = Point(ns[2], ns[3]) * 2.0 - Point(ns[0], ns[1]);
+                    cp = Point::from((ns[2], ns[3])) * 2.0 - Point::from((ns[0], ns[1]));
                     ns = parse_n_nums(&mut tokens, 4)?;
-                    pb.cubic(cp.0, cp.1, ns[0], ns[1], ns[2], ns[3]);
+                    pb.cubic(cp.x(), cp.y(), ns[0], ns[1], ns[2], ns[3]);
                 }
-                last_control_point = LastControlPoint::Quad(Point(ns[0], ns[1]));
+                last_control_point = LastControlPoint::Quad(Point::from((ns[0], ns[1])));
             }
             Token::SmallS => {
                 let mut ns = parse_n_nums(&mut tokens, 4)?;
                 let mut current = pb.current_pos().unwrap_or((0.0, 0.0)).into();
                 let mut cp = cubic_reflection_point(&last_control_point, current);
-                pb.cubic(cp.0, cp.1, current.0 + ns[0], current.1 + ns[1], current.0 + ns[2], current.1 + ns[3]);
+                pb.cubic(
+                    cp.x(),
+                    cp.y(),
+                    current.x() + ns[0],
+                    current.y() + ns[1],
+                    current.x() + ns[2],
+                    current.y() + ns[3],
+                );
                 while is_num_or_comma(&tokens.peek().unwrap().to_owned()?) {
-                    cp = current + Point(ns[0], ns[1]) * 2.0 - Point(ns[2], ns[3]);
-                    current = current + Point(ns[2], ns[3]);
+                    cp = current + Point::from((ns[0], ns[1])) * 2.0 - Point::from((ns[2], ns[3]));
+                    current = current + Point::from((ns[2], ns[3]));
                     ns = parse_n_nums(&mut tokens, 4)?;
-                    pb.cubic(cp.0, cp.1, current.0 + ns[0], current.1 + ns[1], current.0 + ns[2], current.1 + ns[3]);
+                    pb.cubic(
+                        cp.x(),
+                        cp.y(),
+                        current.x() + ns[0],
+                        current.y() + ns[1],
+                        current.x() + ns[2],
+                        current.y() + ns[3],
+                    );
                 }
-                last_control_point = LastControlPoint::Quad(Point(current.0 + ns[0], current.1 + ns[1]));
+                last_control_point =
+                    LastControlPoint::Quad(Point::from((current.x() + ns[0], current.y() + ns[1])));
             }
             Token::LargeA => {
                 let mut ns = parse_n_nums(&mut tokens, 7)?;
-                pb.ellipse_from_endpoint(ns[0], ns[1], ns[2].to_radians(), ns[3] != 0.0, ns[4] != 0.0, ns[5], ns[6]);
+                pb.ellipse_from_endpoint(
+                    ns[0],
+                    ns[1],
+                    ns[2].to_radians(),
+                    ns[3] != 0.0,
+                    ns[4] != 0.0,
+                    ns[5],
+                    ns[6],
+                );
                 while is_num_or_comma(&tokens.peek().unwrap().to_owned()?) {
                     ns = parse_n_nums(&mut tokens, 7)?;
-                    pb.ellipse_from_endpoint(ns[0], ns[1], ns[2].to_radians(), ns[3] != 0.0, ns[4] != 0.0, ns[5], ns[6]);
+                    pb.ellipse_from_endpoint(
+                        ns[0],
+                        ns[1],
+                        ns[2].to_radians(),
+                        ns[3] != 0.0,
+                        ns[4] != 0.0,
+                        ns[5],
+                        ns[6],
+                    );
                 }
                 last_control_point = LastControlPoint::None;
             }
             Token::SmallA => {
                 let mut ns = parse_n_nums(&mut tokens, 7)?;
                 let mut current: Point = pb.current_pos().unwrap_or((0.0, 0.0)).into();
-                current = current + Point(ns[5], ns[6]);
-                pb.ellipse_from_endpoint(ns[0], ns[1], ns[2].to_radians(), ns[3] != 0.0, ns[4] != 0.0, current.0, current.1);
+                current = current + Point::from((ns[5], ns[6]));
+                pb.ellipse_from_endpoint(
+                    ns[0],
+                    ns[1],
+                    ns[2].to_radians(),
+                    ns[3] != 0.0,
+                    ns[4] != 0.0,
+                    current.x(),
+                    current.y(),
+                );
                 while is_num_or_comma(&tokens.peek().unwrap().to_owned()?) {
                     ns = parse_n_nums(&mut tokens, 7)?;
-                    current = current + Point(ns[5], ns[6]);
-                    pb.ellipse_from_endpoint(ns[0], ns[1], ns[2].to_radians(), ns[3] != 0.0, ns[4] != 0.0, current.0, current.1);
+                    current = current + Point::from((ns[5], ns[6]));
+                    pb.ellipse_from_endpoint(
+                        ns[0],
+                        ns[1],
+                        ns[2].to_radians(),
+                        ns[3] != 0.0,
+                        ns[4] != 0.0,
+                        current.x(),
+                        current.y(),
+                    );
                 }
                 last_control_point = LastControlPoint::None;
             }
@@ -263,22 +342,14 @@ fn skip_comma(tokens: &mut Peekable<Tokenize<Chars>>) -> Result<(), String> {
 
 fn quad_reflection_point(lcp: &LastControlPoint, pos: Point) -> Point {
     match lcp {
-        LastControlPoint::Quad(p) => {
-            pos * 2.0 - *p
-        }
-        _ => {
-            pos
-        }
+        LastControlPoint::Quad(p) => pos * 2.0 - *p,
+        _ => pos,
     }
 }
 
 fn cubic_reflection_point(lcp: &LastControlPoint, pos: Point) -> Point {
     match lcp {
-        LastControlPoint::Cubic(p) => {
-            pos * 2.0 - *p
-        }
-        _ => {
-            pos
-        }
+        LastControlPoint::Cubic(p) => pos * 2.0 - *p,
+        _ => pos,
     }
 }

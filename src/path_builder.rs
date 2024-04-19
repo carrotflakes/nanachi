@@ -47,12 +47,12 @@ impl PathBuilder {
                 self.path_start = None;
             }
         }
-        self.set_pos(Point(x, y));
+        self.set_pos(Point::from((x, y)));
     }
 
     /// Add a segment that from current position to specified position. And then set the end position to current position.
     pub fn line_to(&mut self, x: f64, y: f64) {
-        let p = Point(x, y);
+        let p = Point::from((x, y));
         if let Some(last_pos) = self.last_pos {
             self.push(PathItem::Line(Line(last_pos, p)));
         }
@@ -61,7 +61,7 @@ impl PathBuilder {
 
     /// Add an arc.
     pub fn arc(&mut self, x: f64, y: f64, radius: f64, angle1: f64, angle2: f64) {
-        let center = Point(x, y);
+        let center = Point::from((x, y));
         let arc = PathItem::Arc(Arc {
             center,
             radius,
@@ -91,7 +91,7 @@ impl PathBuilder {
     ) {
         let radius_x = radius_x.abs();
         let radius_y = radius_y.abs();
-        let center = Point(x, y);
+        let center = Point::from((x, y));
         let ellipse = PathItem::Ellipse(Ellipse {
             center,
             radius_x,
@@ -121,8 +121,10 @@ impl PathBuilder {
         x: f64,
         y: f64,
     ) {
-        let start = self.last_pos.unwrap_or_else(|| panic!("PathBuilder::move_to() is required before ellipse_from_endpoint"));
-        let end = Point(x, y);
+        let start = self.last_pos.unwrap_or_else(|| {
+            panic!("PathBuilder::move_to() is required before ellipse_from_endpoint")
+        });
+        let end = Point::from((x, y));
         if radius_x == 0.0 || radius_y == 0.0 {
             self.set_pos(end);
             self.push(PathItem::Line(Line(start, end)));
@@ -132,23 +134,25 @@ impl PathBuilder {
         let mut radius_y = radius_y.abs();
         let p = (start - end).rotate(-rotation) / 2.0;
         {
-            let s = (p.0 / radius_x).powi(2) + (p.1 / radius_y).powi(2);
+            let s = (p.x() / radius_x).powi(2) + (p.y() / radius_y).powi(2);
             if 1.0 < s {
                 radius_x *= s.sqrt();
                 radius_y *= s.sqrt();
             }
         }
         let (rx2, ry2) = (radius_x.powi(2), radius_y.powi(2));
-        let mut a = ((rx2 * ry2 - rx2 * p.1.powi(2) - ry2 * p.0.powi(2)) / (rx2 * p.1.powi(2) + ry2 * p.0.powi(2))).sqrt();
+        let mut a = ((rx2 * ry2 - rx2 * p.y().powi(2) - ry2 * p.x().powi(2))
+            / (rx2 * p.y().powi(2) + ry2 * p.x().powi(2)))
+        .sqrt();
         if large == clockwise {
             a = -a;
         }
-        let q = Point(radius_x * p.1 / radius_y, -radius_y * p.0 / radius_x) * a;
+        let q = Point::from((radius_x * p.y() / radius_y, -radius_y * p.x() / radius_x)) * a;
         let center = q.rotate(rotation) + (start + end) / 2.0;
-        let a1 = Point((p.0 - q.0) / radius_x, (p.1 - q.1) / radius_y);
-        let mut angle1 = (a1.0 / a1.norm()).acos().copysign(a1.1);
-        let a2 = Point(-(p.0 + q.0) / radius_x, -(p.1 + q.1) / radius_y);
-        let mut angle2 = (a2.0 / a2.norm()).acos().copysign(a2.1);
+        let a1 = Point::from(((p.x() - q.x()) / radius_x, (p.y() - q.y()) / radius_y));
+        let mut angle1 = (a1.x() / a1.norm()).acos().copysign(a1.y());
+        let a2 = Point::from((-(p.x() + q.x()) / radius_x, -(p.y() + q.y()) / radius_y));
+        let mut angle2 = (a2.x() / a2.norm()).acos().copysign(a2.y());
         if clockwise && angle2 < angle1 {
             angle2 += PI * 2.0;
         }
@@ -172,8 +176,8 @@ impl PathBuilder {
         if let Some(last_pos) = self.last_pos {
             let quad = PathItem::Quad(Quad {
                 start: last_pos,
-                end: Point(x, y),
-                control1: Point(control_x, control_y),
+                end: Point::from((x, y)),
+                control1: Point::from((control_x, control_y)),
             });
             let left_point = quad.left_point();
             if last_pos != left_point {
@@ -199,9 +203,9 @@ impl PathBuilder {
         if let Some(last_pos) = self.last_pos {
             let cubic = PathItem::Cubic(Cubic {
                 start: last_pos,
-                end: Point(x, y),
-                control1: Point(control_x1, control_y1),
-                control2: Point(control_x2, control_y2),
+                end: Point::from((x, y)),
+                control1: Point::from((control_x1, control_y1)),
+                control2: Point::from((control_x2, control_y2)),
             });
             let left_point = cubic.left_point();
             if last_pos != left_point {
@@ -217,7 +221,7 @@ impl PathBuilder {
     /// Close the path.
     pub fn close(&mut self) {
         if let Some(p) = self.path_start {
-            self.line_to(p.0, p.1);
+            self.line_to(p.x(), p.y());
             self.push(PathItem::CloseAndJump);
             self.path_start = None;
             self.last_pos = None;

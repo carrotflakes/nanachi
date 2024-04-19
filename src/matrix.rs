@@ -68,10 +68,10 @@ impl Matrix {
     pub fn apply<P: From<Point> + Into<Point>>(&self, p: P) -> P {
         let p: Point = p.into();
         let s = &self.0;
-        Point(
-            p.0 * s[0] + p.1 * s[1] + s[2],
-            p.0 * s[3] + p.1 * s[4] + s[5],
-        )
+        Point::from((
+            p.x() * s[0] + p.y() * s[1] + s[2],
+            p.x() * s[3] + p.y() * s[4] + s[5],
+        ))
         .into()
     }
 
@@ -128,7 +128,10 @@ fn test() {
         .translate(1.0, 2.0)
         .rotate(1.0)
         .scale(0.5, 0.6);
-    assert!((Point(3.0, 4.0) - am.inverse().apply(am.apply(Point(3.0, 4.0)))).norm() < 0.00001);
+    assert!(
+        (Point::from((3.0, 4.0)) - am.inverse().apply(am.apply(Point::from((3.0, 4.0))))).norm()
+            < 0.00001
+    );
 
     assert_eq!(
         am.rotate(0.1).then(&Matrix::new().translate(-0.5, -0.6)),

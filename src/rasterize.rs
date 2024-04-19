@@ -25,23 +25,27 @@ impl RasterizeBuffer {
     ) {
         let mut bound = [self.width as f64, 0.0f64, self.height as f64, 0.0f64];
         for (a, b) in segments {
-            if a.1 == b.1 {
+            if a.y() == b.y() {
                 continue;
             }
-            let (a, b, signum) = if a.1 < b.1 { (a, b, -1.0) } else { (b, a, 1.0) };
-            let upper = a.1;
-            let lower = b.1;
+            let (a, b, signum) = if a.y() < b.y() {
+                (a, b, -1.0)
+            } else {
+                (b, a, 1.0)
+            };
+            let upper = a.y();
+            let lower = b.y();
             if lower < 0.0 || self.height as f64 <= upper {
                 continue;
             }
-            bound[0] = bound[0].min(a.0.min(b.0));
-            bound[1] = bound[1].max(a.0.max(b.0));
+            bound[0] = bound[0].min(a.x().min(b.x()));
+            bound[1] = bound[1].max(a.x().max(b.x()));
             bound[2] = bound[2].min(upper);
             bound[3] = bound[3].max(lower);
-            if a.0 == b.0 {
+            if a.x() == b.x() {
                 if 0.0 <= upper {
                     if lower <= upper.ceil() {
-                        f2(&mut self.buffer, self.width, signum, upper, lower, a.0);
+                        f2(&mut self.buffer, self.width, signum, upper, lower, a.x());
                         continue;
                     }
                     f2(
@@ -50,7 +54,7 @@ impl RasterizeBuffer {
                         signum,
                         upper,
                         upper.ceil(),
-                        a.0,
+                        a.x(),
                     );
                 }
                 if lower < self.height as f64 {
@@ -60,7 +64,7 @@ impl RasterizeBuffer {
                         signum,
                         lower.floor(),
                         lower,
-                        a.0,
+                        a.x(),
                     );
                 }
                 for y in
@@ -72,7 +76,7 @@ impl RasterizeBuffer {
                         signum,
                         y as f64,
                         (y + 1) as f64,
-                        a.0,
+                        a.x(),
                     );
                 }
             } else {
@@ -128,17 +132,21 @@ impl RasterizeBuffer {
     ) {
         let mut bound = [self.width as f64, 0.0f64, self.height as f64, 0.0f64];
         for (a, b) in segments {
-            if a.1 == b.1 {
+            if a.y() == b.y() {
                 continue;
             }
-            let (a, b, signum) = if a.1 < b.1 { (a, b, -1.0) } else { (b, a, 1.0) };
-            let upper = a.1;
-            let lower = b.1;
+            let (a, b, signum) = if a.y() < b.y() {
+                (a, b, -1.0)
+            } else {
+                (b, a, 1.0)
+            };
+            let upper = a.y();
+            let lower = b.y();
             if lower < 0.0 || self.height as f64 <= upper {
                 continue;
             }
-            bound[0] = bound[0].min(a.0.min(b.0));
-            bound[1] = bound[1].max(a.0.max(b.0));
+            bound[0] = bound[0].min(a.x().min(b.x()));
+            bound[1] = bound[1].max(a.x().max(b.x()));
             bound[2] = bound[2].min(upper);
             bound[3] = bound[3].max(lower);
             let int = Intersection::new(a, b);
@@ -254,10 +262,10 @@ impl Intersection {
     #[inline]
     fn new(a: Point, b: Point) -> Intersection {
         Intersection(
-            a.1,
-            (b.0 - a.0) / (b.1 - a.1),
-            a.0,
-            (b.1 - a.1) / (b.0 - a.0),
+            a.y(),
+            (b.x() - a.x()) / (b.y() - a.y()),
+            a.x(),
+            (b.y() - a.y()) / (b.x() - a.x()),
         )
     }
 

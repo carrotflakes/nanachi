@@ -9,19 +9,21 @@ pub struct Quad {
 
 impl Quad {
     pub fn bound(&self) -> (f64, f64, f64, f64) {
-        let x_t = (self.end.1 - self.control1.1) / (self.start.1 + self.end.1 - 2.0 * self.control1.1);
-        let y_t = (self.end.0 - self.control1.0) / (self.start.0 + self.end.0 - 2.0 * self.control1.0);
-        let mut x_min = self.start.0.min(self.end.0);
-        let mut x_max = self.start.0.max(self.end.0);
+        let x_t = (self.end.y() - self.control1.y())
+            / (self.start.y() + self.end.y() - 2.0 * self.control1.y());
+        let y_t = (self.end.x() - self.control1.x())
+            / (self.start.x() + self.end.x() - 2.0 * self.control1.x());
+        let mut x_min = self.start.x().min(self.end.x());
+        let mut x_max = self.start.x().max(self.end.x());
         if 0.0 <= y_t && y_t <= 1.0 {
-            x_min = x_min.min(self.pos(y_t).0);
-            x_max = x_max.max(self.pos(y_t).0);
+            x_min = x_min.min(self.pos(y_t).x());
+            x_max = x_max.max(self.pos(y_t).x());
         }
-        let mut y_min = self.start.1.min(self.end.1);
-        let mut y_max = self.start.1.max(self.end.1);
+        let mut y_min = self.start.y().min(self.end.y());
+        let mut y_max = self.start.y().max(self.end.y());
         if 0.0 <= x_t && x_t <= 1.0 {
-            y_min = y_min.min(self.pos(x_t).1);
-            y_max = y_max.max(self.pos(x_t).1);
+            y_min = y_min.min(self.pos(x_t).y());
+            y_max = y_max.max(self.pos(x_t).y());
         }
         (x_min, x_max, y_min, y_max)
     }

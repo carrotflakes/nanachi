@@ -21,7 +21,7 @@ impl<'a, C: Clone, FC: FillColor<C>> Transform<'a, C, FC> {
 
 impl<'a, C: Clone, FC: FillColor<C>> FillColor<C> for Transform<'a, C, FC> {
     fn fill_color(&self, x: f64, y: f64) -> C {
-        let p = self.matrix.apply(Point(x, y));
-        self.fill_color.fill_color(p.0, p.1)
+        let p = self.matrix.apply(Point::from((x, y)));
+        self.fill_color.fill_color(p.x(), p.y())
     }
 }

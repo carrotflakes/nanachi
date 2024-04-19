@@ -37,7 +37,7 @@ impl<'a, I: Iterator<Item = &'a PathItem>> Flatten<'a, I> {
     pub fn new(it: I, tolerance: f64) -> Self {
         let mut flatten = Flatten {
             tolerance,
-            last: Point(0.0, 0.0),
+            last: Point::from((0.0, 0.0)),
             state: FlattenState::End,
             path_items: it,
         };
@@ -155,9 +155,7 @@ impl<'a, I: Iterator<Item = &'a PathItem>> Iterator for Flatten<'a, I> {
                 self.next_state();
                 Some(pi)
             }
-            FlattenState::End => {
-                None
-            }
+            FlattenState::End => None,
         }
     }
 }
@@ -196,5 +194,5 @@ pub fn path_flatten_only_cubic(path: &Path, tolerance: f64) -> Path {
 }
 
 fn point_to_point2d(p: &Point) -> Point2D<f64> {
-    Point2D::new(p.0, p.1)
+    Point2D::new(p.x(), p.y())
 }

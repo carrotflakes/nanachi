@@ -47,7 +47,11 @@ pub fn path_outline(path: &Path, width: f64, join: &Join, cap: &Cap) -> Path {
             res.push(PathItem::CloseAndJump);
 
             // inner
-            let mut it = pis.iter().rev().filter(|pi| !pi.is_zero()).map(|pi| pi.flip());
+            let mut it = pis
+                .iter()
+                .rev()
+                .filter(|pi| !pi.is_zero())
+                .map(|pi| pi.flip());
             let m = res.len();
             path_item_offset(&mut res, &it.next().unwrap(), width);
             let first = res[m].left_point();
@@ -75,7 +79,11 @@ pub fn path_outline(path: &Path, width: f64, join: &Join, cap: &Cap) -> Path {
                 add_join(&mut res, join, pi.left_point(), s, tmp[0].left_point());
                 res.extend(tmp.drain(..));
             }
-            let mut it = pis.iter().rev().filter(|pi| !pi.is_zero()).map(|pi| pi.flip());
+            let mut it = pis
+                .iter()
+                .rev()
+                .filter(|pi| !pi.is_zero())
+                .map(|pi| pi.flip());
             path_item_offset(&mut tmp, &it.next().unwrap(), width);
             let s = res.last().unwrap().right_point();
             add_cap(&mut res, cap, s, tmp[0].left_point());
@@ -146,9 +154,9 @@ fn add_join(pis: &mut Vec<PathItem>, join: &Join, center: Point, start: Point, e
             } else {
                 let p = intersect_line_and_line(
                     start,
-                    start + Point(start.1 - center.1, center.0 - start.0),
+                    start + Point::from((start.y() - center.y(), center.x() - start.x())),
                     end,
-                    end + Point(center.1 - end.1, end.0 - center.0),
+                    end + Point::from((center.y() - end.y(), end.x() - center.x())),
                 );
                 if ((p - center).norm() as f32) < *limit {
                     pis.push(PathItem::Line(Line(start, p)));
@@ -174,7 +182,7 @@ fn add_cap(pis: &mut Vec<PathItem>, cap: &Cap, start: Point, end: Point) {
             pis.push(PathItem::Line(Line(start, end)));
         }
         Cap::Square => {
-            let v = Point(end.1 - start.1, start.0 - end.0) * 0.5;
+            let v = Point::from((end.y() - start.y(), start.x() - end.x())) * 0.5;
             pis.push(PathItem::Line(Line(start, start + v)));
             pis.push(PathItem::Line(Line(start + v, end + v)));
             pis.push(PathItem::Line(Line(end + v, end)));
@@ -186,7 +194,7 @@ fn path_item_offset(pis: &mut Vec<PathItem>, path_item: &PathItem, width: f64) {
     match path_item {
         PathItem::Line(Line(p1, p2)) => {
             let n = (*p2 - *p1).unit();
-            let d = Point(n.1, -n.0) * width;
+            let d = Point::from((n.y(), -n.x())) * width;
             pis.push(PathItem::Line(Line(*p1 + d, *p2 + d)));
         }
         PathItem::Arc(arc) => {
@@ -211,22 +219,22 @@ fn path_item_offset(pis: &mut Vec<PathItem>, path_item: &PathItem, width: f64) {
         PathItem::Quad(quad) => {
             let start_d = {
                 let n = (quad.control1 - quad.start).unit();
-                Point(n.1, -n.0) * width
+                Point::from((n.y(), -n.x())) * width
             };
             let end_d = {
                 let n = (quad.end - quad.control1).unit();
-                Point(n.1, -n.0) * width
+                Point::from((n.y(), -n.x())) * width
             };
             if {
                 let v0 = quad.start - quad.control1;
                 let v1 = quad.end - quad.control1;
-                0.0 <= v1.0 * v0.0 + v1.1 * v0.1 // whether acute angle
+                0.0 <= v1.x() * v0.x() + v1.y() * v0.y() // whether acute angle
             } {
                 let t = quad.closest_t_to_control();
                 let (q1, q2) = quad.separate(t);
                 let middle_d = {
                     let n = (q2.control1 - q2.start).unit();
-                    Point(n.1, -n.0) * width
+                    Point::from((n.y(), -n.x())) * width
                 };
 
                 pis.push(PathItem::Quad(Quad {
@@ -268,13 +276,13 @@ fn path_item_offset(pis: &mut Vec<PathItem>, path_item: &PathItem, width: f64) {
 }
 
 fn intersect_line_and_line(p1: Point, p2: Point, p3: Point, p4: Point) -> Point {
-    let det = (p1.0 - p2.0) * (p4.1 - p3.1) - (p4.0 - p3.0) * (p1.1 - p2.1);
-    let t = ((p4.1 - p3.1) * (p4.0 - p2.0) + (p3.0 - p4.0) * (p4.1 - p2.1)) / det;
-    let x = t * p1.0 + (1.0 - t) * p2.0;
-    let y = t * p1.1 + (1.0 - t) * p2.1;
-    Point(x, y)
+    let det = (p1.x() - p2.x()) * (p4.y() - p3.y()) - (p4.x() - p3.x()) * (p1.y() - p2.y());
+    let t = ((p4.y() - p3.y()) * (p4.x() - p2.x()) + (p3.x() - p4.x()) * (p4.y() - p2.y())) / det;
+    let x = t * p1.x() + (1.0 - t) * p2.x();
+    let y = t * p1.y() + (1.0 - t) * p2.y();
+    Point::from((x, y))
 }
 
 fn point_is_right_side_of_line(p1: Point, p2: Point) -> bool {
-    p1.0 * p2.1 < p1.1 * p2.0
+    p1.x() * p2.y() < p1.y() * p2.x()
 }
