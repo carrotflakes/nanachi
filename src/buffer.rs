@@ -44,4 +44,8 @@ impl<P: Pixel> GenericBuffer<P> {
             buffer: vec![pixel; (width * height) as usize],
         }
     }
+
+    pub fn as_slice(&self) -> &[P] {
+        &self.buffer
+    }
 }
