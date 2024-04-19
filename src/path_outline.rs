@@ -21,7 +21,7 @@ pub enum Cap {
 }
 
 /// Create a path that is outline of given path.
-pub fn path_outline(path: &Path, width: f64, join: &Join, cap: &Cap) -> Path {
+pub fn path_outline(path: &Path, width: f32, join: &Join, cap: &Cap) -> Path {
     assert_ne!(width, 0.0);
     let mut res = Vec::with_capacity(path.0.len() * 4);
     let mut tmp = Vec::with_capacity(4);
@@ -102,7 +102,7 @@ pub fn path_outline(path: &Path, width: f64, join: &Join, cap: &Cap) -> Path {
     Path(res)
 }
 
-pub fn path_offset(path: &Path, width: f64, join: &Join) -> Path {
+pub fn path_offset(path: &Path, width: f32, join: &Join) -> Path {
     let mut res = Vec::with_capacity(path.0.len() * 2);
     let mut tmp = Vec::with_capacity(4);
     for (pis, closed) in path.continuations() {
@@ -190,7 +190,7 @@ fn add_cap(pis: &mut Vec<PathItem>, cap: &Cap, start: Point, end: Point) {
     }
 }
 
-fn path_item_offset(pis: &mut Vec<PathItem>, path_item: &PathItem, width: f64) {
+fn path_item_offset(pis: &mut Vec<PathItem>, path_item: &PathItem, width: f32) {
     match path_item {
         PathItem::Line(Line(p1, p2)) => {
             let n = (*p2 - *p1).unit();

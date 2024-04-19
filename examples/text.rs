@@ -38,7 +38,12 @@ fn main() {
         // get bounding box
         let (left, top, right, bottom) = glyphs.iter().fold((500, 100, 0, 0), |b, g| {
             if let Some(bb) = g.pixel_bounding_box() {
-                (b.0.min(bb.min.x), b.1.min(bb.min.y), b.2.max(bb.max.x), b.3.max(bb.max.y))
+                (
+                    b.0.min(bb.min.x),
+                    b.1.min(bb.min.y),
+                    b.2.max(bb.max.x),
+                    b.3.max(bb.max.y),
+                )
             } else {
                 b
             }
@@ -47,10 +52,10 @@ fn main() {
         // show rectangle
         context.fill(
             &rect(
-                left as f64,
-                top as f64,
-                (right - left) as f64,
-                (bottom - top) as f64,
+                left as f32,
+                top as f32,
+                (right - left) as f32,
+                (bottom - top) as f32,
             ),
             &rect_fill_style,
         );
@@ -62,7 +67,7 @@ fn main() {
                 glyph.draw(|x, y, v| {
                     let x = x + bounding_box.min.x as u32;
                     let y = y + bounding_box.min.y as u32;
-                    write(x, y, v.min(1.0) as f64);
+                    write(x, y, v.min(1.0) as f32);
                 });
             }
         }

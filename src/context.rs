@@ -59,7 +59,7 @@ where
     R: BorrowMut<RasterizeBuffer>,
 {
     pub image: I,
-    pub flatten_tolerance: f64,
+    pub flatten_tolerance: f32,
     pub antialiasing: bool,
     pub join: Join,
     pub cap: Cap,
@@ -113,7 +113,7 @@ where
         &mut self,
         path: &Path,
         fill_style: &FillStyle<P, FC, C, FR>,
-        width: f64,
+        width: f32,
     ) {
         let path = self.path_transform_and_flatten(path);
         let path = path_outline(&path, width / 2.0, &self.join, &self.cap);
@@ -125,7 +125,7 @@ where
         &mut self,
         path: &Path,
         fill_style: &FillStyle<P, FC, C, FR>,
-        width: f64,
+        width: f32,
         join: &Join,
         cap: &Cap,
     ) {
@@ -150,7 +150,7 @@ where
         let inverted_matrix = self.matrix.inverse();
         for y in 0..h {
             for x in 0..w {
-                let p = inverted_matrix.apply(Point::from((x as f64, y as f64)));
+                let p = inverted_matrix.apply(Point::from((x as f32, y as f32)));
                 image.put_pixel(x, y, fill_color.fill_color(p.x(), p.y()));
             }
         }

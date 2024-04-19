@@ -24,7 +24,7 @@ enum FlattenState {
 /// let flatten_path = Path::new(Flatten::new(path.0.iter(), 1.0).collect());
 /// ```
 pub struct Flatten<'a, I: Iterator<Item = &'a PathItem>> {
-    tolerance: f64,
+    tolerance: f32,
     last: Point,
     state: FlattenState,
     path_items: I,
@@ -34,7 +34,7 @@ impl<'a, I: Iterator<Item = &'a PathItem>> Flatten<'a, I> {
     /// Create [`Flatten`].
     ///
     /// `tolerance` is the tolerance for flattening error. Smaller `tolerance` makes generated curve smooth.
-    pub fn new(it: I, tolerance: f64) -> Self {
+    pub fn new(it: I, tolerance: f32) -> Self {
         let mut flatten = Flatten {
             tolerance,
             last: Point::from((0.0, 0.0)),
@@ -160,11 +160,11 @@ impl<'a, I: Iterator<Item = &'a PathItem>> Iterator for Flatten<'a, I> {
     }
 }
 
-pub fn path_flatten(path: &Path, tolerance: f64) -> Path {
+pub fn path_flatten(path: &Path, tolerance: f32) -> Path {
     Path(Flatten::new(path.0.iter(), tolerance).collect())
 }
 
-pub fn path_flatten_only_cubic(path: &Path, tolerance: f64) -> Path {
+pub fn path_flatten_only_cubic(path: &Path, tolerance: f32) -> Path {
     let mut pis = Vec::new();
     for pi in path.0.iter() {
         match pi {
@@ -193,6 +193,6 @@ pub fn path_flatten_only_cubic(path: &Path, tolerance: f64) -> Path {
     Path(pis)
 }
 
-fn point_to_point2d(p: &Point) -> Point2D<f64> {
+fn point_to_point2d(p: &Point) -> Point2D<f32> {
     Point2D::new(p.x(), p.y())
 }

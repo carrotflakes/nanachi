@@ -6,10 +6,10 @@ struct K {
     points: Vec<Point>,
     close: bool,
     n: usize,
-    l: Vec<f64>,
+    l: Vec<f32>,
     b: Vec<Point>,
-    t: Vec<f64>,
-    a: Vec<f64>,
+    t: Vec<f32>,
+    a: Vec<f32>,
 }
 
 impl K {
@@ -159,11 +159,11 @@ pub fn k_curve(points: Vec<Point>, close: bool, iteration: usize) -> Vec<Point> 
     k.get_bezier_points()
 }
 
-fn tri_area(p1: Point, p2: Point, p3: Point) -> f64 {
+fn tri_area(p1: Point, p2: Point, p3: Point) -> f32 {
     ((p1.x() - p3.x()) * (p2.y() - p3.y()) - (p2.x() - p3.x()) * (p1.y() - p3.y())).abs() / 2.0
 }
 
-fn solve_cubic_equation(a: f64, b: f64, c: f64, d: f64) -> f64 {
+fn solve_cubic_equation(a: f32, b: f32, c: f32, d: f32) -> f32 {
     let b = b / (a * 3.0);
     let c = c / a;
     let d = d / a;
@@ -173,7 +173,7 @@ fn solve_cubic_equation(a: f64, b: f64, c: f64, d: f64) -> f64 {
 
     if dd.abs() < 1.0e-12 {
         let r = q.cbrt() - b;
-        return 1.0f64.min(if 0.0 <= r { r } else { r * -2.0 });
+        return 1.0f32.min(if 0.0 <= r { r } else { r * -2.0 });
     }
     if dd > 0.0 {
         let sqrtdd = dd.sqrt();
@@ -182,7 +182,7 @@ fn solve_cubic_equation(a: f64, b: f64, c: f64, d: f64) -> f64 {
     }
     let tmp = 2.0 * (-p).sqrt();
     let arg = (-dd).sqrt().atan2(-q) / 3.0;
-    let pi2d3 = 2.0 * std::f64::consts::PI / 3.0;
+    let pi2d3 = 2.0 * std::f32::consts::PI / 3.0;
     let r1 = tmp * arg.cos() - b;
     if 0.0 <= r1 && r1 <= 1.0 {
         return r1;
@@ -198,7 +198,7 @@ fn solve_cubic_equation(a: f64, b: f64, c: f64, d: f64) -> f64 {
     panic!("Invalid solution: {}, {}, {}", r1, r2, r3)
 }
 
-fn solve_cubic_equation_with_check(a: f64, b: f64, c: f64, d: f64) -> f64 {
+fn solve_cubic_equation_with_check(a: f32, b: f32, c: f32, d: f32) -> f32 {
     let x = solve_cubic_equation(a, b, c, d);
     if !((a * x.powi(3) + b * x.powi(2) + c * x + d).abs() < 0.0001) {
         println!(
@@ -214,7 +214,7 @@ fn solve_cubic_equation_with_check(a: f64, b: f64, c: f64, d: f64) -> f64 {
     x
 }
 
-fn solve_tridiagonal_equation(a: &mut Vec<f64>, b: &mut Vec<Point>, ps: &Vec<Point>) {
+fn solve_tridiagonal_equation(a: &mut Vec<f32>, b: &mut Vec<Point>, ps: &Vec<Point>) {
     let n = ps.len();
     for i in 0..n + 1 {
         a[(i + 1) * 3] /= a[i * 3 + 1];

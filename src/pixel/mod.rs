@@ -10,7 +10,7 @@ pub use rgba::Rgba;
 
 /// A trait for represents a pixel.
 pub trait Pixel: Clone + 'static {
-    fn lerp(&self, rhs: &Self, rate: f64) -> Self;
+    fn lerp(&self, rhs: &Self, rate: f32) -> Self;
 }
 
 pub trait Arithmetic:
@@ -37,8 +37,8 @@ impl Into<PremultipliedRgba> for Rgba {
     }
 }
 
-impl Pixel for f64 {
-    fn lerp(&self, rhs: &Self, rate: f64) -> Self {
+impl Pixel for f32 {
+    fn lerp(&self, rhs: &Self, rate: f32) -> Self {
         self * (1.0 - rate) + rhs * rate
     }
 }

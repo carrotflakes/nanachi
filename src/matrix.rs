@@ -4,7 +4,7 @@ use crate::point::Point;
 
 /// Matrix for affine transformation.
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub struct Matrix(pub [f64; 6]);
+pub struct Matrix(pub [f32; 6]);
 
 impl Matrix {
     /// Create a Matrix that no transform.
@@ -13,19 +13,19 @@ impl Matrix {
     }
 
     /// Create new Matrix translated with specified position from myself.
-    pub fn translate(&self, x: f64, y: f64) -> Matrix {
+    pub fn translate(&self, x: f32, y: f32) -> Matrix {
         let s = &self.0;
         Matrix([s[0], s[1], s[2] + x, s[3], s[4], s[5] + y])
     }
 
     /// Create new Matrix scaled with specified size from myself.
-    pub fn scale(&self, x: f64, y: f64) -> Matrix {
+    pub fn scale(&self, x: f32, y: f32) -> Matrix {
         let s = &self.0;
         Matrix([s[0] * x, s[1] * x, s[2] * x, s[3] * y, s[4] * y, s[5] * y])
     }
 
     /// Create new Matrix rotated with specified angle from myself.
-    pub fn rotate(&self, rad: f64) -> Matrix {
+    pub fn rotate(&self, rad: f32) -> Matrix {
         let s = &self.0;
         let (sin, cos) = rad.sin_cos();
         Matrix([
@@ -39,7 +39,7 @@ impl Matrix {
     }
 
     /// Create new Matrix skewed with specified y-axis amount from myself.
-    pub fn skew_y(&self, dy: f64) -> Matrix {
+    pub fn skew_y(&self, dy: f32) -> Matrix {
         let s = &self.0;
         Matrix([
             s[0],
@@ -52,7 +52,7 @@ impl Matrix {
     }
 
     /// Create new Matrix skewed with specified x-axis amount from myself.
-    pub fn skew_x(&self, dx: f64) -> Matrix {
+    pub fn skew_x(&self, dx: f32) -> Matrix {
         let s = &self.0;
         Matrix([
             s[0] + s[3] * dx,
@@ -164,8 +164,8 @@ fn test() {
                     .iter()
             )
             .map(|(a, b)| (a - b).abs())
-            .sum::<f64>()
+            .sum::<f32>()
             < 0.0001
     );
-    assert_eq!(Matrix::new().apply((0.0f64, 0.0f64)), (0.0, 0.0));
+    assert_eq!(Matrix::new().apply((0.0f32, 0.0f32)), (0.0, 0.0));
 }

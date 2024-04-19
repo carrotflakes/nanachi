@@ -2,9 +2,9 @@ use nanachi::{
     buffer::GenericBuffer,
     compositor,
     context::{ChildContext, Context, FillStyle},
+    contrib::k_curve::k_curve,
     fill_color, fill_rule,
     image::RgbaImage,
-    contrib::k_curve::k_curve,
     matrix::Matrix,
     path::Path,
     path_builder::PathBuilder,
@@ -14,7 +14,7 @@ use nanachi::{
 };
 use rand_core::RngCore;
 use rand_pcg::Pcg32;
-use std::f64::consts::PI;
+use std::f32::consts::PI;
 
 type Pixel = Rgba;
 // type Pixel = PremultipliedRgba;
@@ -24,7 +24,7 @@ fn main() {
     let mut context = Context::from_pixel(width, height, rgba(255, 255, 255, 255)).high_quality();
     context.clear(&fill_color::LinearGradient::new(
         (0.0, 0.0),
-        (0.0, height as f64),
+        (0.0, height as f32),
         vec![
             (0.0, rgba(255, 255, 255, 255)),
             (1.0, rgba(130, 130, 130, 255)),
@@ -48,9 +48,9 @@ fn draw_stars<'a>(mut context: ChildContext<'a, Pixel, GenericBuffer<Pixel>>) {
     let spoke = (2.0 * PI / 5.0).cos() / (1.0 * PI / 5.0).cos();
     let mut pb = PathBuilder::new();
     for i in 0..10 {
-        let p = i as f64 / 10.0 * PI * 2.0;
+        let p = i as f32 / 10.0 * PI * 2.0;
         let (s, c) = p.sin_cos();
-        let r = (1.0 - (i % 2) as f64 * (1.0 - spoke)) * 10.0;
+        let r = (1.0 - (i % 2) as f32 * (1.0 - spoke)) * 10.0;
         pb.line_to(-s * r, c * r);
     }
     pb.close();
@@ -60,11 +60,11 @@ fn draw_stars<'a>(mut context: ChildContext<'a, Pixel, GenericBuffer<Pixel>>) {
 
     for i in 0..100 {
         let t = (
-            rnd.next_u32() as f64 / std::u32::MAX as f64 * 512.0,
-            rnd.next_u32() as f64 / std::u32::MAX as f64 * 512.0,
+            rnd.next_u32() as f32 / std::u32::MAX as f32 * 512.0,
+            rnd.next_u32() as f32 / std::u32::MAX as f32 * 512.0,
         );
-        let r = rnd.next_u32() as f64 / std::u32::MAX as f64 * PI * 2.0;
-        let s = rnd.next_u32() as f64 / std::u32::MAX as f64 * 4.0 + 5.0;
+        let r = rnd.next_u32() as f32 / std::u32::MAX as f32 * PI * 2.0;
+        let s = rnd.next_u32() as f32 / std::u32::MAX as f32 * 4.0 + 5.0;
         let path = path_transform(
             &path,
             &Matrix::new().rotate(r).scale(s, s).translate(t.0, t.1),
@@ -263,26 +263,26 @@ fn draw_nanachi<'a>(mut context: ChildContext<'a, Pixel, GenericBuffer<Pixel>>) 
 fn draw_frame<'a>(mut context: ChildContext<'a, Pixel, GenericBuffer<Pixel>>) {
     let mut rnd = Pcg32::new(0xcafef00dd15ea5e5, 0xa02bdbf7bb3c0a7);
     let size = 8.0;
-    let mut rnd = || (1.0 - rnd.next_u32() as f64 / std::u32::MAX as f64 * 2.0) * size;
+    let mut rnd = || (1.0 - rnd.next_u32() as f32 / std::u32::MAX as f32 * 2.0) * size;
     let mut builder = PathBuilder::new();
     for i in 0..10 {
         let (dx, dy) = (rnd(), rnd());
-        let i = i as f64 / 10.0;
+        let i = i as f32 / 10.0;
         builder.line_to(10.0 + i * (512.0 - 20.0) + dx, 10.0 + dy);
     }
     for i in 0..10 {
         let (dx, dy) = (rnd(), rnd());
-        let i = i as f64 / 10.0;
+        let i = i as f32 / 10.0;
         builder.line_to(512.0 - 10.0 + dx, 10.0 + i * (512.0 - 20.0) + dy);
     }
     for i in 0..10 {
         let (dx, dy) = (rnd(), rnd());
-        let i = i as f64 / 10.0;
+        let i = i as f32 / 10.0;
         builder.line_to(512.0 - 10.0 - i * (512.0 - 20.0) + dx, 512.0 - 10.0 + dy);
     }
     for i in 0..10 {
         let (dx, dy) = (rnd(), rnd());
-        let i = i as f64 / 10.0;
+        let i = i as f32 / 10.0;
         builder.line_to(10.0 + dx, 512.0 - 10.0 - i * (512.0 - 20.0) + dy);
     }
     builder.close();

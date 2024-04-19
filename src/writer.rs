@@ -8,16 +8,16 @@ pub fn image_writer<'a, P, B, F, C>(
     buffer: &'a mut B,
     fill_color: &'a F,
     compositor: &'a C,
-) -> impl FnMut(u32, u32, f64) + 'a
+) -> impl FnMut(u32, u32, f32) + 'a
 where
     P: Pixel,
     B: Buffer<P>,
     F: FillColor<P>,
     C: Compositor<P> + 'static,
 {
-    move |x: u32, y: u32, v: f64| {
+    move |x: u32, y: u32, v: f32| {
         let dst = buffer.get_pixel(x, y);
-        let src = fill_color.fill_color(x as f64, y as f64);
+        let src = fill_color.fill_color(x as f32, y as f32);
         let p = compositor.composite(dst, &src, v);
         buffer.put_pixel(x, y, p);
     }

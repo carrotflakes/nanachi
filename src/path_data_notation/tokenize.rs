@@ -22,7 +22,7 @@ pub enum Token {
     SmallT,
     LargeA,
     SmallA,
-    Num(f64),
+    Num(f32),
     Comma,
     EOS,
 }
@@ -40,7 +40,7 @@ impl<'a, T: Iterator<Item = char>> Tokenize<'a, T> {
         }
     }
 
-    pub fn try_parse_num(&mut self) -> Option<Result<f64, String>> {
+    pub fn try_parse_num(&mut self) -> Option<Result<f32, String>> {
         let mut str = if let Some('-') = self.chars.peek() {
             self.chars.next();
             "-"

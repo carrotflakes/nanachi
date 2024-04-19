@@ -8,29 +8,29 @@ macro_rules! def_linear_compositor {
     ) => {
         impl Compositor<Rgba<u8>> for $name {
             #[allow(unused_variables)]
-            fn composite(&self, a: &Rgba<u8>, b: &Rgba<u8>, alpha: f64) -> Rgba<u8> {
-                let $aa = a.0[3] as f64 / std::u8::MAX as f64;
-                let $ba = b.0[3] as f64 / std::u8::MAX as f64 * alpha;
+            fn composite(&self, a: &Rgba<u8>, b: &Rgba<u8>, alpha: f32) -> Rgba<u8> {
+                let $aa = a.0[3] as f32 / std::u8::MAX as f32;
+                let $ba = b.0[3] as f32 / std::u8::MAX as f32 * alpha;
                 $($rest1)+
                 Rgba([
-                    (a.0[0] as f64 * $ax + b.0[0] as f64 * $bx).round() as u8,
-                    (a.0[1] as f64 * $ax + b.0[1] as f64 * $bx).round() as u8,
-                    (a.0[2] as f64 * $ax + b.0[2] as f64 * $bx).round() as u8,
-                    ($ca * std::u8::MAX as f64).round() as u8,
+                    (a.0[0] as f32 * $ax + b.0[0] as f32 * $bx).round() as u8,
+                    (a.0[1] as f32 * $ax + b.0[1] as f32 * $bx).round() as u8,
+                    (a.0[2] as f32 * $ax + b.0[2] as f32 * $bx).round() as u8,
+                    ($ca * std::u8::MAX as f32).round() as u8,
                 ])
             }
         }
 
         impl Compositor<Rgb<u8>> for $name {
             #[allow(unused_variables)]
-            fn composite(&self, a: &Rgb<u8>, b: &Rgb<u8>, alpha: f64) -> Rgb<u8> {
+            fn composite(&self, a: &Rgb<u8>, b: &Rgb<u8>, alpha: f32) -> Rgb<u8> {
                 let $aa = 1.0;
                 let $ba = alpha;
                 $($rest2)+
                 Rgb([
-                    (a.0[0] as f64 * $ax + b.0[0] as f64 * $bx).round() as u8,
-                    (a.0[1] as f64 * $ax + b.0[1] as f64 * $bx).round() as u8,
-                    (a.0[2] as f64 * $ax + b.0[2] as f64 * $bx).round() as u8,
+                    (a.0[0] as f32 * $ax + b.0[0] as f32 * $bx).round() as u8,
+                    (a.0[1] as f32 * $ax + b.0[1] as f32 * $bx).round() as u8,
+                    (a.0[2] as f32 * $ax + b.0[2] as f32 * $bx).round() as u8,
                 ])
             }
         }
@@ -187,20 +187,20 @@ macro_rules! def_compositor {
     ) => {
         impl Compositor<Rgba<u8>> for $name {
             #[allow(unused_variables)]
-            fn composite(&self, $a: &Rgba<u8>, $b: &Rgba<u8>, alpha: f64) -> Rgba<u8> {
-                let $aa = $a.0[3] as f64 / std::u8::MAX as f64;
-                let $ba = $b.0[3] as f64 / std::u8::MAX as f64 * alpha;
+            fn composite(&self, $a: &Rgba<u8>, $b: &Rgba<u8>, alpha: f32) -> Rgba<u8> {
+                let $aa = $a.0[3] as f32 / std::u8::MAX as f32;
+                let $ba = $b.0[3] as f32 / std::u8::MAX as f32 * alpha;
                 $($rest1)+
                 Rgba([
                     $($rest2,)+
-                    ($ca * std::u8::MAX as f64).round() as u8,
+                    ($ca * std::u8::MAX as f32).round() as u8,
                 ])
             }
         }
 
         impl Compositor<Rgb<u8>> for $name {
             #[allow(unused_variables)]
-            fn composite(&self, $a: &Rgb<u8>, $b: &Rgb<u8>, alpha: f64) -> Rgb<u8> {
+            fn composite(&self, $a: &Rgb<u8>, $b: &Rgb<u8>, alpha: f32) -> Rgb<u8> {
                 let $aa = 1.0;
                 let $ba = alpha;
                 $($rest1)+
@@ -218,11 +218,11 @@ def_compositor! {
         let ax = (aa * (1.0 - ba)) / ca;
         let bx = (ba * (1.0 - aa)) / ca;
         let cx = aa * ba / ca;
-        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f64, a.0[1] as f64, a.0[2] as f64, b.0[0] as f64, b.0[1] as f64, b.0[2] as f64);
+        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f32, a.0[1] as f32, a.0[2] as f32, b.0[0] as f32, b.0[1] as f32, b.0[2] as f32);
     } [
-        (a0 * ax + b0 * bx + a.0[0].min(b.0[0]) as f64 * cx).round() as u8,
-        (a1 * ax + b1 * bx + a.0[1].min(b.0[1]) as f64 * cx).round() as u8,
-        (a2 * ax + b2 * bx + a.0[2].min(b.0[2]) as f64 * cx).round() as u8,
+        (a0 * ax + b0 * bx + a.0[0].min(b.0[0]) as f32 * cx).round() as u8,
+        (a1 * ax + b1 * bx + a.0[1].min(b.0[1]) as f32 * cx).round() as u8,
+        (a2 * ax + b2 * bx + a.0[2].min(b.0[2]) as f32 * cx).round() as u8,
     ]
 }
 
@@ -232,11 +232,11 @@ def_compositor! {
         let ax = (aa * (1.0 - ba)) / ca;
         let bx = (ba * (1.0 - aa)) / ca;
         let cx = aa * ba / ca;
-        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f64, a.0[1] as f64, a.0[2] as f64, b.0[0] as f64, b.0[1] as f64, b.0[2] as f64);
+        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f32, a.0[1] as f32, a.0[2] as f32, b.0[0] as f32, b.0[1] as f32, b.0[2] as f32);
     } [
-        (a0 * ax + b0 * bx + a.0[0].max(b.0[0]) as f64 * cx).round() as u8,
-        (a1 * ax + b1 * bx + a.0[1].max(b.0[1]) as f64 * cx).round() as u8,
-        (a2 * ax + b2 * bx + a.0[2].max(b.0[2]) as f64 * cx).round() as u8,
+        (a0 * ax + b0 * bx + a.0[0].max(b.0[0]) as f32 * cx).round() as u8,
+        (a1 * ax + b1 * bx + a.0[1].max(b.0[1]) as f32 * cx).round() as u8,
+        (a2 * ax + b2 * bx + a.0[2].max(b.0[2]) as f32 * cx).round() as u8,
     ]
 }
 
@@ -246,7 +246,7 @@ def_compositor! {
         let ax = (aa * (1.0 - ba)) / ca;
         let bx = (ba * (1.0 - aa)) / ca;
         let cx = aa * ba / ca;
-        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f64, a.0[1] as f64, a.0[2] as f64, b.0[0] as f64, b.0[1] as f64, b.0[2] as f64);
+        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f32, a.0[1] as f32, a.0[2] as f32, b.0[0] as f32, b.0[1] as f32, b.0[2] as f32);
     } [
         (a0 * ax + b0 * bx + a0 * b0 / 255.0 * cx).round() as u8,
         (a1 * ax + b1 * bx + a1 * b1 / 255.0 * cx).round() as u8,
@@ -260,7 +260,7 @@ def_compositor! {
         let ax = (aa * (1.0 - ba)) / ca;
         let bx = (ba * (1.0 - aa)) / ca;
         let cx = aa * ba / ca;
-        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f64, a.0[1] as f64, a.0[2] as f64, b.0[0] as f64, b.0[1] as f64, b.0[2] as f64);
+        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f32, a.0[1] as f32, a.0[2] as f32, b.0[0] as f32, b.0[1] as f32, b.0[2] as f32);
     } [
         (a0 * ax + b0 * bx + (a0 + b0 - a0 * b0 / 255.0) * cx).round() as u8,
         (a1 * ax + b1 * bx + (a1 + b1 - a1 * b1 / 255.0) * cx).round() as u8,
@@ -274,7 +274,7 @@ def_compositor! {
         let ax = (aa * (1.0 - ba)) / ca;
         let bx = (ba * (1.0 - aa)) / ca;
         let cx = aa * ba / ca;
-        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f64, a.0[1] as f64, a.0[2] as f64, b.0[0] as f64, b.0[1] as f64, b.0[2] as f64);
+        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f32, a.0[1] as f32, a.0[2] as f32, b.0[0] as f32, b.0[1] as f32, b.0[2] as f32);
     } [
         (a0 * ax + b0 * bx + if a0 < 127.0 {2.0 * a0 * b0 / 255.0} else {255.0 - 2.0 * (255.0 - a0) * (255.0 - b0) / 255.0} * cx).round() as u8,
         (a1 * ax + b1 * bx + if a1 < 127.0 {2.0 * a1 * b1 / 255.0} else {255.0 - 2.0 * (255.0 - a1) * (255.0 - b1) / 255.0} * cx).round() as u8,
@@ -288,7 +288,7 @@ def_compositor! {
         let ax = (aa * (1.0 - ba)) / ca;
         let bx = (ba * (1.0 - aa)) / ca;
         let cx = aa * ba / ca;
-        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f64, a.0[1] as f64, a.0[2] as f64, b.0[0] as f64, b.0[1] as f64, b.0[2] as f64);
+        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f32, a.0[1] as f32, a.0[2] as f32, b.0[0] as f32, b.0[1] as f32, b.0[2] as f32);
     } [
         (a0 * ax + b0 * bx + if b0 < 127.0 {2.0 * a0 * b0 / 255.0} else {255.0 - 2.0 * (255.0 - a0) * (255.0 - b0) / 255.0} * cx).round() as u8,
         (a1 * ax + b1 * bx + if b1 < 127.0 {2.0 * a1 * b1 / 255.0} else {255.0 - 2.0 * (255.0 - a1) * (255.0 - b1) / 255.0} * cx).round() as u8,
@@ -302,7 +302,7 @@ def_compositor! {
         let ax = (aa * (1.0 - ba)) / ca;
         let bx = (ba * (1.0 - aa)) / ca;
         let cx = aa * ba / ca;
-        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f64, a.0[1] as f64, a.0[2] as f64, b.0[0] as f64, b.0[1] as f64, b.0[2] as f64);
+        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f32, a.0[1] as f32, a.0[2] as f32, b.0[0] as f32, b.0[1] as f32, b.0[2] as f32);
     } [
         (a0 * ax + b0 * bx + if b0 < 255.0 {(a0 / (255.0 - b0)).min(1.0) * 255.0} else {255.0} * cx).round() as u8,
         (a1 * ax + b1 * bx + if b1 < 255.0 {(a1 / (255.0 - b1)).min(1.0) * 255.0} else {255.0} * cx).round() as u8,
@@ -316,7 +316,7 @@ def_compositor! {
         let ax = (aa * (1.0 - ba)) / ca;
         let bx = (ba * (1.0 - aa)) / ca;
         let cx = aa * ba / ca;
-        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f64, a.0[1] as f64, a.0[2] as f64, b.0[0] as f64, b.0[1] as f64, b.0[2] as f64);
+        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f32, a.0[1] as f32, a.0[2] as f32, b.0[0] as f32, b.0[1] as f32, b.0[2] as f32);
     } [
         (a0 * ax + b0 * bx + if 0.0 < b0 {255.0 - ((255.0 - a0) / b0).min(1.0) * 255.0} else {0.0} * cx).round() as u8,
         (a1 * ax + b1 * bx + if 0.0 < b1 {255.0 - ((255.0 - a1) / b1).min(1.0) * 255.0} else {0.0} * cx).round() as u8,
@@ -324,15 +324,14 @@ def_compositor! {
     ]
 }
 
-
 def_compositor! {
     SoftLight(a, b, aa, ba, ca) {
         let ca = aa + ba - aa * ba;
         let ax = (aa * (1.0 - ba)) / ca;
         let bx = (ba * (1.0 - aa)) / ca;
         let cx = aa * ba / ca;
-        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f64, a.0[1] as f64, a.0[2] as f64, b.0[0] as f64, b.0[1] as f64, b.0[2] as f64);
-        fn f(a: f64, b: f64) -> f64 {
+        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f32, a.0[1] as f32, a.0[2] as f32, b.0[0] as f32, b.0[1] as f32, b.0[2] as f32);
+        fn f(a: f32, b: f32) -> f32 {
             let a = a / 255.0;
             let b = b / 255.0;
             255.0 * if 0.5 < b {
@@ -359,7 +358,7 @@ def_compositor! {
         let ax = (aa * (1.0 - ba)) / ca;
         let bx = (ba * (1.0 - aa)) / ca;
         let cx = aa * ba / ca;
-        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f64, a.0[1] as f64, a.0[2] as f64, b.0[0] as f64, b.0[1] as f64, b.0[2] as f64);
+        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f32, a.0[1] as f32, a.0[2] as f32, b.0[0] as f32, b.0[1] as f32, b.0[2] as f32);
     } [
         (a0 * ax + b0 * bx + (a0 - b0).abs() * cx).round() as u8,
         (a1 * ax + b1 * bx + (a1 - b1).abs() * cx).round() as u8,
@@ -373,7 +372,7 @@ def_compositor! {
         let ax = (aa * (1.0 - ba)) / ca;
         let bx = (ba * (1.0 - aa)) / ca;
         let cx = aa * ba / ca;
-        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f64, a.0[1] as f64, a.0[2] as f64, b.0[0] as f64, b.0[1] as f64, b.0[2] as f64);
+        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f32, a.0[1] as f32, a.0[2] as f32, b.0[0] as f32, b.0[1] as f32, b.0[2] as f32);
     } [
         (a0 * ax + b0 * bx + (a0 + b0 - 2.0 * a0 * b0 / 255.0) * cx).round() as u8,
         (a1 * ax + b1 * bx + (a1 + b1 - 2.0 * a1 * b1 / 255.0) * cx).round() as u8,
@@ -382,7 +381,7 @@ def_compositor! {
 }
 
 impl Compositor<Rgba<u8>> for Basic {
-    fn composite(&self, a: &Rgba<u8>, b: &Rgba<u8>, alpha: f64) -> Rgba<u8> {
+    fn composite(&self, a: &Rgba<u8>, b: &Rgba<u8>, alpha: f32) -> Rgba<u8> {
         use Basic::*;
         match self {
             Clear => Clear.composite(a, b, alpha),
@@ -414,7 +413,7 @@ impl Compositor<Rgba<u8>> for Basic {
 }
 
 impl Compositor<Rgb<u8>> for Basic {
-    fn composite(&self, a: &Rgb<u8>, b: &Rgb<u8>, alpha: f64) -> Rgb<u8> {
+    fn composite(&self, a: &Rgb<u8>, b: &Rgb<u8>, alpha: f32) -> Rgb<u8> {
         use Basic::*;
         match self {
             Clear => Clear.composite(a, b, alpha),

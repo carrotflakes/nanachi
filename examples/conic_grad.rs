@@ -5,7 +5,7 @@ fn main() {
     let (width, height) = (512, 512);
     let mut context = Context::from_pixel(width, height, rgba(255, 255, 255, 255)).high_quality();
     context.clear(&fill_color::ConicGradient::new(
-        (width as f64 / 2.0, height as f64 / 2.0),
+        (width as f32 / 2.0, height as f32 / 2.0),
         0.1,
         vec![(0.0, rgba(255, 0, 0, 255)), (1.0, rgba(0, 255, 255, 255))],
     ));

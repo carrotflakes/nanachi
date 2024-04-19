@@ -1,9 +1,9 @@
 use crate::fill_color::FillColor;
 use crate::pixel::Pixel;
 
-type GradientPoint<P> = (f64, P);
+type GradientPoint<P> = (f32, P);
 
-fn gradient<P: Pixel>(points: &Vec<GradientPoint<P>>, p: f64) -> P {
+fn gradient<P: Pixel>(points: &Vec<GradientPoint<P>>, p: f32) -> P {
     if p <= points[0].0 {
         return points[0].1.clone();
     }
@@ -31,17 +31,17 @@ fn gradient<P: Pixel>(points: &Vec<GradientPoint<P>>, p: f64) -> P {
 /// ```
 #[derive(Debug, Clone)]
 pub struct LinearGradient<P: Pixel> {
-    start: (f64, f64),
-    sin: f64,
-    cos: f64,
-    d: f64,
+    start: (f32, f32),
+    sin: f32,
+    cos: f32,
+    d: f32,
     points: Vec<GradientPoint<P>>,
 }
 
 impl<P: Pixel> LinearGradient<P> {
     pub fn new(
-        start: (f64, f64),
-        end: (f64, f64),
+        start: (f32, f32),
+        end: (f32, f32),
         points: Vec<GradientPoint<P>>,
     ) -> LinearGradient<P> {
         assert!(!points.is_empty());
@@ -57,7 +57,7 @@ impl<P: Pixel> LinearGradient<P> {
 }
 
 impl<P: Pixel> FillColor<P> for LinearGradient<P> {
-    fn fill_color(&self, x: f64, y: f64) -> P {
+    fn fill_color(&self, x: f32, y: f32) -> P {
         let p = ((x - self.start.0) * self.cos + (y - self.start.1) * self.sin) / self.d;
         gradient(&self.points, p)
     }
@@ -77,13 +77,13 @@ impl<P: Pixel> FillColor<P> for LinearGradient<P> {
 /// ```
 #[derive(Debug, Clone)]
 pub struct RadialGradient<P: Pixel> {
-    start: (f64, f64),
-    radius: f64,
+    start: (f32, f32),
+    radius: f32,
     points: Vec<GradientPoint<P>>,
 }
 
 impl<P: Pixel> RadialGradient<P> {
-    pub fn new(start: (f64, f64), radius: f64, points: Vec<GradientPoint<P>>) -> RadialGradient<P> {
+    pub fn new(start: (f32, f32), radius: f32, points: Vec<GradientPoint<P>>) -> RadialGradient<P> {
         assert!(!points.is_empty());
         RadialGradient {
             start,
@@ -94,7 +94,7 @@ impl<P: Pixel> RadialGradient<P> {
 }
 
 impl<P: Pixel> FillColor<P> for RadialGradient<P> {
-    fn fill_color(&self, x: f64, y: f64) -> P {
+    fn fill_color(&self, x: f32, y: f32) -> P {
         let p = (x - self.start.0).hypot(y - self.start.1) / self.radius;
         gradient(&self.points, p)
     }
@@ -103,30 +103,30 @@ impl<P: Pixel> FillColor<P> for RadialGradient<P> {
 /// Conic gradient.
 #[derive(Debug, Clone)]
 pub struct ConicGradient<P: Pixel> {
-    origin: (f64, f64),
-    start_angle: f64,
+    origin: (f32, f32),
+    start_angle: f32,
     points: Vec<GradientPoint<P>>,
 }
 
 impl<P: Pixel> ConicGradient<P> {
     pub fn new(
-        origin: (f64, f64),
-        start_angle: f64,
+        origin: (f32, f32),
+        start_angle: f32,
         points: Vec<GradientPoint<P>>,
     ) -> ConicGradient<P> {
         assert!(!points.is_empty());
         ConicGradient {
             origin,
-            start_angle: (-start_angle).rem_euclid(std::f64::consts::TAU) + std::f64::consts::PI,
+            start_angle: (-start_angle).rem_euclid(std::f32::consts::TAU) + std::f32::consts::PI,
             points,
         }
     }
 }
 
 impl<P: Pixel> FillColor<P> for ConicGradient<P> {
-    fn fill_color(&self, x: f64, y: f64) -> P {
+    fn fill_color(&self, x: f32, y: f32) -> P {
         let p = ((self.origin.1 - y).atan2(self.origin.0 - x) + self.start_angle)
-            / std::f64::consts::TAU
+            / std::f32::consts::TAU
             % 1.0;
         gradient(&self.points, p)
     }

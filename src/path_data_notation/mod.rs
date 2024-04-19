@@ -307,7 +307,7 @@ pub fn parse(str: &str) -> Result<Path, String> {
     Ok(pb.end())
 }
 
-fn parse_n_nums(tokens: &mut Peekable<Tokenize<Chars>>, n: usize) -> Result<Vec<f64>, String> {
+fn parse_n_nums(tokens: &mut Peekable<Tokenize<Chars>>, n: usize) -> Result<Vec<f32>, String> {
     let mut v = Vec::new();
     for _ in 0..n {
         skip_comma(tokens)?;

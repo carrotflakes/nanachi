@@ -94,7 +94,7 @@ fn f<C: compositor::Compositor<Rgba> + 'static>(img: &mut GenericBuffer<Rgba>, i
     context
         .transformed_context(
             &Matrix::new()
-                .rotate(90f64.to_radians())
+                .rotate(90f32.to_radians())
                 .translate(20.0, 20.0),
         )
         .fill(

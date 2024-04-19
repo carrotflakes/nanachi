@@ -15,7 +15,7 @@ fn main() {
     draw_image_transformed(
         &mut img,
         &src,
-        (0.0, 0.0, width as f64, height as f64),
+        (0.0, 0.0, width as f32, height as f32),
         Matrix::new()
             .translate(-200.0, -200.0)
             .scale(1.8, 1.8)

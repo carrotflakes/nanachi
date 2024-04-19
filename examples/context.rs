@@ -7,7 +7,7 @@ use nanachi::{
     path_builder::PathBuilder,
     primitives,
 };
-use std::f64::consts::PI;
+use std::f32::consts::PI;
 
 fn main() {
     let (width, height) = (512, 512);

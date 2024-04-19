@@ -2,7 +2,7 @@
 
 /// FillRule Trait
 pub trait FillRule: Copy {
-    fn apply(&self, value: f64) -> f64;
+    fn apply(&self, value: f32) -> f32;
     fn is_inverse(&self) -> bool;
 }
 
@@ -11,7 +11,7 @@ pub trait FillRule: Copy {
 pub struct NonZero;
 
 impl FillRule for NonZero {
-    fn apply(&self, value: f64) -> f64 {
+    fn apply(&self, value: f32) -> f32 {
         value.abs().min(1.0)
     }
 
@@ -25,7 +25,7 @@ impl FillRule for NonZero {
 pub struct EvenOdd;
 
 impl FillRule for EvenOdd {
-    fn apply(&self, value: f64) -> f64 {
+    fn apply(&self, value: f32) -> f32 {
         1.0 - (value.rem_euclid(2.0) - 1.0).abs()
     }
 
@@ -39,7 +39,7 @@ impl FillRule for EvenOdd {
 pub struct InverseNonZero;
 
 impl FillRule for InverseNonZero {
-    fn apply(&self, value: f64) -> f64 {
+    fn apply(&self, value: f32) -> f32 {
         1.0 - value.abs().min(1.0)
     }
 
@@ -53,7 +53,7 @@ impl FillRule for InverseNonZero {
 pub struct InverseEvenOdd;
 
 impl FillRule for InverseEvenOdd {
-    fn apply(&self, value: f64) -> f64 {
+    fn apply(&self, value: f32) -> f32 {
         (value.rem_euclid(2.0) - 1.0).abs()
     }
 
@@ -66,7 +66,7 @@ impl FillRule for InverseEvenOdd {
 pub struct Abs;
 
 impl FillRule for Abs {
-    fn apply(&self, value: f64) -> f64 {
+    fn apply(&self, value: f32) -> f32 {
         value.abs()
     }
 
@@ -79,7 +79,7 @@ impl FillRule for Abs {
 pub struct Raw;
 
 impl FillRule for Raw {
-    fn apply(&self, value: f64) -> f64 {
+    fn apply(&self, value: f32) -> f32 {
         value
     }
 

@@ -5,7 +5,7 @@ use crate::{
     path::{Path, PathItem},
     point::Point,
 };
-use std::f64::consts::PI;
+use std::f32::consts::TAU;
 
 /// Path builder.
 #[derive(Debug, Clone)]
@@ -39,7 +39,7 @@ impl PathBuilder {
     }
 
     /// Set current position.
-    pub fn move_to(&mut self, x: f64, y: f64) {
+    pub fn move_to(&mut self, x: f32, y: f32) {
         match self.items.last() {
             Some(PathItem::CloseAndJump) | Some(PathItem::Jump) | None => {}
             Some(_) => {
@@ -51,7 +51,7 @@ impl PathBuilder {
     }
 
     /// Add a segment that from current position to specified position. And then set the end position to current position.
-    pub fn line_to(&mut self, x: f64, y: f64) {
+    pub fn line_to(&mut self, x: f32, y: f32) {
         let p = Point::from((x, y));
         if let Some(last_pos) = self.last_pos {
             self.push(PathItem::Line(Line(last_pos, p)));
@@ -60,7 +60,7 @@ impl PathBuilder {
     }
 
     /// Add an arc.
-    pub fn arc(&mut self, x: f64, y: f64, radius: f64, angle1: f64, angle2: f64) {
+    pub fn arc(&mut self, x: f32, y: f32, radius: f32, angle1: f32, angle2: f32) {
         let center = Point::from((x, y));
         let arc = PathItem::Arc(Arc {
             center,
@@ -81,13 +81,13 @@ impl PathBuilder {
     /// Add an ellipse.
     pub fn ellipse(
         &mut self,
-        x: f64,
-        y: f64,
-        radius_x: f64,
-        radius_y: f64,
-        rotation: f64,
-        angle1: f64,
-        angle2: f64,
+        x: f32,
+        y: f32,
+        radius_x: f32,
+        radius_y: f32,
+        rotation: f32,
+        angle1: f32,
+        angle2: f32,
     ) {
         let radius_x = radius_x.abs();
         let radius_y = radius_y.abs();
@@ -113,13 +113,13 @@ impl PathBuilder {
     /// Add an endpoint-parameterized ellipse.
     pub fn ellipse_from_endpoint(
         &mut self,
-        radius_x: f64,
-        radius_y: f64,
-        rotation: f64,
+        radius_x: f32,
+        radius_y: f32,
+        rotation: f32,
         large: bool,
         clockwise: bool,
-        x: f64,
-        y: f64,
+        x: f32,
+        y: f32,
     ) {
         let start = self.last_pos.unwrap_or_else(|| {
             panic!("PathBuilder::move_to() is required before ellipse_from_endpoint")
@@ -154,10 +154,10 @@ impl PathBuilder {
         let a2 = Point::from((-(p.x() + q.x()) / radius_x, -(p.y() + q.y()) / radius_y));
         let mut angle2 = (a2.x() / a2.norm()).acos().copysign(a2.y());
         if clockwise && angle2 < angle1 {
-            angle2 += PI * 2.0;
+            angle2 += TAU;
         }
         if !clockwise && angle1 < angle2 {
-            angle1 += PI * 2.0;
+            angle1 += TAU;
         }
         let ellipse = PathItem::Ellipse(Ellipse {
             center,
@@ -172,7 +172,7 @@ impl PathBuilder {
     }
 
     /// Add a quadratic bezier curve.
-    pub fn quad(&mut self, control_x: f64, control_y: f64, x: f64, y: f64) {
+    pub fn quad(&mut self, control_x: f32, control_y: f32, x: f32, y: f32) {
         if let Some(last_pos) = self.last_pos {
             let quad = PathItem::Quad(Quad {
                 start: last_pos,
@@ -193,12 +193,12 @@ impl PathBuilder {
     /// Add a cubic bezier curve.
     pub fn cubic(
         &mut self,
-        control_x1: f64,
-        control_y1: f64,
-        control_x2: f64,
-        control_y2: f64,
-        x: f64,
-        y: f64,
+        control_x1: f32,
+        control_y1: f32,
+        control_x2: f32,
+        control_y2: f32,
+        x: f32,
+        y: f32,
     ) {
         if let Some(last_pos) = self.last_pos {
             let cubic = PathItem::Cubic(Cubic {
@@ -236,7 +236,7 @@ impl PathBuilder {
     }
 
     /// Return current position.
-    pub fn current_pos(&self) -> Option<(f64, f64)> {
+    pub fn current_pos(&self) -> Option<(f32, f32)> {
         self.last_pos.map(|p| p.into())
     }
 }

@@ -4,7 +4,7 @@ use crate::matrix::Matrix;
 use crate::models::{Cubic, Ellipse, Line, Quad};
 use crate::path::{Path, PathItem};
 use crate::point::Point;
-use std::f64::consts::PI;
+use std::f32::consts::TAU;
 
 /// Transform a path with the [`Matrix`].
 pub fn path_transform(path: &Path, matrix: &Matrix) -> Path {
@@ -94,10 +94,10 @@ fn transform_ellipse(ellipse: &Ellipse, matrix: &Matrix) -> Ellipse {
     //     std::mem::swap(&mut angle1, &mut angle2);
     // }
     if (ellipse.angle1 < ellipse.angle2) ^ (signum < 0.0) && angle1 >= angle2 {
-        angle2 += PI * 2.0;
+        angle2 += TAU;
     }
     if (ellipse.angle1 > ellipse.angle2) ^ (signum < 0.0) && angle1 <= angle2 {
-        angle1 += PI * 2.0;
+        angle1 += TAU;
     }
     Ellipse {
         center,
@@ -113,7 +113,7 @@ fn transform_ellipse(ellipse: &Ellipse, matrix: &Matrix) -> Ellipse {
 fn test() {
     let am = Matrix::new().scale(3.0, 2.0).skew_y(0.5).rotate(0.1);
     // let k = (am.0[1] + am.0[2]) / (am.0[4] + am.0[5]) + (am.0[3] + am.0[5]) / (am.0[0] + am.0[2]);
-    let k = (PI / 2.0 - am.0[4].atan2(am.0[1]) + am.0[3].atan2(am.0[0])).tan();
+    let k = (std::f32::consts::PI / 2.0 - am.0[4].atan2(am.0[1]) + am.0[3].atan2(am.0[0])).tan();
     let p = am
         .apply(Point::from((1.0, 0.0)))
         .rotate(am.0[1].atan2(am.0[4]))
@@ -121,8 +121,8 @@ fn test() {
     let q = am.0[1].hypot(am.0[4]);
     dbg!(k, p, q);
 
-    let k = 0.5f64;
-    let p = 3.0f64;
+    let k = 0.5f32;
+    let p = 3.0f32;
     let q = 2.0;
     let rotation = 1.0 / 2.0 * (2.0 * k / (1.0 - k.powi(2) - (q / p).powi(2))).atan();
     let scale_x = p * (1.0 + k * rotation.tan()).sqrt();

@@ -8,7 +8,7 @@ macro_rules! def_linear_compositor {
     ) => {
         impl Compositor<PremultipliedRgba> for $name {
             #[allow(unused_variables)]
-            fn composite(&self, a: &PremultipliedRgba, b: &PremultipliedRgba, alpha: f64) -> PremultipliedRgba {
+            fn composite(&self, a: &PremultipliedRgba, b: &PremultipliedRgba, alpha: f32) -> PremultipliedRgba {
                 let $aa = a.0[3];
                 let $ba = b.0[3] * alpha as f32;
                 $($rest1)+
@@ -146,7 +146,7 @@ macro_rules! def_compositor {
     ) => {
         impl Compositor<PremultipliedRgba> for $name {
             #[allow(unused_variables)]
-            fn composite(&self, $a: &PremultipliedRgba, $b: &PremultipliedRgba, alpha: f64) -> PremultipliedRgba {
+            fn composite(&self, $a: &PremultipliedRgba, $b: &PremultipliedRgba, alpha: f32) -> PremultipliedRgba {
                 let alpha = alpha as f32;
                 let $aa = $a.0[3];
                 let $ba = $b.0[3] * alpha;
@@ -345,7 +345,12 @@ def_compositor! {
 }
 
 impl Compositor<PremultipliedRgba> for Basic {
-    fn composite(&self, a: &PremultipliedRgba, b: &PremultipliedRgba, alpha: f64) -> PremultipliedRgba {
+    fn composite(
+        &self,
+        a: &PremultipliedRgba,
+        b: &PremultipliedRgba,
+        alpha: f32,
+    ) -> PremultipliedRgba {
         use Basic::*;
         match self {
             Clear => Clear.composite(a, b, alpha),

@@ -8,7 +8,7 @@ pub struct Quad {
 }
 
 impl Quad {
-    pub fn bound(&self) -> (f64, f64, f64, f64) {
+    pub fn bound(&self) -> (f32, f32, f32, f32) {
         let x_t = (self.end.y() - self.control1.y())
             / (self.start.y() + self.end.y() - 2.0 * self.control1.y());
         let y_t = (self.end.x() - self.control1.x())
@@ -28,12 +28,12 @@ impl Quad {
         (x_min, x_max, y_min, y_max)
     }
 
-    pub fn pos(&self, t: f64) -> Point {
+    pub fn pos(&self, t: f32) -> Point {
         let it = 1.0 - t;
         self.start * it.powi(2) + self.control1 * t * it * 2.0 + self.end * t.powi(2)
     }
 
-    pub fn separate(&self, t: f64) -> (Quad, Quad) {
+    pub fn separate(&self, t: f32) -> (Quad, Quad) {
         debug_assert!(0.0 <= t && t <= 1.0);
         let middle = self.pos(t);
         (
@@ -50,7 +50,7 @@ impl Quad {
         )
     }
 
-    pub fn closest_t_to_control(&self) -> f64 {
+    pub fn closest_t_to_control(&self) -> f32 {
         let v0 = self.control1 - self.start;
         let v1 = self.end - self.control1;
 

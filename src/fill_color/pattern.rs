@@ -44,7 +44,7 @@ where
     DB: std::ops::Deref<Target = B>,
     I: Interpolation<P, B>,
 {
-    fn fill_color(&self, x: f64, y: f64) -> P {
+    fn fill_color(&self, x: f32, y: f32) -> P {
         let (x, y) = self.matrix.apply((x, y));
         self.interpolation.interpolate(&self.image, x, y)
     }
