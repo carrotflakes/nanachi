@@ -21,11 +21,11 @@ path-data-notation = []
 image-crate = ["image"]
 
 [dependencies]
-image = { version = "0.24", default-features = false, optional = true }
+image = { version = "0.25", default-features = false, optional = true }
 lyon_geom = "1.0"
 
 [dev-dependencies]
 rand_pcg = "0.3"
 rand_core = "0.6"
-image = { version = "0.24", features = ["png"] }
+image = { version = "0.25", features = ["png"] }
 rusttype = "0.9"
