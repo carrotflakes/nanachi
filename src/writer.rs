@@ -17,7 +17,7 @@ where
 {
     move |x: u32, y: u32, v: f32| {
         let dst = buffer.get_pixel(x, y);
-        let src = fill_color.fill_color(x as f32, y as f32);
+        let src = fill_color.fill_color([x as f32, y as f32]);
         let p = compositor.composite(dst, &src, v);
         buffer.put_pixel(x, y, p);
     }

@@ -135,7 +135,7 @@ fn add_join(pis: &mut Vec<PathItem>, join: &Join, center: Point, start: Point, e
         return;
     }
     let mut bevel = || {
-        pis.push(PathItem::Line(Line(start, end)));
+        pis.push(PathItem::Line(Line([start, end])));
     };
     match join {
         Join::Round => {
@@ -159,8 +159,8 @@ fn add_join(pis: &mut Vec<PathItem>, join: &Join, center: Point, start: Point, e
                     end + Point::from((center.y() - end.y(), end.x() - center.x())),
                 );
                 if ((p - center).norm() as f32) < *limit {
-                    pis.push(PathItem::Line(Line(start, p)));
-                    pis.push(PathItem::Line(Line(p, end)));
+                    pis.push(PathItem::Line(Line([start, p])));
+                    pis.push(PathItem::Line(Line([p, end])));
                 } else {
                     bevel();
                 }
@@ -179,23 +179,23 @@ fn add_cap(pis: &mut Vec<PathItem>, cap: &Cap, start: Point, end: Point) {
             )));
         }
         Cap::Butt => {
-            pis.push(PathItem::Line(Line(start, end)));
+            pis.push(PathItem::Line(Line([start, end])));
         }
         Cap::Square => {
             let v = Point::from((end.y() - start.y(), start.x() - end.x())) * 0.5;
-            pis.push(PathItem::Line(Line(start, start + v)));
-            pis.push(PathItem::Line(Line(start + v, end + v)));
-            pis.push(PathItem::Line(Line(end + v, end)));
+            pis.push(PathItem::Line(Line([start, start + v])));
+            pis.push(PathItem::Line(Line([start + v, end + v])));
+            pis.push(PathItem::Line(Line([end + v, end])));
         }
     }
 }
 
 fn path_item_offset(pis: &mut Vec<PathItem>, path_item: &PathItem, width: f32) {
     match path_item {
-        PathItem::Line(Line(p1, p2)) => {
+        PathItem::Line(Line([p1, p2])) => {
             let n = (*p2 - *p1).unit();
             let d = Point::from((n.y(), -n.x())) * width;
-            pis.push(PathItem::Line(Line(*p1 + d, *p2 + d)));
+            pis.push(PathItem::Line(Line([*p1 + d, *p2 + d])));
         }
         PathItem::Arc(arc) => {
             let signum = (arc.angle2 - arc.angle1).signum();

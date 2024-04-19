@@ -75,19 +75,19 @@ impl Ellipse {
         }
     }
 
-    pub fn bound(&self) -> (f32, f32, f32, f32) {
+    pub fn bound(&self) -> [f32; 4] {
         let ux = self.radius_x * self.rotation.cos();
         let uy = self.radius_x * self.rotation.sin();
         let vx = self.radius_y * (self.rotation + FRAC_PI_2).cos();
         let vy = self.radius_y * (self.rotation + FRAC_PI_2).sin();
         let dx = ux.hypot(vx);
         let dy = uy.hypot(vy);
-        (
+        [
             self.center.x() - dx,
             self.center.x() + dx,
             self.center.y() - dy,
             self.center.y() + dy,
-        )
+        ]
     }
 
     pub fn pos(&self, angle: f32) -> Point {
@@ -100,13 +100,13 @@ impl Ellipse {
         -((self.rotation - FRAC_PI_2).tan() * self.radius_y / self.radius_x).atan()
     }
 
-    pub fn angle_norm(&self) -> (f32, f32) {
+    pub fn angle_norm(&self) -> [f32; 2] {
         let (a1, a2) = if self.angle1 < self.angle2 {
             (self.angle1, self.angle2)
         } else {
             (self.angle2, self.angle1)
         };
         let a = a1.rem_euclid(TAU);
-        (a, if a2 - a < 0.0 { a2 + TAU } else { a2 })
+        [a, if a2 - a < 0.0 { a2 + TAU } else { a2 }]
     }
 }

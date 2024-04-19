@@ -35,7 +35,7 @@ fn main() {
         fill_color::Transform::new(&pattern, Matrix::new().rotate(PI * 0.25).scale(2.0, 2.0));
     let mut img = ImageBuffer::from_fn(width, height, |x, y| {
         use nanachi::fill_color::FillColor;
-        bg_fill_color.fill_color(x as f32, y as f32)
+        bg_fill_color.fill_color([x as f32, y as f32])
     });
     let mut context = Context::from_image(&mut img).high_quality();
 

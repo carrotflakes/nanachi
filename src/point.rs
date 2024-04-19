@@ -74,6 +74,18 @@ impl std::ops::Div<f32> for Point {
     }
 }
 
+impl<T: Into<f32> + Copy> From<[T; 2]> for Point {
+    fn from(array: [T; 2]) -> Point {
+        Point([array[0].into(), array[1].into()])
+    }
+}
+
+impl From<Point> for [f32; 2] {
+    fn from(point: Point) -> [f32; 2] {
+        point.0
+    }
+}
+
 impl<T: Into<f32>> From<(T, T)> for Point {
     fn from(tuple: (T, T)) -> Point {
         Point([tuple.0.into(), tuple.1.into()])

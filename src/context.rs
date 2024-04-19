@@ -151,7 +151,7 @@ where
         for y in 0..h {
             for x in 0..w {
                 let p = inverted_matrix.apply(Point::from((x as f32, y as f32)));
-                image.put_pixel(x, y, fill_color.fill_color(p.x(), p.y()));
+                image.put_pixel(x, y, fill_color.fill_color(p.into()));
             }
         }
     }

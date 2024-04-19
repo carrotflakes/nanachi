@@ -6,9 +6,10 @@
 
 use crate::buffer::Buffer;
 use crate::pixel::Pixel;
+use crate::point::Point;
 
 pub trait Interpolation<P: Pixel, B: Buffer<P>> {
-    fn interpolate(&self, buffer: &B, x: f32, y: f32) -> P;
+    fn interpolate(&self, buffer: &B, pos: Point) -> P;
 }
 
 /// Nearest neighbor interpolation.
@@ -16,12 +17,12 @@ pub trait Interpolation<P: Pixel, B: Buffer<P>> {
 pub struct NearestNeighbor;
 
 impl<P: Pixel, B: Buffer<P>> Interpolation<P, B> for NearestNeighbor {
-    fn interpolate(&self, buffer: &B, x: f32, y: f32) -> P {
+    fn interpolate(&self, buffer: &B, pos: Point) -> P {
         let (width, height) = buffer.dimensions();
         buffer
             .get_pixel(
-                (x.rem_euclid(width as f32).floor() as u32).min(width - 1),
-                (y.rem_euclid(height as f32).floor() as u32).min(height - 1),
+                (pos.x().rem_euclid(width as f32).floor() as u32).min(width - 1),
+                (pos.y().rem_euclid(height as f32).floor() as u32).min(height - 1),
             )
             .clone()
     }
@@ -32,10 +33,10 @@ impl<P: Pixel, B: Buffer<P>> Interpolation<P, B> for NearestNeighbor {
 pub struct Bilinear;
 
 impl<P: Pixel, B: Buffer<P>> Interpolation<P, B> for Bilinear {
-    fn interpolate(&self, buffer: &B, x: f32, y: f32) -> P {
+    fn interpolate(&self, buffer: &B, pos: Point) -> P {
         let (width, height) = buffer.dimensions();
-        let mut x = x.rem_euclid(width as f32);
-        let mut y = y.rem_euclid(height as f32);
+        let mut x = pos.x().rem_euclid(width as f32);
+        let mut y = pos.y().rem_euclid(height as f32);
         let x2 = (x as u32 + 1) % width;
         let y2 = (y as u32 + 1) % height;
         if x as u32 == width {

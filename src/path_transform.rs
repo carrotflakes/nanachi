@@ -12,7 +12,7 @@ pub fn path_transform(path: &Path, matrix: &Matrix) -> Path {
     for pi in path.0.iter() {
         pis.push(match pi {
             PathItem::Line(line) => {
-                PathItem::Line(Line(matrix.apply(line.0), matrix.apply(line.1)))
+                PathItem::Line(Line([matrix.apply(line.0[0]), matrix.apply(line.0[1])]))
             }
             PathItem::Arc(arc) => PathItem::Ellipse(transform_ellipse(
                 &Ellipse {

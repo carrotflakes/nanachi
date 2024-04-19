@@ -145,7 +145,7 @@ impl<'a, I: Iterator<Item = &'a PathItem>> Iterator for Flatten<'a, I> {
                     self.next_state();
                     self.next()
                 } else {
-                    let line = PathItem::Line(Line(self.last, ps[i]));
+                    let line = PathItem::Line(Line([self.last, ps[i]]));
                     self.last = ps[i];
                     self.state = FlattenState::Lines(ps, i + 1);
                     Some(line)
@@ -180,7 +180,7 @@ pub fn path_flatten_only_cubic(path: &Path, tolerance: f32) -> Path {
                 let mut p = cubic.start;
                 for q in it {
                     if p != q {
-                        pis.push(PathItem::Line(Line(p, q)));
+                        pis.push(PathItem::Line(Line([p, q])));
                         p = q;
                     }
                 }

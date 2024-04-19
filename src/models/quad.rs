@@ -8,7 +8,7 @@ pub struct Quad {
 }
 
 impl Quad {
-    pub fn bound(&self) -> (f32, f32, f32, f32) {
+    pub fn bound(&self) -> [f32; 4] {
         let x_t = (self.end.y() - self.control1.y())
             / (self.start.y() + self.end.y() - 2.0 * self.control1.y());
         let y_t = (self.end.x() - self.control1.x())
@@ -25,7 +25,7 @@ impl Quad {
             y_min = y_min.min(self.pos(x_t).y());
             y_max = y_max.max(self.pos(x_t).y());
         }
-        (x_min, x_max, y_min, y_max)
+        [x_min, x_max, y_min, y_max]
     }
 
     pub fn pos(&self, t: f32) -> Point {

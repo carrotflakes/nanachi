@@ -26,10 +26,10 @@ impl<I: Iterator<Item = PathItem>> Iterator for Segments<I> {
         match self.path_items.next() {
             Some(PathItem::Line(l)) => {
                 if self.loop_start == None {
-                    self.loop_start = Some(l.0);
+                    self.loop_start = Some(l.0[0]);
                 }
-                self.last = l.1;
-                Some((l.0, l.1))
+                self.last = l.0[1];
+                Some((l.0[0], l.0[1]))
             }
             Some(PathItem::CloseAndJump) => {
                 self.loop_start = None;

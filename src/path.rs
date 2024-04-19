@@ -17,7 +17,7 @@ pub enum PathItem {
 impl PathItem {
     pub fn flip(&self) -> PathItem {
         match self {
-            PathItem::Line(line) => PathItem::Line(Line(line.1, line.0)),
+            PathItem::Line(line) => PathItem::Line(Line([line.0[1], line.0[0]])),
             PathItem::Arc(arc) => PathItem::Arc(Arc {
                 center: arc.center,
                 radius: arc.radius,
@@ -50,7 +50,7 @@ impl PathItem {
 
     pub fn right_point(&self) -> Point {
         match self {
-            PathItem::Line(line) => line.1,
+            PathItem::Line(line) => line.0[1],
             PathItem::Arc(arc) => {
                 arc.center
                     + Point::from((arc.angle2.cos() * arc.radius, arc.angle2.sin() * arc.radius))
@@ -70,7 +70,7 @@ impl PathItem {
 
     pub fn left_point(&self) -> Point {
         match self {
-            PathItem::Line(line) => line.0,
+            PathItem::Line(line) => line.0[0],
             PathItem::Arc(arc) => {
                 arc.center
                     + Point::from((arc.angle1.cos() * arc.radius, arc.angle1.sin() * arc.radius))
@@ -90,7 +90,7 @@ impl PathItem {
 
     pub fn is_zero(&self) -> bool {
         match self {
-            PathItem::Line(line) => line.0 == line.1,
+            PathItem::Line(line) => line.0[0] == line.0[1],
             PathItem::Arc(arc) => arc.radius == 0.0 || arc.angle1 == arc.angle2,
             PathItem::Ellipse(ellipse) => {
                 (ellipse.radius_x == 0.0 && ellipse.radius_y == 0.0)
@@ -140,7 +140,7 @@ impl Path {
     pub fn from_points(points: &Vec<Point>, close: bool) -> Path {
         let mut pis = Vec::new();
         for i in 0..points.len() - 1 {
-            pis.push(PathItem::Line(Line(points[i], points[i + 1])));
+            pis.push(PathItem::Line(Line([points[i], points[i + 1]])));
         }
         if close && &points[0] == points.last().unwrap() {
             pis.push(PathItem::CloseAndJump);
@@ -170,10 +170,10 @@ impl Path {
             match pi {
                 PathItem::Line(l) => {
                     if first_line {
-                        points.push(l.0);
+                        points.push(l.0[0]);
                         first_line = false;
                     }
-                    points.push(l.1);
+                    points.push(l.0[1]);
                 }
                 PathItem::Arc(_)
                 | PathItem::Ellipse(_)

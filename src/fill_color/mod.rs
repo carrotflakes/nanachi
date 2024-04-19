@@ -17,7 +17,7 @@ pub use transform::Transform;
 /// A trait for Colorization.
 /// Generates `Pixel` from (x, y).
 pub trait FillColor<C> {
-    fn fill_color(&self, x: f32, y: f32) -> C;
+    fn fill_color(&self, pos: [f32; 2]) -> C;
 }
 
 /// Solid color.
@@ -31,7 +31,7 @@ impl<C: Clone> Solid<C> {
 }
 
 impl<C: Clone> FillColor<C> for Solid<C> {
-    fn fill_color(&self, _: f32, _: f32) -> C {
+    fn fill_color(&self, _: [f32; 2]) -> C {
         self.0.clone()
     }
 }
@@ -47,8 +47,8 @@ impl<C: Clone> BlockCheck<C> {
 }
 
 impl<C: Clone> FillColor<C> for BlockCheck<C> {
-    fn fill_color(&self, x: f32, y: f32) -> C {
-        if ((x / self.2) as isize + (y / self.2) as isize) % 2 == 0 {
+    fn fill_color(&self, pos: [f32; 2]) -> C {
+        if ((pos[0] / self.2) as isize + (pos[1] / self.2) as isize) % 2 == 0 {
             self.0.clone()
         } else {
             self.1.clone()

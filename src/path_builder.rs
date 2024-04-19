@@ -54,7 +54,7 @@ impl PathBuilder {
     pub fn line_to(&mut self, x: f32, y: f32) {
         let p = Point::from((x, y));
         if let Some(last_pos) = self.last_pos {
-            self.push(PathItem::Line(Line(last_pos, p)));
+            self.push(PathItem::Line(Line([last_pos, p])));
         }
         self.set_pos(p);
     }
@@ -71,7 +71,7 @@ impl PathBuilder {
         if let Some(last_pos) = self.last_pos {
             let left_point = arc.left_point();
             if last_pos != left_point {
-                self.push(PathItem::Line(Line(last_pos, left_point)));
+                self.push(PathItem::Line(Line([last_pos, left_point])));
             }
         }
         self.set_pos(arc.right_point());
@@ -103,7 +103,7 @@ impl PathBuilder {
         if let Some(last_pos) = self.last_pos {
             let left_point = ellipse.left_point();
             if last_pos != left_point {
-                self.push(PathItem::Line(Line(last_pos, left_point)));
+                self.push(PathItem::Line(Line([last_pos, left_point])));
             }
         }
         self.set_pos(ellipse.right_point());
@@ -127,7 +127,7 @@ impl PathBuilder {
         let end = Point::from((x, y));
         if radius_x == 0.0 || radius_y == 0.0 {
             self.set_pos(end);
-            self.push(PathItem::Line(Line(start, end)));
+            self.push(PathItem::Line(Line([start, end])));
             return;
         }
         let mut radius_x = radius_x.abs();
@@ -181,7 +181,7 @@ impl PathBuilder {
             });
             let left_point = quad.left_point();
             if last_pos != left_point {
-                self.push(PathItem::Line(Line(last_pos, left_point)));
+                self.push(PathItem::Line(Line([last_pos, left_point])));
             }
             self.set_pos(quad.right_point());
             self.push(quad);
@@ -209,7 +209,7 @@ impl PathBuilder {
             });
             let left_point = cubic.left_point();
             if last_pos != left_point {
-                self.push(PathItem::Line(Line(last_pos, left_point)));
+                self.push(PathItem::Line(Line([last_pos, left_point])));
             }
             self.set_pos(cubic.right_point());
             self.push(cubic);

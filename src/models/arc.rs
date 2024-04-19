@@ -24,13 +24,13 @@ impl Arc {
         }
     }
 
-    pub fn angle_norm(&self) -> (f32, f32) {
+    pub fn angle_norm(&self) -> [f32; 2] {
         let (a1, a2) = if self.angle1 < self.angle2 {
             (self.angle1, self.angle2)
         } else {
             (self.angle2, self.angle1)
         };
         let a = a1.rem_euclid(TAU);
-        (a, if a2 - a < 0.0 { a2 + TAU } else { a2 })
+        [a, if a2 - a < 0.0 { a2 + TAU } else { a2 }]
     }
 }

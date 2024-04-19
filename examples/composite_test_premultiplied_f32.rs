@@ -115,9 +115,9 @@ fn f<C: compositor::Compositor<PremultipliedRgba> + 'static>(
     draw_image_pixel_perfect(
         img,
         &context.image,
-        (x, y),
-        (0, 0),
-        (60, 60),
+        [x, y],
+        [0, 0],
+        [60, 60],
         &compositor::Src,
     );
 }
