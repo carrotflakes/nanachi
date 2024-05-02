@@ -15,13 +15,12 @@ fn main() {
     draw_image_transformed(
         &mut img,
         &src,
-        [0.0, 0.0, width as f32, height as f32],
+        [110.0, 110.0, width as f32 - 110.0, height as f32 - 110.0],
         Matrix::new()
-            .translate(-200.0, -200.0)
-            .scale(1.8, 1.8)
+            .scale(0.8, 0.8)
             .rotate(0.2)
-            .translate(200.0, 200.0),
-        &compositor::DstOver,
+            .translate(10.0, 10.0),
+        &compositor::SrcOver,
         interpolation::Bilinear,
     );
 
