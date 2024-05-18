@@ -4,13 +4,13 @@ use crate::pixel::Rgba;
 macro_rules! def_linear_compositor {
     (
         $name:ident ($aa:ident, $ba:ident => $ca:ident, $ax:ident, $bx:ident)
-        {$($rest1:tt)+} {$($rest2:tt)+}
+        {$($rest1:tt)+}
     ) => {
         impl Compositor<Rgba> for $name {
             #[allow(unused_variables)]
-            fn composite(&self, a: &Rgba, b: &Rgba, alpha: f32) -> Rgba {
+            fn composite_with_alpha(&self, a: &Rgba, b: &Rgba, alpha: f32) -> Rgba {
                 let $aa = a.0[3];
-                let $ba = b.0[3] * alpha as f32;
+                let $ba = b.0[3] * alpha;
                 $($rest1)+
                 Rgba([
                     a.0[0] * $ax + b.0[0] * $bx,
@@ -28,9 +28,6 @@ def_linear_compositor! {
         let c = 0.0;
         let ax = 0.0;
         let bx = 0.0;
-    } {
-        let ax = 0.0;
-        let bx = 0.0;
     }
 }
 
@@ -39,18 +36,12 @@ def_linear_compositor! {
         let c = b;
         let ax = 0.0;
         let bx = b;
-    } {
-        let ax = 0.0;
-        let bx = b;
     }
 }
 
 def_linear_compositor! {
     Dst(a, b => c, ax, bx) {
         let c = a;
-        let ax = a;
-        let bx = 0.0;
-    } {
         let ax = a;
         let bx = 0.0;
     }
@@ -64,18 +55,12 @@ def_linear_compositor! {
         }
         let ax = (a * (1.0 - b)) / c;
         let bx = b / c;
-    } {
-        let ax = a * (1.0 - b);
-        let bx = b;
     }
 }
 
 def_linear_compositor! {
     SrcIn(a, b => c, ax, bx) {
         let c = a * b;
-        let ax = 0.0;
-        let bx = 1.0;
-    } {
         let ax = 0.0;
         let bx = 1.0;
     }
@@ -86,21 +71,15 @@ def_linear_compositor! {
         let c = (1.0 - a) * b;
         let ax = 0.0;
         let bx = 1.0;
-    } {
-        let ax = 0.0;
-        let bx = 1.0;
     }
 }
 
 def_linear_compositor! {
     SrcAtop(a, b => c, ax, bx) {
-        let c = b;
+        let c = a;
         if c == 0.0 {
             return Rgba([0.0, 0.0, 0.0, 0.0]);
         }
-        let ax = 1.0 - b;
-        let bx = b;
-    } {
         let ax = 1.0 - b;
         let bx = b;
     }
@@ -114,18 +93,12 @@ def_linear_compositor! {
         }
         let ax = a / c;
         let bx = ((1.0 - a) * b) / c;
-    } {
-        let ax = a;
-        let bx = (1.0 - a) * b;
     }
 }
 
 def_linear_compositor! {
     DstIn(a, b => c, ax, bx) {
         let c = a * b;
-        let ax = 1.0;
-        let bx = 0.0;
-    } {
         let ax = 1.0;
         let bx = 0.0;
     }
@@ -136,21 +109,15 @@ def_linear_compositor! {
         let c = a * (1.0 - b);
         let ax = 1.0;
         let bx = 0.0;
-    } {
-        let ax = 1.0;
-        let bx = 0.0;
     }
 }
 
 def_linear_compositor! {
     DstAtop(a, b => c, ax, bx) {
-        let c = a;
+        let c = b;
         if c == 0.0 {
             return Rgba([0.0, 0.0, 0.0, 0.0]);
         }
-        let ax = a;
-        let bx = 1.0 - a;
-    } {
         let ax = a;
         let bx = 1.0 - a;
     }
@@ -161,9 +128,6 @@ def_linear_compositor! {
         let ax = a * (1.0 - b);
         let bx = (1.0 - a) * b;
         let c = a + b - 2.0 * a * b;
-    } {
-        let ax = a * (1.0 - b);
-        let bx = (1.0 - a) * b;
     }
 }
 
@@ -175,26 +139,34 @@ def_linear_compositor! {
         }
         let ax = a / c;
         let bx = b / c;
-    } {
-        let ax = a;
-        let bx = b;
     }
 }
 
 macro_rules! def_compositor {
     (
-        $name:ident ($a:ident, $b:ident, $aa:ident, $ba:ident, $ca:ident)
-        {$($rest1:tt)+} [$($rest2:expr,)+]
+        $name:ident
+        $e:expr
     ) => {
         impl Compositor<Rgba> for $name {
             #[allow(unused_variables)]
-            fn composite(&self, $a: &Rgba, $b: &Rgba, alpha: f32) -> Rgba {
-                let $aa = $a.0[3];
-                let $ba = $b.0[3] * alpha as f32;
-                $($rest1)+
+            fn composite_with_alpha(&self, a: &Rgba, b: &Rgba, alpha: f32) -> Rgba {
+                let aa = a.0[3];
+                let ba = b.0[3] * alpha;
+
+                let ca = aa + ba - aa * ba;
+                if ca == 0.0 {
+                    return Rgba([0.0, 0.0, 0.0, 0.0]);
+                }
+                let ax = (aa * (1.0 - ba)) / ca;
+                let bx = (ba * (1.0 - aa)) / ca;
+                let cx = aa * ba / ca;
+
+                let e = $e;
                 Rgba([
-                    $($rest2,)+
-                    $ca,
+                    a.0[0] * ax + b.0[0] * bx + e(a.0[0], b.0[0]) * cx,
+                    a.0[1] * ax + b.0[1] * bx + e(a.0[1], b.0[1]) * cx,
+                    a.0[2] * ax + b.0[2] * bx + e(a.0[2], b.0[2]) * cx,
+                    ca,
                 ])
             }
         }
@@ -202,231 +174,102 @@ macro_rules! def_compositor {
 }
 
 def_compositor! {
-    Darken(a, b, aa, ba, ca) {
-        let ca = aa + ba - aa * ba;
-        if ca == 0.0 {
-            return Rgba([0.0, 0.0, 0.0, 0.0]);
-        }
-        let ax = (aa * (1.0 - ba)) / ca;
-        let bx = (ba * (1.0 - aa)) / ca;
-        let cx = aa * ba / ca;
-        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f32, a.0[1] as f32, a.0[2] as f32, b.0[0] as f32, b.0[1] as f32, b.0[2] as f32);
-    } [
-        a0 * ax + b0 * bx + a.0[0].min(b.0[0]) * cx,
-        a1 * ax + b1 * bx + a.0[1].min(b.0[1]) * cx,
-        a2 * ax + b2 * bx + a.0[2].min(b.0[2]) * cx,
-    ]
+    Darken
+    {|a: f32, b: f32| a.min(b)}
 }
 
 def_compositor! {
-    Lighten(a, b, aa, ba, ca) {
-        let ca = aa + ba - aa * ba;
-        if ca == 0.0 {
-            return Rgba([0.0, 0.0, 0.0, 0.0]);
-        }
-        let ax = (aa * (1.0 - ba)) / ca;
-        let bx = (ba * (1.0 - aa)) / ca;
-        let cx = aa * ba / ca;
-        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f32, a.0[1] as f32, a.0[2] as f32, b.0[0] as f32, b.0[1] as f32, b.0[2] as f32);
-    } [
-        a0 * ax + b0 * bx + a.0[0].max(b.0[0]) * cx,
-        a1 * ax + b1 * bx + a.0[1].max(b.0[1]) * cx,
-        a2 * ax + b2 * bx + a.0[2].max(b.0[2]) * cx,
-    ]
+    Lighten
+    {|a: f32, b: f32| a.max(b)}
 }
 
 def_compositor! {
-    Multiply(a, b, aa, ba, ca) {
-        let ca = aa + ba - aa * ba;
-        if ca == 0.0 {
-            return Rgba([0.0, 0.0, 0.0, 0.0]);
-        }
-        let ax = (aa * (1.0 - ba)) / ca;
-        let bx = (ba * (1.0 - aa)) / ca;
-        let cx = aa * ba / ca;
-        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f32, a.0[1] as f32, a.0[2] as f32, b.0[0] as f32, b.0[1] as f32, b.0[2] as f32);
-    } [
-        a0 * ax + b0 * bx + a0 * b0 * cx,
-        a1 * ax + b1 * bx + a1 * b1 * cx,
-        a2 * ax + b2 * bx + a2 * b2 * cx,
-    ]
+    Multiply
+    {|a: f32, b: f32| a * b}
 }
 
 def_compositor! {
-    Screen(a, b, aa, ba, ca) {
-        let ca = aa + ba - aa * ba;
-        if ca == 0.0 {
-            return Rgba([0.0, 0.0, 0.0, 0.0]);
-        }
-        let ax = (aa * (1.0 - ba)) / ca;
-        let bx = (ba * (1.0 - aa)) / ca;
-        let cx = aa * ba / ca;
-        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f32, a.0[1] as f32, a.0[2] as f32, b.0[0] as f32, b.0[1] as f32, b.0[2] as f32);
-    } [
-        a0 * ax + b0 * bx + (a0 + b0 - a0 * b0) * cx,
-        a1 * ax + b1 * bx + (a1 + b1 - a1 * b1) * cx,
-        a2 * ax + b2 * bx + (a2 + b2 - a2 * b2) * cx,
-    ]
+    Screen
+    {|a: f32, b: f32| (a + b - a * b)}
 }
 
 def_compositor! {
-    Overlay(a, b, aa, ba, ca) {
-        let ca = aa + ba - aa * ba;
-        if ca == 0.0 {
-            return Rgba([0.0, 0.0, 0.0, 0.0]);
-        }
-        let ax = (aa * (1.0 - ba)) / ca;
-        let bx = (ba * (1.0 - aa)) / ca;
-        let cx = aa * ba / ca;
-        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f32, a.0[1] as f32, a.0[2] as f32, b.0[0] as f32, b.0[1] as f32, b.0[2] as f32);
-    } [
-        a0 * ax + b0 * bx + if a0 < 0.5 {2.0 * a0 * b0} else {1.0 - 2.0 * (1.0 - a0) * (1.0 - b0)} * cx,
-        a1 * ax + b1 * bx + if a1 < 0.5 {2.0 * a1 * b1} else {1.0 - 2.0 * (1.0 - a1) * (1.0 - b1)} * cx,
-        a2 * ax + b2 * bx + if a2 < 0.5 {2.0 * a2 * b2} else {1.0 - 2.0 * (1.0 - a2) * (1.0 - b2)} * cx,
-    ]
+    Overlay
+    {|a: f32, b: f32| if a < 0.5 {2.0 * a * b} else {1.0 - 2.0 * (1.0 - a) * (1.0 - b)}}
 }
 
 def_compositor! {
-    HardLight(a, b, aa, ba, ca) {
-        let ca = aa + ba - aa * ba;
-        if ca == 0.0 {
-            return Rgba([0.0, 0.0, 0.0, 0.0]);
-        }
-        let ax = (aa * (1.0 - ba)) / ca;
-        let bx = (ba * (1.0 - aa)) / ca;
-        let cx = aa * ba / ca;
-        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f32, a.0[1] as f32, a.0[2] as f32, b.0[0] as f32, b.0[1] as f32, b.0[2] as f32);
-    } [
-        a0 * ax + b0 * bx + if b0 < 0.5 {2.0 * a0 * b0} else {1.0 - 2.0 * (1.0 - a0) * (1.0 - b0)} * cx,
-        a1 * ax + b1 * bx + if b1 < 0.5 {2.0 * a1 * b1} else {1.0 - 2.0 * (1.0 - a1) * (1.0 - b1)} * cx,
-        a2 * ax + b2 * bx + if b2 < 0.5 {2.0 * a2 * b2} else {1.0 - 2.0 * (1.0 - a2) * (1.0 - b2)} * cx,
-    ]
+    HardLight
+    {|a: f32, b: f32| if b < 0.5 {2.0 * a * b} else {1.0 - 2.0 * (1.0 - a) * (1.0 - b)}}
 }
 
 def_compositor! {
-    Dodge(a, b, aa, ba, ca) {
-        let ca = aa + ba - aa * ba;
-        if ca == 0.0 {
-            return Rgba([0.0, 0.0, 0.0, 0.0]);
-        }
-        let ax = (aa * (1.0 - ba)) / ca;
-        let bx = (ba * (1.0 - aa)) / ca;
-        let cx = aa * ba / ca;
-        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f32, a.0[1] as f32, a.0[2] as f32, b.0[0] as f32, b.0[1] as f32, b.0[2] as f32);
-    } [
-        a0 * ax + b0 * bx + if b0 < 1.0 {(a0 / (1.0 - b0)).min(1.0)} else {1.0} * cx,
-        a1 * ax + b1 * bx + if b1 < 1.0 {(a1 / (1.0 - b1)).min(1.0)} else {1.0} * cx,
-        a2 * ax + b2 * bx + if b2 < 1.0 {(a2 / (1.0 - b2)).min(1.0)} else {1.0} * cx,
-    ]
+    Dodge
+    {|a: f32, b: f32| if b < 1.0 {(a / (1.0 - b)).min(1.0)} else {1.0}}
 }
 
 def_compositor! {
-    Burn(a, b, aa, ba, ca) {
-        let ca = aa + ba - aa * ba;
-        if ca == 0.0 {
-            return Rgba([0.0, 0.0, 0.0, 0.0]);
-        }
-        let ax = (aa * (1.0 - ba)) / ca;
-        let bx = (ba * (1.0 - aa)) / ca;
-        let cx = aa * ba / ca;
-        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f32, a.0[1] as f32, a.0[2] as f32, b.0[0] as f32, b.0[1] as f32, b.0[2] as f32);
-    } [
-        a0 * ax + b0 * bx + if 0.0 < b0 {1.0 - ((1.0 - a0) / b0).min(1.0)} else {0.0} * cx,
-        a1 * ax + b1 * bx + if 0.0 < b1 {1.0 - ((1.0 - a1) / b1).min(1.0)} else {0.0} * cx,
-        a2 * ax + b2 * bx + if 0.0 < b2 {1.0 - ((1.0 - a2) / b2).min(1.0)} else {0.0} * cx,
-    ]
+    Burn
+    {|a: f32, b: f32| if 0.0 < b {1.0 - ((1.0 - a) / b).min(1.0)} else {0.0}}
 }
 
 def_compositor! {
-    SoftLight(a, b, aa, ba, ca) {
-        let ca = aa + ba - aa * ba;
-        if ca == 0.0 {
-            return Rgba([0.0, 0.0, 0.0, 0.0]);
-        }
-        let ax = (aa * (1.0 - ba)) / ca;
-        let bx = (ba * (1.0 - aa)) / ca;
-        let cx = aa * ba / ca;
-        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f32, a.0[1] as f32, a.0[2] as f32, b.0[0] as f32, b.0[1] as f32, b.0[2] as f32);
-        fn f(a: f32, b: f32) -> f32 {
-            if 0.5 < b {
-                a - (1.0 - 2.0 * b) * a * (1.0 - a)
+    SoftLight
+    {|a: f32, b: f32|
+        if b < 0.5 {
+            a - (1.0 - 2.0 * b) * a * (1.0 - a)
+        } else {
+            let g = if a < 0.25 {
+                ((16.0 * a - 12.0) * a + 4.0) * a
             } else {
-                let g = if a < 0.25 {
-                    ((16.0 * a - 12.0) * a + 4.0) * a
-                } else {
-                    a.sqrt()
-                };
-                a + (2.0 * b - 1.0) * (g - a)
-            }
+                a.sqrt()
+            };
+            a + (2.0 * b - 1.0) * (g - a)
         }
-    } [
-        a0 * ax + b0 * bx + f(a0, b0) * cx,
-        a1 * ax + b1 * bx + f(a1, b1) * cx,
-        a2 * ax + b2 * bx + f(a2, b2) * cx,
-    ]
+    }
 }
 
 def_compositor! {
-    Difference(a, b, aa, ba, ca) {
-        let ca = aa + ba - aa * ba;
-        if ca == 0.0 {
-            return Rgba([0.0, 0.0, 0.0, 0.0]);
-        }
-        let ax = (aa * (1.0 - ba)) / ca;
-        let bx = (ba * (1.0 - aa)) / ca;
-        let cx = aa * ba / ca;
-        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f32, a.0[1] as f32, a.0[2] as f32, b.0[0] as f32, b.0[1] as f32, b.0[2] as f32);
-    } [
-        a0 * ax + b0 * bx + (a0 - b0).abs() * cx,
-        a1 * ax + b1 * bx + (a1 - b1).abs() * cx,
-        a2 * ax + b2 * bx + (a2 - b2).abs() * cx,
-    ]
+    Difference
+    {|a: f32, b: f32| (a - b).abs()}
 }
 
 def_compositor! {
-    Exclusion(a, b, aa, ba, ca) {
-        let ca = aa + ba - aa * ba;
-        if ca == 0.0 {
-            return Rgba([0.0, 0.0, 0.0, 0.0]);
-        }
-        let ax = (aa * (1.0 - ba)) / ca;
-        let bx = (ba * (1.0 - aa)) / ca;
-        let cx = aa * ba / ca;
-        let (a0, a1, a2, b0, b1, b2) = (a.0[0] as f32, a.0[1] as f32, a.0[2] as f32, b.0[0] as f32, b.0[1] as f32, b.0[2] as f32);
-    } [
-        a0 * ax + b0 * bx + (a0 + b0 - 2.0 * a0 * b0) * cx,
-        a1 * ax + b1 * bx + (a1 + b1 - 2.0 * a1 * b1) * cx,
-        a2 * ax + b2 * bx + (a2 + b2 - 2.0 * a2 * b2) * cx,
-    ]
+    Exclusion
+    {|a: f32, b: f32| (a + b - 2.0 * a * b)}
 }
 
 impl Compositor<Rgba> for Basic {
-    fn composite(&self, a: &Rgba, b: &Rgba, alpha: f32) -> Rgba {
+    fn composite(&self, dst: &Rgba, src: &Rgba) -> Rgba {
+        self.composite_with_alpha(dst, src, 1.0)
+    }
+
+    fn composite_with_alpha(&self, a: &Rgba, b: &Rgba, alpha: f32) -> Rgba {
         match self {
-            Basic::Clear => Clear.composite(a, b, alpha),
-            Basic::Src => Src.composite(a, b, alpha),
-            Basic::Dst => Dst.composite(a, b, alpha),
-            Basic::SrcOver => SrcOver.composite(a, b, alpha),
-            Basic::SrcIn => SrcIn.composite(a, b, alpha),
-            Basic::SrcOut => SrcOut.composite(a, b, alpha),
-            Basic::SrcAtop => SrcAtop.composite(a, b, alpha),
-            Basic::DstOver => DstOver.composite(a, b, alpha),
-            Basic::DstIn => DstIn.composite(a, b, alpha),
-            Basic::DstOut => DstOut.composite(a, b, alpha),
-            Basic::DstAtop => DstAtop.composite(a, b, alpha),
-            Basic::Xor => Xor.composite(a, b, alpha),
-            Basic::Add => Add.composite(a, b, alpha),
-            Basic::Darken => Darken.composite(a, b, alpha),
-            Basic::Lighten => Lighten.composite(a, b, alpha),
-            Basic::Multiply => Multiply.composite(a, b, alpha),
-            Basic::Screen => Screen.composite(a, b, alpha),
-            Basic::Overlay => Overlay.composite(a, b, alpha),
-            Basic::HardLight => HardLight.composite(a, b, alpha),
-            Basic::Dodge => Dodge.composite(a, b, alpha),
-            Basic::Burn => Burn.composite(a, b, alpha),
-            Basic::SoftLight => SoftLight.composite(a, b, alpha),
-            Basic::Difference => Difference.composite(a, b, alpha),
-            Basic::Exclusion => Exclusion.composite(a, b, alpha),
+            Basic::Clear => Clear.composite_with_alpha(a, b, alpha),
+            Basic::Src => Src.composite_with_alpha(a, b, alpha),
+            Basic::Dst => Dst.composite_with_alpha(a, b, alpha),
+            Basic::SrcOver => SrcOver.composite_with_alpha(a, b, alpha),
+            Basic::SrcIn => SrcIn.composite_with_alpha(a, b, alpha),
+            Basic::SrcOut => SrcOut.composite_with_alpha(a, b, alpha),
+            Basic::SrcAtop => SrcAtop.composite_with_alpha(a, b, alpha),
+            Basic::DstOver => DstOver.composite_with_alpha(a, b, alpha),
+            Basic::DstIn => DstIn.composite_with_alpha(a, b, alpha),
+            Basic::DstOut => DstOut.composite_with_alpha(a, b, alpha),
+            Basic::DstAtop => DstAtop.composite_with_alpha(a, b, alpha),
+            Basic::Xor => Xor.composite_with_alpha(a, b, alpha),
+            Basic::Add => Add.composite_with_alpha(a, b, alpha),
+            Basic::Darken => Darken.composite_with_alpha(a, b, alpha),
+            Basic::Lighten => Lighten.composite_with_alpha(a, b, alpha),
+            Basic::Multiply => Multiply.composite_with_alpha(a, b, alpha),
+            Basic::Screen => Screen.composite_with_alpha(a, b, alpha),
+            Basic::Overlay => Overlay.composite_with_alpha(a, b, alpha),
+            Basic::HardLight => HardLight.composite_with_alpha(a, b, alpha),
+            Basic::Dodge => Dodge.composite_with_alpha(a, b, alpha),
+            Basic::Burn => Burn.composite_with_alpha(a, b, alpha),
+            Basic::SoftLight => SoftLight.composite_with_alpha(a, b, alpha),
+            Basic::Difference => Difference.composite_with_alpha(a, b, alpha),
+            Basic::Exclusion => Exclusion.composite_with_alpha(a, b, alpha),
         }
     }
 }

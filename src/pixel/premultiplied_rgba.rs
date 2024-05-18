@@ -9,12 +9,11 @@ pub struct PremultipliedRgba(pub [f32; 4]);
 
 impl Pixel for PremultipliedRgba {
     fn lerp(&self, rhs: &Self, rate: f32) -> Self {
-        let i = 1.0 - rate;
         PremultipliedRgba([
-            self.0[0] * i + rhs.0[0] * rate,
-            self.0[1] * i + rhs.0[1] * rate,
-            self.0[2] * i + rhs.0[2] * rate,
-            self.0[3] * i + rhs.0[3] * rate,
+            self.0[0] + (rhs.0[0] - self.0[0]) * rate,
+            self.0[1] + (rhs.0[1] - self.0[1]) * rate,
+            self.0[2] + (rhs.0[2] - self.0[2]) * rate,
+            self.0[3] + (rhs.0[3] - self.0[3]) * rate,
         ])
     }
 }
@@ -71,9 +70,8 @@ impl Mul<f32> for PremultipliedRgba {
     }
 }
 
-// broken?
-// impl Arithmetic for PremultipliedRgba {
-//     fn zero() -> Self {
-//         PremultipliedRgba([0.0, 0.0, 0.0, 0.0])
-//     }
-// }
+impl Arithmetic for PremultipliedRgba {
+    fn zero() -> Self {
+        PremultipliedRgba([0.0, 0.0, 0.0, 0.0])
+    }
+}

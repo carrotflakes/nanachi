@@ -3,7 +3,7 @@ use nanachi::{
     context::{Context, FillStyle},
     draw_image::draw_image_pixel_perfect,
     fill_color, fill_rule,
-    image::{ImageBuffer, Rgb, Rgba},
+    image::{ImageBuffer, Rgba},
     matrix::Matrix,
     path_builder::PathBuilder,
 };
@@ -62,20 +62,20 @@ fn f<C: compositor::Compositor<Rgba<u8>> + 'static>(
         (-10.0, 0.0),
         (10.0, 0.0),
         vec![
-            (0.1, Rgba([255, 0, 0, 150])),
-            (0.4, Rgba([255, 0, 0, 255])),
-            (0.6, Rgba([255, 0, 0, 255])),
-            (0.9, Rgba([255, 255, 0, 255])),
+            (0.1, Rgba([255, 0, 0, 10])),
+            (0.3, Rgba([255, 0, 0, 255])),
+            (0.5, Rgba([255, 0, 0, 255])),
+            (0.8, Rgba([255, 255, 0, 255])),
         ],
     );
     let fc2 = fill_color::LinearGradient::new(
         (-10.0, 0.0),
         (10.0, 0.0),
         vec![
-            (0.1, Rgba([0, 0, 255, 150])),
-            (0.4, Rgba([0, 0, 255, 255])),
-            (0.6, Rgba([0, 0, 255, 255])),
-            (0.9, Rgba([0, 255, 255, 255])),
+            (0.1, Rgba([0, 0, 255, 10])),
+            (0.3, Rgba([0, 0, 255, 255])),
+            (0.5, Rgba([0, 0, 255, 255])),
+            (0.8, Rgba([0, 255, 255, 255])),
         ],
     );
 

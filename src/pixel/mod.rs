@@ -22,7 +22,7 @@ pub trait Arithmetic:
 impl Into<Rgba> for PremultipliedRgba {
     fn into(self) -> Rgba {
         let [r, g, b, a] = self.0;
-        if a == 0.0 {
+        if a != 0.0 {
             Rgba([r / a, g / a, b / a, a])
         } else {
             Rgba([0.0, 0.0, 0.0, 0.0])
@@ -39,6 +39,6 @@ impl Into<PremultipliedRgba> for Rgba {
 
 impl Pixel for f32 {
     fn lerp(&self, rhs: &Self, rate: f32) -> Self {
-        self * (1.0 - rate) + rhs * rate
+        self + (rhs - self) * rate
     }
 }

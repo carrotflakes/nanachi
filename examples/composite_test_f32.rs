@@ -1,5 +1,5 @@
 use nanachi::{
-    buffer::{Buffer, GenericBuffer},
+    buffer::GenericBuffer,
     compositor,
     context::{Context, FillStyle},
     draw_image::draw_image_pixel_perfect,
@@ -61,20 +61,20 @@ fn f<C: compositor::Compositor<Rgba> + 'static>(img: &mut GenericBuffer<Rgba>, i
         (-10.0, 0.0),
         (10.0, 0.0),
         vec![
-            (0.1, rgba(255, 0, 0, 150)),
-            (0.4, rgba(255, 0, 0, 255)),
-            (0.6, rgba(255, 0, 0, 255)),
-            (0.9, rgba(255, 255, 0, 255)),
+            (0.1, rgba(255, 0, 0, 10)),
+            (0.3, rgba(255, 0, 0, 255)),
+            (0.5, rgba(255, 0, 0, 255)),
+            (0.8, rgba(255, 255, 0, 255)),
         ],
     );
     let fc2 = fill_color::LinearGradient::new(
         (-10.0, 0.0),
         (10.0, 0.0),
         vec![
-            (0.1, rgba(0, 0, 255, 150)),
-            (0.4, rgba(0, 0, 255, 255)),
-            (0.6, rgba(0, 0, 255, 255)),
-            (0.9, rgba(0, 255, 255, 255)),
+            (0.1, rgba(0, 0, 255, 10)),
+            (0.3, rgba(0, 0, 255, 255)),
+            (0.5, rgba(0, 0, 255, 255)),
+            (0.8, rgba(0, 255, 255, 255)),
         ],
     );
 

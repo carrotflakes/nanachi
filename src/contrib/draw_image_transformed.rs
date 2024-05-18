@@ -46,7 +46,7 @@ pub fn draw_image_transformed<P, BD, BS, C, I>(
             {
                 let dp = dst.get_pixel(x, y);
                 let sp = interpolation.interpolate(src, sp.into());
-                let p = compositor.composite(dp, &sp, 1.0);
+                let p = compositor.composite(dp, &sp);
                 dst.put_pixel(x, y, p);
             }
         }
