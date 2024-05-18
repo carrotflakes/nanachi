@@ -72,10 +72,10 @@ def_linear_compositor! {
 
 def_linear_compositor! {
     SrcOver(a, b => c, ax, bx) {
-        let c = a + b - (a * b + 255 >> 8);
-        if c == 0 {
+        if a + b == 0 {
             return Rgba([0, 0, 0, 0]);
         }
+        let c = a + b - (a * b + 255 >> 8);
         let ax = (a * (255 - b)) / c;
         let bx = (b << 8) / c;
     } {
