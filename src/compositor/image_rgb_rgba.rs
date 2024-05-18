@@ -276,22 +276,22 @@ def_compositor! {
 
 def_compositor! {
     Multiply
-    {|a: u16, b: u16| (a * b >> 8)}
+    {|a: u16, b: u16| (a * b + 255 >> 8)}
 }
 
 def_compositor! {
     Screen
-    {|a: u16, b: u16| (a + b - (a * b >> 8))}
+    {|a: u16, b: u16| (a + b - (a * b + 255 >> 8))}
 }
 
 def_compositor! {
     Overlay
-    {|a: u16, b: u16| if a < 128 {a * b >> 8} else {255 - ((255 - a) * (255 - b) >> 7)}}
+    {|a: u16, b: u16| if a < 128 {a * b + 255 >> 8} else {255 - ((255 - a) * (255 - b) >> 7)}}
 }
 
 def_compositor! {
     HardLight
-    {|a: u16, b: u16| if b < 128 {a * b >> 8} else {255 - ((255 - a) * (255 - b) >> 7)}}
+    {|a: u16, b: u16| if b < 128 {a * b + 255 >> 8} else {255 - ((255 - a) * (255 - b) >> 7)}}
 }
 
 def_compositor! {
