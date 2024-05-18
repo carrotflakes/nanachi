@@ -1,0 +1,77 @@
+<html>
+
+<head></head>
+
+<body style="background: black;">
+  <canvas id="canvas" width="320" height="320"></canvas>
+  <script>
+    const el = document.getElementById('canvas');
+    const ctx = el.getContext('2d');
+
+    if (ctx) {
+      ctx.clearRect(0, 0, el.width, el.height);
+      const comps = [
+        "source-over",
+        "copy",
+        "source-over",
+        "source-over",
+        "source-in",
+
+        "source-out",
+        "source-atop",
+        "destination-over",
+        "destination-in",
+        "destination-out",
+
+        "destination-atop",
+        "xor",
+        "lighter",
+        "darken",
+        "lighten",
+
+        "multiply",
+        "screen",
+        "overlay",
+        "hard-light",
+        "color-dodge",
+
+        "color-burn",
+        "soft-light",
+        "difference",
+        "exclusion",
+      ];
+      for (const i in comps) {
+        ctx.save();
+        const x = (i % 5) * 60;
+        const y = Math.floor(i / 5) * 60;
+
+        ctx.beginPath();
+        ctx.rect(x, y, 60, 60);
+        ctx.clip();
+
+        ctx.globalCompositeOperation = "source-over";
+        const grad = ctx.createLinearGradient(x + 10, y, x + 40, y);
+        grad.addColorStop(0.1, 'rgba(255,0,0,0.1)');
+        grad.addColorStop(0.3, 'rgba(255,0,0,1)');
+        grad.addColorStop(0.5, 'rgba(255,0,0,1)');
+        grad.addColorStop(0.8, 'rgba(255,255,0,1)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(x + 20, y + 10, 20, 40);
+
+        ctx.globalCompositeOperation = comps[i];
+        const grad2 = ctx.createLinearGradient(x, y + 10, x, y + 40);
+        grad2.addColorStop(0.1, 'rgba(0,0,255,0.1)');
+        grad2.addColorStop(0.3, 'rgba(0,0,255,1)');
+        grad2.addColorStop(0.5, 'rgba(0,0,255,1)');
+        grad2.addColorStop(0.8, 'rgba(0,255,255,1)');
+        ctx.fillStyle = grad2;
+        ctx.fillRect(x + 10, y + 20, 40, 20);
+
+        ctx.restore();
+      }
+    }
+
+  </script>
+</body>
+
+</html>
