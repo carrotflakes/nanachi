@@ -13,7 +13,7 @@ where
     P: Pixel,
     B: Buffer<P>,
     F: FillColor<P>,
-    C: Compositor<P> + 'static,
+    C: Compositor<P>,
 {
     let composite = compositor.composite_with_alpha();
 

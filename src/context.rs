@@ -25,7 +25,7 @@ pub struct FillStyle<P, FC, C, FR>
 where
     P: Pixel,
     FC: FillColor<P>,
-    C: Compositor<P> + 'static,
+    C: Compositor<P>,
     FR: FillRule,
 {
     pub color: FC,
@@ -38,7 +38,7 @@ impl<P, FC, C, FR> FillStyle<P, FC, C, FR>
 where
     P: Pixel,
     FC: FillColor<P>,
-    C: Compositor<P> + 'static,
+    C: Compositor<P>,
     FR: FillRule,
 {
     pub fn new(color: FC, compositor: C, fill_rule: FR) -> Self {
