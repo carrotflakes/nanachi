@@ -55,29 +55,27 @@ fn f<C: compositor::Compositor<PremultipliedRgba> + 'static>(
     c: C,
 ) {
     let mut pb = PathBuilder::new();
-    pb.move_to(-10.0, -20.0);
-    pb.line_to(10.0, -20.0);
-    pb.line_to(10.0, 20.0);
-    pb.line_to(-10.0, 20.0);
+    pb.move_to(-16.0, -20.0);
+    pb.line_to(16.0, -20.0);
+    pb.line_to(16.0, 20.0);
+    pb.line_to(-16.0, 20.0);
     pb.close();
     let path = pb.end();
     let fc1 = fill_color::LinearGradient::new(
-        (-10.0, 0.0),
-        (10.0, 0.0),
+        (-16.0, 0.0),
+        (16.0, 0.0),
         vec![
             (0.1, rgba(255, 0, 0, 10)),
-            (0.3, rgba(255, 0, 0, 255)),
-            (0.5, rgba(255, 0, 0, 255)),
+            (0.4, rgba(255, 0, 0, 255)),
             (0.8, rgba(255, 255, 0, 255)),
         ],
     );
     let fc2 = fill_color::LinearGradient::new(
-        (-10.0, 0.0),
-        (10.0, 0.0),
+        (-16.0, 0.0),
+        (16.0, 0.0),
         vec![
             (0.1, rgba(0, 0, 255, 10)),
-            (0.3, rgba(0, 0, 255, 255)),
-            (0.5, rgba(0, 0, 255, 255)),
+            (0.4, rgba(0, 0, 255, 255)),
             (0.8, rgba(0, 255, 255, 255)),
         ],
     );

@@ -4,7 +4,7 @@
 [![Crates.io](https://img.shields.io/crates/v/nanachi.svg)](https://crates.io/crates/nanachi)
 [![Documentation](https://docs.rs/nanachi/badge.svg)](https://docs.rs/nanachi)
 
-**NOTE: Nanachi is still buggy and the API will changed!**
+**This is my hobby project. If you are looking for a 2D graphics library in Rust, [tiny-skia](https://github.com/RazrFalcon/tiny-skia) is a good alternate.**
 
 ![nanachi](https://github.com/carrotflakes/nanachi/raw/main/nanachi.png)
 

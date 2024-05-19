@@ -36,6 +36,8 @@ pub fn draw_image_transformed<P, BD, BS, C, I>(
     let inverted_matrix = matrix.inverse();
     let dst_size = dst.dimensions();
 
+    let composite = compositor.composite();
+
     for y in top.floor().max(0.0) as u32..(bottom.ceil() as u32).min(dst_size.1) {
         for x in left.floor().max(0.0) as u32..(right.ceil() as u32).min(dst_size.0) {
             let sp = inverted_matrix.apply([x as f32, y as f32]);
@@ -46,7 +48,7 @@ pub fn draw_image_transformed<P, BD, BS, C, I>(
             {
                 let dp = dst.get_pixel(x, y);
                 let sp = interpolation.interpolate(src, sp.into());
-                let p = compositor.composite(dp, &sp);
+                let p = composite(dp, &sp);
                 dst.put_pixel(x, y, p);
             }
         }

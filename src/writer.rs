@@ -15,10 +15,12 @@ where
     F: FillColor<P>,
     C: Compositor<P> + 'static,
 {
+    let composite = compositor.composite_with_alpha();
+
     move |x: u32, y: u32, v: f32| {
         let dst = buffer.get_pixel(x, y);
         let src = fill_color.fill_color([x as f32, y as f32]);
-        let p = compositor.composite_with_alpha(dst, &src, v);
+        let p = composite(dst, &src, v);
         buffer.put_pixel(x, y, p);
     }
 }

@@ -13,11 +13,12 @@ pub trait CompositorAttr {
 
 /// Compositor composites two pixels with alpha value.
 pub trait Compositor<T>: CompositorAttr {
-    fn composite_with_alpha(&self, dst: &T, src: &T, alpha: f32) -> T;
+    type F1: Fn(&T, &T, f32) -> T;
+    type F2: Fn(&T, &T) -> T;
 
-    fn composite(&self, dst: &T, src: &T) -> T {
-        self.composite_with_alpha(dst, src, 1.0)
-    }
+    fn composite_with_alpha(&self) -> Self::F1;
+
+    fn composite(&self) -> Self::F2;
 }
 
 #[derive(Clone)]

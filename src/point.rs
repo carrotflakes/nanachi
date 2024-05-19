@@ -22,7 +22,7 @@ impl Point {
     }
 
     pub fn lerp(self, rhs: Self, v: f32) -> Self {
-        self * (1.0 - v) + rhs * v
+        self + (rhs - self) * v
     }
 
     pub fn norm(self) -> f32 {

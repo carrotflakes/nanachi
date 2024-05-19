@@ -7,17 +7,37 @@ macro_rules! def_linear_compositor {
         {$($rest1:tt)+}
     ) => {
         impl Compositor<Rgba> for $name {
+            type F1 = fn(&Rgba, &Rgba, f32) -> Rgba;
+            type F2 = fn(&Rgba, &Rgba) -> Rgba;
+
             #[allow(unused_variables)]
-            fn composite_with_alpha(&self, a: &Rgba, b: &Rgba, alpha: f32) -> Rgba {
-                let $aa = a.0[3];
-                let $ba = b.0[3] * alpha;
-                $($rest1)+
-                Rgba([
-                    a.0[0] * $ax + b.0[0] * $bx,
-                    a.0[1] * $ax + b.0[1] * $bx,
-                    a.0[2] * $ax + b.0[2] * $bx,
-                    $ca,
-                ])
+            fn composite_with_alpha(&self) -> Self::F1 {
+                |a, b, alpha| {
+                    let $aa = a.0[3];
+                    let $ba = b.0[3] * alpha;
+                    $($rest1)+
+                    Rgba([
+                        a.0[0] * $ax + b.0[0] * $bx,
+                        a.0[1] * $ax + b.0[1] * $bx,
+                        a.0[2] * $ax + b.0[2] * $bx,
+                        $ca,
+                    ])
+                }
+            }
+
+            #[allow(unused_variables)]
+            fn composite(&self) -> Self::F2 {
+                |a, b| {
+                    let $aa = a.0[3];
+                    let $ba = b.0[3];
+                    $($rest1)+
+                    Rgba([
+                        a.0[0] * $ax + b.0[0] * $bx,
+                        a.0[1] * $ax + b.0[1] * $bx,
+                        a.0[2] * $ax + b.0[2] * $bx,
+                        $ca,
+                    ])
+                }
             }
         }
     };
@@ -148,26 +168,55 @@ macro_rules! def_compositor {
         $e:expr
     ) => {
         impl Compositor<Rgba> for $name {
+            type F1 = fn(&Rgba, &Rgba, f32) -> Rgba;
+            type F2 = fn(&Rgba, &Rgba) -> Rgba;
+
             #[allow(unused_variables)]
-            fn composite_with_alpha(&self, a: &Rgba, b: &Rgba, alpha: f32) -> Rgba {
-                let aa = a.0[3];
-                let ba = b.0[3] * alpha;
+            fn composite_with_alpha(&self) -> Self::F1 {
+                |a, b, alpha| {
+                    let aa = a.0[3];
+                    let ba = b.0[3] * alpha;
 
-                let ca = aa + ba - aa * ba;
-                if ca == 0.0 {
-                    return Rgba([0.0, 0.0, 0.0, 0.0]);
+                    let ca = aa + ba - aa * ba;
+                    if ca == 0.0 {
+                        return Rgba([0.0, 0.0, 0.0, 0.0]);
+                    }
+                    let ax = (aa * (1.0 - ba)) / ca;
+                    let bx = (ba * (1.0 - aa)) / ca;
+                    let cx = aa * ba / ca;
+
+                    let e = $e;
+                    Rgba([
+                        a.0[0] * ax + b.0[0] * bx + e(a.0[0], b.0[0]) * cx,
+                        a.0[1] * ax + b.0[1] * bx + e(a.0[1], b.0[1]) * cx,
+                        a.0[2] * ax + b.0[2] * bx + e(a.0[2], b.0[2]) * cx,
+                        ca,
+                    ])
                 }
-                let ax = (aa * (1.0 - ba)) / ca;
-                let bx = (ba * (1.0 - aa)) / ca;
-                let cx = aa * ba / ca;
+            }
 
-                let e = $e;
-                Rgba([
-                    a.0[0] * ax + b.0[0] * bx + e(a.0[0], b.0[0]) * cx,
-                    a.0[1] * ax + b.0[1] * bx + e(a.0[1], b.0[1]) * cx,
-                    a.0[2] * ax + b.0[2] * bx + e(a.0[2], b.0[2]) * cx,
-                    ca,
-                ])
+            #[allow(unused_variables)]
+            fn composite(&self) -> Self::F2 {
+                |a, b| {
+                    let aa = a.0[3];
+                    let ba = b.0[3];
+
+                    let ca = aa + ba - aa * ba;
+                    if ca == 0.0 {
+                        return Rgba([0.0, 0.0, 0.0, 0.0]);
+                    }
+                    let ax = (aa * (1.0 - ba)) / ca;
+                    let bx = (ba * (1.0 - aa)) / ca;
+                    let cx = aa * ba / ca;
+
+                    let e = $e;
+                    Rgba([
+                        a.0[0] * ax + b.0[0] * bx + e(a.0[0], b.0[0]) * cx,
+                        a.0[1] * ax + b.0[1] * bx + e(a.0[1], b.0[1]) * cx,
+                        a.0[2] * ax + b.0[2] * bx + e(a.0[2], b.0[2]) * cx,
+                        ca,
+                    ])
+                }
             }
         }
     };
@@ -240,36 +289,64 @@ def_compositor! {
 }
 
 impl Compositor<Rgba> for Basic {
-    fn composite(&self, dst: &Rgba, src: &Rgba) -> Rgba {
-        self.composite_with_alpha(dst, src, 1.0)
+    type F1 = fn(&Rgba, &Rgba, f32) -> Rgba;
+    type F2 = fn(&Rgba, &Rgba) -> Rgba;
+
+    fn composite(&self) -> Self::F2 {
+        match self {
+            Basic::Clear => Compositor::<Rgba>::composite(&Clear),
+            Basic::Src => Compositor::<Rgba>::composite(&Src),
+            Basic::Dst => Compositor::<Rgba>::composite(&Dst),
+            Basic::SrcOver => Compositor::<Rgba>::composite(&SrcOver),
+            Basic::SrcIn => Compositor::<Rgba>::composite(&SrcIn),
+            Basic::SrcOut => Compositor::<Rgba>::composite(&SrcOut),
+            Basic::SrcAtop => Compositor::<Rgba>::composite(&SrcAtop),
+            Basic::DstOver => Compositor::<Rgba>::composite(&DstOver),
+            Basic::DstIn => Compositor::<Rgba>::composite(&DstIn),
+            Basic::DstOut => Compositor::<Rgba>::composite(&DstOut),
+            Basic::DstAtop => Compositor::<Rgba>::composite(&DstAtop),
+            Basic::Xor => Compositor::<Rgba>::composite(&Xor),
+            Basic::Add => Compositor::<Rgba>::composite(&Add),
+            Basic::Darken => Compositor::<Rgba>::composite(&Darken),
+            Basic::Lighten => Compositor::<Rgba>::composite(&Lighten),
+            Basic::Multiply => Compositor::<Rgba>::composite(&Multiply),
+            Basic::Screen => Compositor::<Rgba>::composite(&Screen),
+            Basic::Overlay => Compositor::<Rgba>::composite(&Overlay),
+            Basic::HardLight => Compositor::<Rgba>::composite(&HardLight),
+            Basic::Dodge => Compositor::<Rgba>::composite(&Dodge),
+            Basic::Burn => Compositor::<Rgba>::composite(&Burn),
+            Basic::SoftLight => Compositor::<Rgba>::composite(&SoftLight),
+            Basic::Difference => Compositor::<Rgba>::composite(&Difference),
+            Basic::Exclusion => Compositor::<Rgba>::composite(&Exclusion),
+        }
     }
 
-    fn composite_with_alpha(&self, a: &Rgba, b: &Rgba, alpha: f32) -> Rgba {
+    fn composite_with_alpha(&self) -> Self::F1 {
         match self {
-            Basic::Clear => Clear.composite_with_alpha(a, b, alpha),
-            Basic::Src => Src.composite_with_alpha(a, b, alpha),
-            Basic::Dst => Dst.composite_with_alpha(a, b, alpha),
-            Basic::SrcOver => SrcOver.composite_with_alpha(a, b, alpha),
-            Basic::SrcIn => SrcIn.composite_with_alpha(a, b, alpha),
-            Basic::SrcOut => SrcOut.composite_with_alpha(a, b, alpha),
-            Basic::SrcAtop => SrcAtop.composite_with_alpha(a, b, alpha),
-            Basic::DstOver => DstOver.composite_with_alpha(a, b, alpha),
-            Basic::DstIn => DstIn.composite_with_alpha(a, b, alpha),
-            Basic::DstOut => DstOut.composite_with_alpha(a, b, alpha),
-            Basic::DstAtop => DstAtop.composite_with_alpha(a, b, alpha),
-            Basic::Xor => Xor.composite_with_alpha(a, b, alpha),
-            Basic::Add => Add.composite_with_alpha(a, b, alpha),
-            Basic::Darken => Darken.composite_with_alpha(a, b, alpha),
-            Basic::Lighten => Lighten.composite_with_alpha(a, b, alpha),
-            Basic::Multiply => Multiply.composite_with_alpha(a, b, alpha),
-            Basic::Screen => Screen.composite_with_alpha(a, b, alpha),
-            Basic::Overlay => Overlay.composite_with_alpha(a, b, alpha),
-            Basic::HardLight => HardLight.composite_with_alpha(a, b, alpha),
-            Basic::Dodge => Dodge.composite_with_alpha(a, b, alpha),
-            Basic::Burn => Burn.composite_with_alpha(a, b, alpha),
-            Basic::SoftLight => SoftLight.composite_with_alpha(a, b, alpha),
-            Basic::Difference => Difference.composite_with_alpha(a, b, alpha),
-            Basic::Exclusion => Exclusion.composite_with_alpha(a, b, alpha),
+            Basic::Clear => Compositor::<Rgba>::composite_with_alpha(&Clear),
+            Basic::Src => Compositor::<Rgba>::composite_with_alpha(&Src),
+            Basic::Dst => Compositor::<Rgba>::composite_with_alpha(&Dst),
+            Basic::SrcOver => Compositor::<Rgba>::composite_with_alpha(&SrcOver),
+            Basic::SrcIn => Compositor::<Rgba>::composite_with_alpha(&SrcIn),
+            Basic::SrcOut => Compositor::<Rgba>::composite_with_alpha(&SrcOut),
+            Basic::SrcAtop => Compositor::<Rgba>::composite_with_alpha(&SrcAtop),
+            Basic::DstOver => Compositor::<Rgba>::composite_with_alpha(&DstOver),
+            Basic::DstIn => Compositor::<Rgba>::composite_with_alpha(&DstIn),
+            Basic::DstOut => Compositor::<Rgba>::composite_with_alpha(&DstOut),
+            Basic::DstAtop => Compositor::<Rgba>::composite_with_alpha(&DstAtop),
+            Basic::Xor => Compositor::<Rgba>::composite_with_alpha(&Xor),
+            Basic::Add => Compositor::<Rgba>::composite_with_alpha(&Add),
+            Basic::Darken => Compositor::<Rgba>::composite_with_alpha(&Darken),
+            Basic::Lighten => Compositor::<Rgba>::composite_with_alpha(&Lighten),
+            Basic::Multiply => Compositor::<Rgba>::composite_with_alpha(&Multiply),
+            Basic::Screen => Compositor::<Rgba>::composite_with_alpha(&Screen),
+            Basic::Overlay => Compositor::<Rgba>::composite_with_alpha(&Overlay),
+            Basic::HardLight => Compositor::<Rgba>::composite_with_alpha(&HardLight),
+            Basic::Dodge => Compositor::<Rgba>::composite_with_alpha(&Dodge),
+            Basic::Burn => Compositor::<Rgba>::composite_with_alpha(&Burn),
+            Basic::SoftLight => Compositor::<Rgba>::composite_with_alpha(&SoftLight),
+            Basic::Difference => Compositor::<Rgba>::composite_with_alpha(&Difference),
+            Basic::Exclusion => Compositor::<Rgba>::composite_with_alpha(&Exclusion),
         }
     }
 }
